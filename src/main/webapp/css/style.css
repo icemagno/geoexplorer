@@ -1,0 +1,185 @@
+.routeText {
+	font-weight: bold;
+	font-size : 11px;
+}
+
+.routeSubText {
+	font-style: italic;
+	font-size : 10px;
+}
+
+.setting-icon {
+	background-image: url('../img/settings.svg') !important;
+	background-repeat: no-repeat; 
+}
+
+.server-icon {
+	background-image: url('../img/servers.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.forecast-icon {
+	background-image: url('../img/fogg.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.buoy-icon {
+	background-image: url('../img/buoy.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.grid-icon {
+	background-image: url('../img/grid.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.query-icon {
+	background-image: url('../img/query.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.layers-icon {
+	background-image: url('../img/layers.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.add-wms-icon {
+	background-image: url('../img/add_layer_wms.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.delete-icon {
+	background-image: url('../img/delete.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.add-folder-icon {
+	background-image: url('../img/add-folder.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.add-external-icon {
+	background-image: url('../img/add-external.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.remove-external-icon {
+	background-image: url('../img/remove-external.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.preview-layer-icon {
+	background-image: url('../img/preview-layer.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.socket-icon {
+	background-image: url('../img/socket.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.add-icon {
+	background-image: url('../img/add.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.plus-icon {
+	background-image: url('../img/plus.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.minus-icon {
+	background-image: url('../img/minus.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.kml-icon {
+	background-image: url('../img/kml.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.wms-icon {
+	background-image: url('../img/wms.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.shp-icon {
+	background-image: url('../img/shp.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.tif-icon {
+	background-image: url('../img/tif.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.lock-icon {
+	background-image: url('../img/lock.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.base-icon {
+	background-image: url('../img/basemap.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.add-scenery-icon {
+	background-image: url('../img/add-scenery.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.save-icon {
+	background-image: url('../img/save.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.scenery-icon {
+	background-image: url('../img/scenery.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.reload-icon {
+	background-image: url('../img/reload.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.filter-icon {
+	background-image: url('../img/filter.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.loadscenery-icon {
+	background-image: url('../img/loadscenery.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.scenery-public {
+	background-image: url('../img/public.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.scenery-private {
+	background-image: url('../img/private.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.copy-icon {
+	background-image: url('../img/copy.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.route-icon {
+	background-image: url('../img/route.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.cube-icon {
+	background-image: url('../img/cube.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.postgres-icon {
+	background-image: url('../img/server.svg') !important;
+	background-repeat: no-repeat;
+}
+

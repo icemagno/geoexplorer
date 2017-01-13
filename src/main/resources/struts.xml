@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC
+   "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+   "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<constant name="struts.devMode" value="false" />
+	<constant name="struts.multipart.maxSize" value="734003200" />
+	
+
+	<package name="default" extends="struts-default">
+	
+	 	<interceptors> 
+			<interceptor name="autorizador" class="br.mil.mar.casnav.mclm.interceptor.ClientAccessInterceptor" />
+			
+			<interceptor-stack name="seguranca">  
+				<interceptor-ref name="autorizador" />
+				<interceptor-ref name="defaultStack" />
+			</interceptor-stack>
+		</interceptors>
+	  
+		<global-results>
+			<result name="notLogged">/index.jsp</result> 
+		</global-results>
+	  
+	  
+	</package>
+	
+    <constant name="struts.enable.DynamicMethodInvocation" value="false" />
+    <constant name="struts.devMode" value="false" />	
+
+</struts>

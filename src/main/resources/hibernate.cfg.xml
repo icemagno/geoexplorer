@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?> 
+ <!DOCTYPE hibernate-configuration PUBLIC
+    "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration> 
+	<session-factory>  
+		<property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property> 
+		<property name="hibernate.connection.driver_class">org.postgresql.Driver</property> 
+		<property name="hibernate.hbm2ddl.auto">update</property>
+
+		<property name="show_sql">false</property>
+		<property name="format_sql">true</property>
+		
+		<property name="hibernate.id.new_generator_mappings">true</property>
+
+		<property name="hibernate.connection.provider_class">org.hibernate.connection.C3P0ConnectionProvider</property>
+		<property name="hibernate.c3p0.min_size">5</property>
+		<property name="hibernate.c3p0.max_size">100</property>
+		<property name="hibernate.c3p0.timeout">10</property>
+		<property name="hibernate.c3p0.max_statements">50</property>
+		<property name="hibernate.c3p0.idle_test_period">3000</property>
+		<property name="hibernate.c3p0.validate">true</property>
+		<property name="hibernate.connection.provider_class">org.hibernate.service.jdbc.connections.internal.C3P0ConnectionProvider</property>
+
+		<property name="hibernate.c3p0.autoCommitOnClose">true</property>
+		<property name="hibernate.c3p0.debugUnreturnedConnectionStackTraces">false</property> 
+		<!--  <property name="hibernate.c3p0.unreturnedConnectionTimeout">40</property>  -->
+		                                
+		<mapping class="br.mil.mar.casnav.mclm.persistence.entity.Config"/>
+		<mapping class="br.mil.mar.casnav.mclm.persistence.entity.NodeData"/>
+		<mapping class="br.mil.mar.casnav.mclm.persistence.entity.Scenery"/>
+		<mapping class="br.mil.mar.casnav.mclm.persistence.entity.SceneryNode"/>
+		<mapping class="br.mil.mar.casnav.mclm.persistence.entity.Server"/>
+		<mapping class="br.mil.mar.casnav.mclm.persistence.entity.Postgres"/>
+		<mapping class="br.mil.mar.casnav.mclm.persistence.entity.PostgresTable"/>
+		<mapping class="br.mil.mar.casnav.mclm.persistence.entity.DataLayer"/>		
+		
+	</session-factory> 
+</hibernate-configuration>
