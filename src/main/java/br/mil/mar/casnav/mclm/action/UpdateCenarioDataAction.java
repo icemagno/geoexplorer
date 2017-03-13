@@ -32,6 +32,8 @@ public class UpdateCenarioDataAction extends BasicActionClass {
 	public String execute () {
 		String resp;
 		
+		System.out.println("UPDATE CENARIO DATA");
+		
 		try {
 			SceneryService sns = new SceneryService();
 			resp = sns.updateScenery( idScenery, mapCenter, mapZoom, mapaBase, servidorBase, mapBbox, mapaBaseAtivo, gradeAtiva );

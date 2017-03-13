@@ -1,0 +1,56 @@
+
+
+// [{"idDictionaryItem":116158,"node":{"idNodeData":903551,"idNodeParent":60210,"indexOrder":1,"layerType":"WMS","children":0,"serviceUrl":"http://172.21.81.43/geoserver/wms/","originalServiceUrl":"","description":"Mapas obtidos do IBGE","institute":"MD / EMCFA / CHELOG","layerName":"view_regioes_br","layerAlias":"Brasil (com Regiões)","serialId":"LRb668ab51","readOnly":true},"originalName":"gid","translatedName":"","dataType":"int"},{"idDictionaryItem":116160,"node":{"idNodeData":903551,"idNodeParent":60210,"indexOrder":1,"layerType":"WMS","children":0,"serviceUrl":"http://172.21.81.43/geoserver/wms/","originalServiceUrl":"","description":"Mapas obtidos do IBGE","institute":"MD / EMCFA / CHELOG","layerName":"view_regioes_br","layerAlias":"Brasil (com Regiões)","serialId":"LRb668ab51","readOnly":true},"originalName":"nome","translatedName":"","dataType":"string"},{"idDictionaryItem":116162,"node":{"idNodeData":903551,"idNodeParent":60210,"indexOrder":1,"layerType":"WMS","children":0,"serviceUrl":"http://172.21.81.43/geoserver/wms/","originalServiceUrl":"","description":"Mapas obtidos do IBGE","institute":"MD / EMCFA / CHELOG","layerName":"view_regioes_br","layerAlias":"Brasil (com Regiões)","serialId":"LRb668ab51","readOnly":true},"originalName":"link_web","translatedName":"","dataType":"string"},{"idDictionaryItem":116164,"node":{"idNodeData":903551,"idNodeParent":60210,"indexOrder":1,"layerType":"WMS","children":0,"serviceUrl":"http://172.21.81.43/geoserver/wms/","originalServiceUrl":"","description":"Mapas obtidos do IBGE","institute":"MD / EMCFA / CHELOG","layerName":"view_regioes_br","layerAlias":"Brasil (com Regiões)","serialId":"LRb668ab51","readOnly":true},"originalName":"versao","translatedName":"","dataType":"date-time"},{"idDictionaryItem":116166,"node":{"idNodeData":903551,"idNodeParent":60210,"indexOrder":1,"layerType":"WMS","children":0,"serviceUrl":"http://172.21.81.43/geoserver/wms/","originalServiceUrl":"","description":"Mapas obtidos do IBGE","institute":"MD / EMCFA / CHELOG","layerName":"view_regioes_br","layerAlias":"Brasil (com Regiões)","serialId":"LRb668ab51","readOnly":true},"originalName":"mappolystyle","translatedName":"","dataType":"int"},{"idDictionaryItem":116168,"node":{"idNodeData":903551,"idNodeParent":60210,"indexOrder":1,"layerType":"WMS","children":0,"serviceUrl":"http://172.21.81.43/geoserver/wms/","originalServiceUrl":"","description":"Mapas obtidos do IBGE","institute":"MD / EMCFA / CHELOG","layerName":"view_regioes_br","layerAlias":"Brasil (com Regiões)","serialId":"LRb668ab51","readOnly":true},"originalName":"mappolyopacity","translatedName":"","dataType":"number"},{"idDictionaryItem":116170,"node":{"idNodeData":903551,"idNodeParent":60210,"indexOrder":1,"layerType":"WMS","children":0,"serviceUrl":"http://172.21.81.43/geoserver/wms/","originalServiceUrl":"","description":"Mapas obtidos do IBGE","institute":"MD / EMCFA / CHELOG","layerName":"view_regioes_br","layerAlias":"Brasil (com Regiões)","serialId":"LRb668ab51","readOnly":true},"originalName":"mappolysymbolcolor","translatedName":"","dataType":"string"},{"idDictionaryItem":116172,"node":{"idNodeData":903551,"idNodeParent":60210,"indexOrder":1,"layerType":"WMS","children":0,"serviceUrl":"http://172.21.81.43/geoserver/wms/","originalServiceUrl":"","description":"Mapas obtidos do IBGE","institute":"MD / EMCFA / CHELOG","layerName":"view_regioes_br","layerAlias":"Brasil (com Regiões)","serialId":"LRb668ab51","readOnly":true},"originalName":"simb_linha_id","translatedName":"","dataType":"int"},{"idDictionaryItem":116174,"node":{"idNodeData":903551,"idNodeParent":60210,"indexOrder":1,"layerType":"WMS","children":0,"serviceUrl":"http://172.21.81.43/geoserver/wms/","originalServiceUrl":"","description":"Mapas obtidos do IBGE","institute":"MD / EMCFA / CHELOG","layerName":"view_regioes_br","layerAlias":"Brasil (com Regiões)","serialId":"LRb668ab51","readOnly":true},"originalName":"maplinecolor","translatedName":"","dataType":"string"},{"idDictionaryItem":116176,"node":{"idNodeData":903551,"idNodeParent":60210,"indexOrder":1,"layerType":"WMS","children":0,"serviceUrl":"http://172.21.81.43/geoserver/wms/","originalServiceUrl":"","description":"Mapas obtidos do IBGE","institute":"MD / EMCFA / CHELOG","layerName":"view_regioes_br","layerAlias":"Brasil (com Regiões)","serialId":"LRb668ab51","readOnly":true},"originalName":"maplinesymbol","translatedName":"","dataType":"int"},{"idDictionaryItem":116178,"node":{"idNodeData":903551,"idNodeParent":60210,"indexOrder":1,"layerType":"WMS","children":0,"serviceUrl":"http://172.21.81.43/geoserver/wms/","originalServiceUrl":"","description":"Mapas obtidos do IBGE","institute":"MD / EMCFA / CHELOG","layerName":"view_regioes_br","layerAlias":"Brasil (com Regiões)","serialId":"LRb668ab51","readOnly":true},"originalName":"maplinesymbolsize","translatedName":"","dataType":"int"},{"idDictionaryItem":116159,"node":{"idNodeData":903551,"idNodeParent":60210,"indexOrder":1,"layerType":"WMS","children":0,"serviceUrl":"http://172.21.81.43/geoserver/wms/","originalServiceUrl":"","description":"Mapas obtidos do IBGE","institute":"MD / EMCFA / CHELOG","layerName":"view_regioes_br","layerAlias":"Brasil (com Regiões)","serialId":"LRb668ab51","readOnly":true},"originalName":"codigo","translatedName":"","dataType":"string"},{"idDictionaryItem":116161,"node":{"idNodeData":903551,"idNodeParent":60210,"indexOrder":1,"layerType":"WMS","children":0,"serviceUrl":"http://172.21.81.43/geoserver/wms/","originalServiceUrl":"","description":"Mapas obtidos do IBGE","institute":"MD / EMCFA / CHELOG","layerName":"view_regioes_br","layerAlias":"Brasil (com Regiões)","serialId":"LRb668ab51","readOnly":true},"originalName":"areakm2","translatedName":"","dataType":"int"},{"idDictionaryItem":116163,"node":{"idNodeData":903551,"idNodeParent":60210,"indexOrder":1,"layerType":"WMS","children":0,"serviceUrl":"http://172.21.81.43/geoserver/wms/","originalServiceUrl":"","description":"Mapas obtidos do IBGE","institute":"MD / EMCFA / CHELOG","layerName":"view_regioes_br","layerAlias":"Brasil (com Regiões)","serialId":"LRb668ab51","readOnly":true},"originalName":"versaozulu","translatedName":"","dataType":"string"},{"idDictionaryItem":116165,"node":{"idNodeData":903551,"idNodeParent":60210,"indexOrder":1,"layerType":"WMS","children":0,"serviceUrl":"http://172.21.81.43/geoserver/wms/","originalServiceUrl":"","description":"Mapas obtidos do IBGE","institute":"MD / EMCFA / CHELOG","layerName":"view_regioes_br","layerAlias":"Brasil (com Regiões)","serialId":"LRb668ab51","readOnly":true},"originalName":"simb_poligono_id","translatedName":"","dataType":"int"},{"idDictionaryItem":116167,"node":{"idNodeData":903551,"idNodeParent":60210,"indexOrder":1,"layerType":"WMS","children":0,"serviceUrl":"http://172.21.81.43/geoserver/wms/","originalServiceUrl":"","description":"Mapas obtidos do IBGE","institute":"MD / EMCFA / CHELOG","layerName":"view_regioes_br","layerAlias":"Brasil (com Regiões)","serialId":"LRb668ab51","readOnly":true},"originalName":"mappolycolor","translatedName":"","dataType":"string"},{"idDictionaryItem":116169,"node":{"idNodeData":903551,"idNodeParent":60210,"indexOrder":1,"layerType":"WMS","children":0,"serviceUrl":"http://172.21.81.43/geoserver/wms/","originalServiceUrl":"","description":"Mapas obtidos do IBGE","institute":"MD / EMCFA / CHELOG","layerName":"view_regioes_br","layerAlias":"Brasil (com Regiões)","serialId":"LRb668ab51","readOnly":true},"originalName":"mappolysymbol","translatedName":"","dataType":"int"},{"idDictionaryItem":116171,"node":{"idNodeData":903551,"idNodeParent":60210,"indexOrder":1,"layerType":"WMS","children":0,"serviceUrl":"http://172.21.81.43/geoserver/wms/","originalServiceUrl":"","description":"Mapas obtidos do IBGE","institute":"MD / EMCFA / CHELOG","layerName":"view_regioes_br","layerAlias":"Brasil (com Regiões)","serialId":"LRb668ab51","readOnly":true},"originalName":"mappolysymbolsize","translatedName":"","dataType":"int"},{"idDictionaryItem":116173,"node":{"idNodeData":903551,"idNodeParent":60210,"indexOrder":1,"layerType":"WMS","children":0,"serviceUrl":"http://172.21.81.43/geoserver/wms/","originalServiceUrl":"","description":"Mapas obtidos do IBGE","institute":"MD / EMCFA / CHELOG","layerName":"view_regioes_br","layerAlias":"Brasil (com Regiões)","serialId":"LRb668ab51","readOnly":true},"originalName":"maplinestyle","translatedName":"","dataType":"int"},{"idDictionaryItem":116175,"node":{"idNodeData":903551,"idNodeParent":60210,"indexOrder":1,"layerType":"WMS","children":0,"serviceUrl":"http://172.21.81.43/geoserver/wms/","originalServiceUrl":"","description":"Mapas obtidos do IBGE","institute":"MD / EMCFA / CHELOG","layerName":"view_regioes_br","layerAlias":"Brasil (com Regiões)","serialId":"LRb668ab51","readOnly":true},"originalName":"maplinewidth","translatedName":"","dataType":"int"},{"idDictionaryItem":116177,"node":{"idNodeData":903551,"idNodeParent":60210,"indexOrder":1,"layerType":"WMS","children":0,"serviceUrl":"http://172.21.81.43/geoserver/wms/","originalServiceUrl":"","description":"Mapas obtidos do IBGE","institute":"MD / EMCFA / CHELOG","layerName":"view_regioes_br","layerAlias":"Brasil (com Regiões)","serialId":"LRb668ab51","readOnly":true},"originalName":"maplinesymbolcolor","translatedName":"","dataType":"string"},{"idDictionaryItem":116179,"node":{"idNodeData":903551,"idNodeParent":60210,"indexOrder":1,"layerType":"WMS","children":0,"serviceUrl":"http://172.21.81.43/geoserver/wms/","originalServiceUrl":"","description":"Mapas obtidos do IBGE","institute":"MD / EMCFA / CHELOG","layerName":"view_regioes_br","layerAlias":"Brasil (com Regiões)","serialId":"LRb668ab51","readOnly":true},"originalName":"geom","translatedName":"","dataType":"MultiPolygon"}]
+
+Ext.define('MCLM.store.Dictionary', {
+    extend: 'Ext.data.Store',
+    storeId:'store.dictionary',
+    requires: ['Ext.data.proxy.Memory'],
+
+    autoLoad : false,
+    autoSync: false,    
+    
+    fields: [
+         {name: 'idDictionaryItem', type:'int', mapping:'idDictionaryItem' },
+         {name: 'idNodeData',type:'int', mapping:'node.idNodeData'},
+         {name: 'layerName',type:'string', mapping:'node.layerName'},
+         {name: 'dataType',type:'string', mapping:'dataType'},
+         {name: 'originalName',type:'string', mapping:'originalName'},
+         {name: 'translatedName',type:'string', mapping:'translatedName'},
+         {name: 'description',type:'string', mapping:'description'},
+    ], 
+
+
+	proxy: {
+        type: 'ajax',
+        reader: {
+            type: 'json',
+        },
+        api: {
+            read: 'getDictionary',
+            create: 'updateDictionary',
+            update: 'updateDictionary',
+            destroy: 'deleteDictionary'
+        },         
+        writer: {
+            type:'json',
+            allowSingle:false,
+            writeAllFields : true,
+            encode:true,
+            rootProperty:'dictionary'
+        }          
+	},    
+    
+    
+	listeners: {
+        load: function(store, records){
+        	console.log( records );
+    	}			
+	},
+    
+    sorters: [{
+    	property: 'originalName',
+    	direction: 'ASC'
+    }]
+        
+});    

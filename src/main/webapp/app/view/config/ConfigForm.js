@@ -57,6 +57,14 @@ Ext.define('MCLM.view.config.ConfigForm', {
             invalidText: 'Apenas números'
         },
         {
+            fieldLabel: 'Distância dos POI da Rota',
+            id : 'distanceFromRoute',
+            width: 150,
+            maskRe: /[0-9.]/, 
+            name: 'distanceFromRoute',
+            allowBlank : false,
+            invalidText: 'Apenas números'
+        },        {
             fieldLabel: 'Usuário do GeoServer',
             width: 350,
             name: 'geoserverUser',
@@ -70,34 +78,6 @@ Ext.define('MCLM.view.config.ConfigForm', {
             allowBlank : false,
             name: 'geoserverPassword',
             invalidText: 'Teste'
-        },
-        
-        {
-            fieldLabel: 'End. do Servidor de Dados',
-            width: 350,
-            allowBlank : false,
-            name: 'dataLayerServer',
-        },
-        {
-            fieldLabel: 'Usuário do Servidor de Dados',
-            width: 350,
-            allowBlank : false,
-            name: 'dataLayerUser',
-        },
-        {
-            fieldLabel: 'Senha do Servidor de Dados',
-            inputType: 'password',
-            width: 350,
-            allowBlank : false,
-            name: 'dataLayerPassword',
-        },
-        {
-            fieldLabel: 'Porta do Servidor de Dados',
-            width: 150,
-            maskRe: /[0-9.]/, 
-            name: 'dataLayerPort',
-            allowBlank : false,
-            invalidText: 'Apenas números'
         },
         {
             fieldLabel: 'End. do Servidor de Rotas',
@@ -134,8 +114,12 @@ Ext.define('MCLM.view.config.ConfigForm', {
         },
         
         
-        
-        
+        {
+            fieldLabel: 'Endereço REST Apolo',
+            width: 350,
+            allowBlank : false,
+            name: 'apoloServer',
+        },
         
         {
             fieldLabel: 'Fator de Busca da Interrogação',

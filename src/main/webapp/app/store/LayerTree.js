@@ -2,7 +2,7 @@ Ext.define('MCLM.store.LayerTree', {
     extend: 'Ext.data.TreeStore',
     storeId:'store.layerTree',
     //autoLoad : true,
-    autoSync: true,
+    autoSync: false,
     requires: [
        'MCLM.model.LayerTreeModel'
     ],	    
@@ -39,7 +39,19 @@ Ext.define('MCLM.store.LayerTree', {
     
 	listeners: {
         load: function(store, records){
-        	//console.log( records );
+        	// Ao recarregar os filhos de um no, verificar se algum deles ja
+        	// estava selecionado (a camada ja exixtia no mapa)
+        	// pois ao recarregar eles vem desmarcados.
+        	// Se existir, marca novamente
+        	for ( var x=0; x < records.length; x++ ) {
+        		var serial = records[x].data.serialId;
+        		var layer = MCLM.Map.findBySerialID( serial );
+        		if( layer ) {
+        			records[x].data.checked = true;
+        			records[x].data.selected = true;
+        		}
+        	}
+        	
     	}			
 	} 
     

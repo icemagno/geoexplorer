@@ -188,6 +188,9 @@ Ext.define('MCLM.view.addlayer.wms.CapabilitiesController', {
     requestCapabilities : function ( node ) {
     	var version = node.version;
     	var url = node.url;
+    	
+    	MCLM.Functions.mainLog("Consultando " + url + " ...");
+    	
     	var capabilitiesStore = Ext.getStore('store.Capabilities');
     	
     	capabilitiesStore.load({

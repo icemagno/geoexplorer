@@ -1,6 +1,7 @@
 Ext.define('MCLM.Functions', {
 	
 	statics: {
+		countLog : 0,
 		
 		guid : function() {
 			  function s4() {
@@ -11,7 +12,59 @@ Ext.define('MCLM.Functions', {
 			  return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
 			    s4() + '-' + s4() + s4() + s4();
 		},
+		hideMainLog : function () {
+			$('#mainLogDisplayContainer').css('display','none');
+			$('#mainLogDisplayTable tbody').empty();
+		},
 		
+		mainLog : function ( message ) {
+			$('#mainLogDisplayContainer').fadeIn(2000);
+			this.countLog++;
+			if ( this.countLog == 5 ) {
+				this.countLog--;
+				$('#mainLogDisplayTable tr:first').remove();
+			}
+			$("<tr><td>" + message + "</td></tr>").appendTo('#mainLogDisplayTable tbody').hide().fadeIn(2000);
+		},
+
+		makePattern : function( color, ptrHDist, ptrVDist, ptrLength, ptrHeight, ptrWidth ) {
+			
+			var newColor = 'rgb(' + color[0] + ',' + color[1] + ',' + color[2] +  ')';
+			
+			var cnv = document.createElement('canvas');
+			var ctx = cnv.getContext('2d');
+			cnv.width = ptrHDist;
+			cnv.height = ptrVDist;
+			
+			ctx.globalAlpha = color[3];
+			ctx.fillStyle = newColor;
+		  
+			// Comprimento nao pode ser maior que a dist H ou V.
+			/*
+			if ( (ptrLength > ptrHDist) || (ptrLength > ptrVDist) ) {
+				// Iguala o comprimento a maior distancia
+				if ( (ptrVDist > ptrHDist) ) ptrLength = prtVDist;
+				if ( (ptrHDist > ptrVDist) ) ptrLength = prtHDist;
+			}
+			*/
+			
+			for(var i = 0; i < ptrLength; ++i) {
+				ctx.fillRect(i, i, ptrWidth, ptrHeight);
+			}
+			return ctx.createPattern(cnv, 'repeat');
+		},			
+		
+		showMainLoadingIcon : function( action ) {
+    		$("#mainLoadingIcon").css('display','block');
+    		$("#mainLoadingInfo").text( action );
+    		$('#mainLoadingIcon').hide().show(0);
+    		//console.log( action );
+    	},
+    	
+		hideMainLoadingIcon : function() {
+    		$("#mainLoadingInfo").text( "" );
+    		$("#mainLoadingIcon").css('display','none');			
+		},
 		
 		inicializaDicas : function() {
 		    Ext.tip.QuickTipManager.init();
@@ -93,91 +146,20 @@ Ext.define('MCLM.Functions', {
 		        text: 'Calcula a rota entre dois pontos.',
 		        width: 150,
 		        dismissDelay: 5000 
+		    }, {
+		        target: 'btnStyle',
+		        title: 'Gerenciar Estilos',
+		        text: 'Gerencia os estilos a serem aplicados nas camadas de dados.',
+		        width: 150,
+		        dismissDelay: 5000 
+		    }, {
+		        target: 'drawFeicaoBtn',
+		        title: 'Desenhar Feições',
+		        text: 'Exibe a barra de ferramentas de desenho de feições.',
+		        width: 150,
+		        dismissDelay: 5000 
 		    }); 	
 		},
-		
-		getFeatureStyle : function( featureType ) {
-			
-			/*
-			
-			var icon = feature.get("icon");
-				var styleTemperature = new ol.style.Style({
-				        image: new ol.style.Icon({
-				        src: 'http://prognoza.hr/metsimboli/' + icon + '.gif'
-				})
-			});			
-			
-			
-			*/
-			var styles = {
-    	        'Point': new ol.style.Style({
-    	          image: image
-    	        }),
-    	        'LineString': new ol.style.Style({
-    	          stroke: new ol.style.Stroke({
-    	            color: 'green',
-    	            width: 1
-    	          })
-    	        }),
-    	        'MultiLineString': new ol.style.Style({
-    	          stroke: new ol.style.Stroke({
-    	            color: 'green',
-    	            width: 1
-    	          })
-    	        }),
-    	        'MultiPoint': new ol.style.Style({
-    	          image: image
-    	        }),
-    	        'MultiPolygon': new ol.style.Style({
-    	          stroke: new ol.style.Stroke({
-    	            color: 'yellow',
-    	            width: 1
-    	          }),
-    	          fill: new ol.style.Fill({
-    	            color: 'rgba(255, 255, 0, 0.1)'
-    	          })
-    	        }),
-    	        'Polygon': new ol.style.Style({
-    	          stroke: new ol.style.Stroke({
-    	            color: 'blue',
-    	            lineDash: [4],
-    	            width: 3
-    	          }),
-    	          fill: new ol.style.Fill({
-    	            color: 'rgba(0, 0, 255, 0.1)'
-    	          })
-    	        }),
-    	        'GeometryCollection': new ol.style.Style({
-    	          stroke: new ol.style.Stroke({
-    	            color: 'magenta',
-    	            width: 2
-    	          }),
-    	          fill: new ol.style.Fill({
-    	            color: 'magenta'
-    	          }),
-    	          image: new ol.style.Circle({
-    	            radius: 10,
-    	            fill: null,
-    	            stroke: new ol.style.Stroke({
-    	              color: 'magenta'
-    	            })
-    	          })
-    	        }),
-    	        'Circle': new ol.style.Style({
-    	          stroke: new ol.style.Stroke({
-    	            color: 'red',
-    	            width: 2
-    	          }),
-    	          fill: new ol.style.Fill({
-    	            color: 'rgba(255,0,0,0.2)'
-    	          })
-    	        })
-			};
-		      
-			return styles[featureType];
-			
-		} 
-		
 
 	}
 

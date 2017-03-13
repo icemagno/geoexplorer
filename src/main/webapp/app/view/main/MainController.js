@@ -48,10 +48,20 @@ Ext.define('MCLM.view.main.MainController', {
     	var rotaWindow = Ext.getCmp('rotaWindow');
     	if ( rotaWindow ) return;
     	rotaWindow = Ext.create('MCLM.view.rotas.RotaWindow');
+    	
+    	rotaWindow.alignTo(Ext.getBody(), "tl-tl", [0, 0]);    	
+    	
     	rotaWindow.show();
     	
     	MCLM.Globals.routeBlinkEnabled = true;
     	
+    },
+	// --------------------------------------------------------------------------------------------
+    editStyles : function() {
+    	var styleListWindow = Ext.getCmp('styleListWindow');
+    	if ( styleListWindow ) return;
+    	styleListWindow = Ext.create('MCLM.view.style.StyleListWindow');
+    	styleListWindow.show();    	
     },
 	// --------------------------------------------------------------------------------------------
     checkInternetConnection: function ( button ) {
@@ -89,5 +99,22 @@ Ext.define('MCLM.view.main.MainController', {
     	this.fireEvent('mountImagePreview');
 	},
 	// --------------------------------------------------------------------------------------------
+    // Exibe a barra de ferramentas de desenho
+    showDrawToolBar : function() {
+
+    	var stylesStore = Ext.getStore('store.styles');
+    	stylesStore.load({
+            callback : function(records, options, success) {
+            	var drawToolBar = Ext.getCmp("drawToolBar");
+            	if ( !drawToolBar ) { 
+            		drawToolBar = Ext.create('MCLM.view.draw.DrawToolBarWindow');
+            	}
+            	drawToolBar.show();
+            	var estiloCombo = Ext.getCmp("idFeicaoStyle");
+            	estiloCombo.setValue( stylesStore.getAt(0) );
+            }
+        });     	
+    	
+    },
     
 });

@@ -7,6 +7,7 @@ import org.hibernate.Transaction;
 
 import br.mil.mar.casnav.mclm.persistence.exceptions.DatabaseConnectException;
 import br.mil.mar.casnav.mclm.persistence.infra.ConnFactory;
+import br.mil.mar.casnav.mclm.persistence.infra.RepositoryMonitor;
 
 public class BasicRepository {
 	protected Session session;
@@ -20,6 +21,7 @@ public class BasicRepository {
 	public BasicRepository() throws DatabaseConnectException {
 		try {
 			session = ConnFactory.getSession();
+			
 			if ( session != null ) {
 				tx = session.beginTransaction();
 			} else {
@@ -31,6 +33,8 @@ public class BasicRepository {
 		}
         UUID uuid = UUID.randomUUID();
         sessionId = uuid.toString().toUpperCase().substring(0,8);
+        
+        RepositoryMonitor.getInstance().addRepo( this );
 	}
 	
 
@@ -58,6 +62,15 @@ public class BasicRepository {
 			//
 		}
 	}
+	
+	protected void finalize() throws Throwable {  
+	    try { 
+	    	closeSession(); 
+	    } catch ( Exception e) { 
+	        e.printStackTrace();
+	    }
+	    super.finalize();  
+	}  	
 	
 	public void commit() {
 		tx.commit(); 

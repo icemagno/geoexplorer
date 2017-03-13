@@ -9,26 +9,35 @@ Ext.define('MCLM.view.servers.PostgreGrid', {
     margin: "0 0 0 0", 
     flex:1,
     loadMask: true,
+    
     autoScroll: true,
     columns:[
 	     {text:'Nome', dataIndex:'name', width:200},
 	     {text:'Endereço', dataIndex:'serverAddress', width:200},
-	     {text:'Banco', dataIndex:'serverDatabase', width:100}
+	     {text:'Banco', dataIndex:'serverDatabase', width:100},
     ],
+    
     dockedItems: [{
         xtype: 'toolbar',
         items: [{
-        	iconCls: 'postgres-icon',
+        	iconCls: 'add-server-icon',
         	id: 'addPg',
             handler : 'addPostgreSource'
         }, {
-        	iconCls: 'remove-external-icon',
+        	iconCls: 'delete-server-icon',
         	id: 'deletePg',
             handler : 'askDeletePostgreSource'
         }]
     }],	
     
 	listeners:{
+		
+		itemclick: function( view, rec, node, index, e, options ) {
+			var postgreTable = Ext.data.StoreManager.lookup('store.postgreTable');
+			postgreTable.removeAll(true);
+			postgreTable.loadData( rec.data.tables );
+		},
+	
 		afterrender:function(){
 			
 		    Ext.tip.QuickTipManager.register({
@@ -41,7 +50,7 @@ Ext.define('MCLM.view.servers.PostgreGrid', {
 		        target: 'deletePg',
 		        title: 'Remover Fonte Externa PostgreSQL',
 		        text: 'Remove a Fonte Externa selecionada.',
-		        width: 150,
+		        width: 250,
 		        dismissDelay: 5000 
 		    });			
 			

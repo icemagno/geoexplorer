@@ -82,6 +82,13 @@ public class Config {
 	@Column(name = "routing_port")
 	private Integer routingPort; 
 	
+	@Column(name = "distance_from_route")
+	private Integer distanceFromRoute; 
+	
+	@Column(length=100, name = "apolo_server")
+	private String apoloServer;
+	
+	
 	public Config() {
 		//
 	}
@@ -93,7 +100,8 @@ public class Config {
 			Boolean externalLayersToLocalServer, String externalWorkspaceName, String proxyHost, String nonProxyHosts,
 			String proxyUser, String proxyPassword, Integer proxyPort, String geoserverUser, String geoserverPassword,
 			Integer mapZoom, Integer queryFactorRadius, String mapCenter, String shapeFileTargetPath, 
-			String routingServer, String routingUser, String routingPassword, Integer routingPort, String routingDatabase ) {
+			String routingServer, String routingUser, String routingPassword, Integer routingPort, String routingDatabase,
+			String apoloServer, Integer distanceFromRoute ) {
 		super();
 		this.idConfig = idConfig;
 		this.geoserverUrl = geoserverUrl;
@@ -118,6 +126,10 @@ public class Config {
 		this.routingPassword = routingPassword;
 		this.routingPort = routingPort;
 		this.routingDatabase = routingDatabase;
+
+		this.apoloServer = apoloServer;
+		
+		this.distanceFromRoute = distanceFromRoute;
 		
 	}
 
@@ -305,6 +317,22 @@ public class Config {
 
 	public void setRoutingPort(Integer routingPort) {
 		this.routingPort = routingPort;
+	}
+
+	public String getApoloServer() {
+		return apoloServer;
+	}
+
+	public void setApoloServer(String apoloServer) {
+		this.apoloServer = apoloServer;
+	}
+
+	public Integer getDistanceFromRoute() {
+		return distanceFromRoute;
+	}
+
+	public void setDistanceFromRoute(Integer distanceFromRoute) {
+		this.distanceFromRoute = distanceFromRoute;
 	}
 
 	

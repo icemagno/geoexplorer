@@ -6,9 +6,11 @@ Ext.define('MCLM.Application', {
     requires: [
        'MCLM.view.main.TelaPrincipal',
        'MCLM.Globals',
-       'MCLM.Functions'
+       'MCLM.Functions',
+       'MCLM.DrawHelper',
+       'MCLM.RouteHelper',
+       
     ],
-    
     
     stores: [
        'MCLM.store.LayerTree',
@@ -21,17 +23,27 @@ Ext.define('MCLM.Application', {
        'MCLM.store.Scenery',
        'MCLM.store.RouteResult',
        'MCLM.store.Tables',
+       'MCLM.store.PostgreTable',
+       'MCLM.store.Dictionary',
+       'MCLM.store.Styles',
     ],
    
     launch: function () {
         
-    	Ext.Ajax.on("beforerequest", function (con) {
-            con.setUseDefaultXhrHeader(false);
-            con.setWithCredentials(true);
+    	Ext.Ajax.on("beforerequest", function (conn, options, eOpts) {
+    		MCLM.Functions.showMainLoadingIcon( options.url );
+    		
+    		conn.setUseDefaultXhrHeader(false);
+    		conn.setWithCredentials(true);
         });    	
     	
+    	Ext.Ajax.on("requestcomplete", function(conn, options, eOpts){
+    		MCLM.Functions.hideMainLoadingIcon();
+        });    	
     	
     	Ext.Ajax.on('requestexception', function (con, resp, op, e) {
+    		$("#mainLoadingInfo").text( "" );
+    		$("#mainLoadingIcon").css('display','none');
            if (resp.status === 401) {
                Ext.Msg.alert('','A sessão de usuário expirou!');
            }
@@ -46,9 +58,13 @@ Ext.define('MCLM.Application', {
 			success: function(response, opts) {
 				var config = Ext.decode(response.responseText);
 				
+				// O Mapa é inicializado em 'MCLM.view.paineis.PainelCentral' no 
+				// metodo 'afterRender'.
+				
+				
 				// Nao modifique a ordem das chamadas abaixo
 				
-				/* 1. */ MCLM.Globals.config = config;				// A aplicacao precida das configuracoes
+				/* 1. */ MCLM.Globals.config = config;				// A aplicacao precisa das configuracoes
 				/* 2. */ Ext.create({ xtype: 'telaPrincipal' });	// 
 				/* 3. */ MCLM.Functions.inicializaDicas();			// As dicas dos botoes precisam dos botoes instanciados
 
@@ -64,6 +80,7 @@ Ext.define('MCLM.Application', {
 				    	var root2 = trabalhoTree.getRootNode();
 				    	root2.expand();
 				    	
+				    	// Icone piscante da tela de rotas
 				    	setInterval( function() {
 				    		if ( !MCLM.Globals.routeBlinkEnabled ) return true;
 				    		$("#"+MCLM.Globals.selectRouteActiveIcon).fadeTo(250, 0.2).fadeTo(250, 1.0); 

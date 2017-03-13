@@ -14,8 +14,11 @@ import javax.persistence.Table;
 @Table(name="postgres_tables") 
 public class PostgresTable {
 
-	public PostgresTable( String name ) {
+	public PostgresTable( String name, String geometryColumnName, Postgres server ) {
 		this.name = name;
+		this.geometryColumnName = geometryColumnName;
+		this.server = server;
+		
 	}
 	
 	public PostgresTable() {

@@ -24,8 +24,6 @@ public class UpdateLayersTreeNodeAction extends BasicActionClass {
 	
 	public String execute () {
 
-		System.out.println("Cliente requisitou updateLayersTreeNode com os dados: " + data); 
-
 		String resp = "";
 		
 		try {

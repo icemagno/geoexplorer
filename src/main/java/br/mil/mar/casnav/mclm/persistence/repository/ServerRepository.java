@@ -109,15 +109,15 @@ public class ServerRepository extends BasicRepository {
 	public List<Postgres> getListPGR() throws Exception {
 		DaoFactory<Postgres> df = new DaoFactory<Postgres>();
 		IDao<Postgres> fm = df.getDao(this.session, Postgres.class);
-		List<Postgres> server = null;
+		List<Postgres> servers = null;
 		try {
-			server = fm.getList("select * from servers_postgres");
+			servers = fm.getList("select * from servers_postgres");
 		} catch ( Exception e ) {
 			closeSession();
 			throw e;
 		}
 		closeSession();
-		return server;
+		return servers;
 	}	
 	
 	public List<PostgresTable> getListTables() throws Exception {
@@ -188,6 +188,22 @@ public class ServerRepository extends BasicRepository {
 		} 
 		closeSession();		
 		return table;
+	}
+
+	public PostgresTable addTable(PostgresTable table) throws Exception {
+		DaoFactory<PostgresTable> df = new DaoFactory<PostgresTable>();
+		IDao<PostgresTable> fm = df.getDao(this.session, PostgresTable.class);
+		
+		try {
+			fm.insertDO( table );
+			commit();
+		} catch (InsertException e) {
+			rollBack();
+			closeSession();
+			throw e;
+		}
+		closeSession();
+		return table;		
 	}		
 	
 }

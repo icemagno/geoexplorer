@@ -4,11 +4,11 @@ Ext.define('MCLM.view.servers.ServersWindow', {
 	xtype: 'serversWindow',
 	title : "Gerenciar Fontes Externas",
 	width : 850,
-	height: 400,
+	height: 490,
 	
 	requires: [
 	   'MCLM.view.servers.ServersGrid',
-	   'MCLM.view.servers.PostgreGrid',
+	   'MCLM.view.servers.DatabasePanel',
 	   'MCLM.view.servers.ServersController'
 	],  
 	controller: 'serversController',
@@ -28,7 +28,7 @@ Ext.define('MCLM.view.servers.ServersWindow', {
     items : [{
         xtype: 'serversGrid',
     },{
-        xtype: 'postgresGrid',
+        xtype: 'databasePanel',
     }],
     
 	    

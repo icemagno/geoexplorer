@@ -8,7 +8,7 @@ Ext.define('MCLM.view.addlayer.tif.UploadTifWindow', {
         'MCLM.view.addlayer.tif.UploadTifForm',
 	],	    
     controller : 'uploadTif',	
-	
+    modal : true,	
 	width : 500,
 	height: 250,
     scrollable: false,

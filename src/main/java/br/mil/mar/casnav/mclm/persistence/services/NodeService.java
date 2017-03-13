@@ -42,8 +42,11 @@ public class NodeService {
 		}
 	}	
 	
-	public void addNode( NodeData node ) throws Exception {
-        rep.insertNode( node );
+	public NodeData addNode( NodeData node ) throws Exception {
+        node = rep.insertNode( node );
+        DictionaryService ds = new DictionaryService();
+        ds.updateDictionary( node );
+        return node;
 	}
 	
 	public void updateNode( NodeData node ) throws UpdateException, NotFoundException {
@@ -67,7 +70,7 @@ public class NodeService {
 	}
 	
 	/*
-	 * Acionado quando o usuário arrasta um nó na árvore de camadas e muda sua posição
+	 * Acionado quando o usuario arrasta um nao na arvore de camadas e muda sua posicao
 	 */
 	public String updateNodeIndexes( String data ) throws Exception {
 		JSONArray ja = new JSONArray( data );
@@ -80,14 +83,14 @@ public class NodeService {
 				int index = jo.getInt( "index" );
 				
 				rep.newTransaction();
-				// Pega o nó no BD
+				// Pega o n. no BD
 				oldNode = rep.getNode( id );
 				// Guarda o pai atual
 				int parentId = oldNode.getIdNodeParent();
 				
 				try {
-					// O pai foi alterado? Se não foi, não haverá esta variável no 
-					// objeto JSON e um erro será gerado.
+					// O pai foi alterado? Se nao foi, nao havera esta variavel no 
+					// objeto JSON e um erro sera gerado.
 					parentId = jo.getInt( "parentId" );
 				} catch ( Exception ignored ) {	}
 				
@@ -98,7 +101,7 @@ public class NodeService {
 				rep.updateNode( oldNode );
 
 			} catch ( Exception ex ) {
-				// Os dados da requisição deste item "x" não vieram como esperado. Tentar o próximo item...
+				// Os dados da requisiao deste item "x" nao vieram como esperado. Tentar o proximo item...
 			}
 		}
 		
@@ -121,13 +124,18 @@ public class NodeService {
 		List<UserTableEntity> utes = gs.genericFetchList( sql );
 		
 		DataLayerService dss = new DataLayerService();
-		
 		JSONArray arrayObj = new JSONArray();
 		for ( UserTableEntity ute : utes ) {
 			TreeNode tn = new TreeNode( ute, dss );
-			JSONObject itemObj = new JSONObject( tn );
-            arrayObj.put( itemObj );		
+			// Nao coloca feicao na arvore do catalogo...
+			if ( !tn.getLayerType().equals("FEI") ) {
+				JSONObject itemObj = new JSONObject( tn );
+	            arrayObj.put( itemObj );		
+			}
 		}
+		dss.closeSession();
+		rep.closeSession();
+		
 		return arrayObj.toString();
 		
 	}

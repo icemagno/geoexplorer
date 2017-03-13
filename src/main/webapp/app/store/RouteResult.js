@@ -3,11 +3,9 @@ Ext.define('MCLM.store.RouteResult', {
     storeId:'store.RouteResult',
     requires: ['Ext.data.proxy.Memory'],
     fields: [
-         {name: 'osm_name'},
+         {name: 'way_name'},
          {name: 'seq'},
-         {name: 'path_id'},
-         {name: 'path_seq'},
-         {name: 'cost'}
+         {name: 'km'},
     ], 
     proxy: { type: 'memory' },
     sorters: [{

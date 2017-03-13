@@ -1,7 +1,7 @@
 package br.mil.mar.casnav.mclm.persistence.entity;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -26,12 +26,12 @@ public class Postgres {
 		this.serverDatabase = serverDatabase;
 		this.serverPort = serverPort;
 		this.type = type;
-		this.tables = new HashSet<PostgresTable>();
+		this.tables = new ArrayList<PostgresTable>();
 	}
 	
 	public Postgres() {
 		// Necessário para uso do Hibernate
-		this.tables = new HashSet<PostgresTable>();
+		this.tables = new ArrayList<PostgresTable>();
 	}
 
 	@Id
@@ -41,7 +41,7 @@ public class Postgres {
 	
     @OneToMany(orphanRemoval=true,  mappedBy="server", fetch = FetchType.EAGER)
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
-    private Set<PostgresTable> tables;	
+    private List<PostgresTable> tables;	
 	
 	@Column(length=250)
 	private String serverAddress;
@@ -120,6 +120,12 @@ public class Postgres {
 		this.serverPort = serverPort;
 	}
 
-
+	public List<PostgresTable> getTables() {
+		return tables;
+	}
+	
+	public void setTables(List<PostgresTable> tables) {
+		this.tables = tables;
+	}
 	
 }

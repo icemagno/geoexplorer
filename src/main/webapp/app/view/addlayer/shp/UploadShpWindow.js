@@ -8,7 +8,7 @@ Ext.define('MCLM.view.addlayer.shp.UploadShpWindow', {
         'MCLM.view.addlayer.shp.UploadShpForm',
 	],	    
     controller : 'uploadShp',	
-	
+    modal : true,	
 	width : 500,
 	height: 250,
     scrollable: false,

@@ -22,6 +22,9 @@ public class DataLayer {
 	@Column(length=250, name="name")
 	private String dataLayerName;	
 	
+	@Column(length=250, name="label_column")
+	private String labelColumn;	
+
 	@Column(length=250)
 	private String hint;
 	
@@ -35,17 +38,23 @@ public class DataLayer {
 	@JoinColumn(name="id_table", foreignKey = @ForeignKey(name = "fk_datalayer_tables"))
 	private PostgresTable table;	
 	
+	@ManyToOne()
+	@JoinColumn(name="id_feature_style", foreignKey = @ForeignKey(name = "fk_datalayer_feature_style"))
+	private FeatureStyle style;	
+	
     public DataLayer() {
     	
     }
     
-    public DataLayer( String dataLayerName, String hint, String whereClause, String propertiesColumns, PostgresTable table ) {
+    public DataLayer( String dataLayerName, String hint, String whereClause, String propertiesColumns, PostgresTable table, 
+    		String labelColumn, FeatureStyle style ) {
     	this.dataLayerName = dataLayerName;
     	this.hint = hint;
     	this.propertiesColumns = propertiesColumns;
     	this.whereClause = whereClause;
     	this.table = table;
-
+    	this.labelColumn = labelColumn;
+    	this.style = style;
     }
 
 	public String getHint() {
@@ -95,7 +104,21 @@ public class DataLayer {
 	public void setDataLayerName(String dataLayerName) {
 		this.dataLayerName = dataLayerName;
 	}
+
+	public String getLabelColumn() {
+		return labelColumn;
+	}
+
+	public void setLabelColumn(String labelColumn) {
+		this.labelColumn = labelColumn;
+	}
 	
+	public void setStyle(FeatureStyle style) {
+		this.style = style;
+	}
 	
+	public FeatureStyle getStyle() {
+		return style;
+	}
     
 }

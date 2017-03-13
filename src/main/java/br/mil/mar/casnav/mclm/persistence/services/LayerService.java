@@ -6,15 +6,19 @@ import java.net.URLDecoder;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.json.JSONObject;
 
 import br.mil.mar.casnav.mclm.misc.Configurator;
+import br.mil.mar.casnav.mclm.misc.DataLayerStylized;
 import br.mil.mar.casnav.mclm.misc.LayerType;
 import br.mil.mar.casnav.mclm.misc.PathFinder;
 import br.mil.mar.casnav.mclm.misc.RESTResponse;
 import br.mil.mar.casnav.mclm.misc.UserTableEntity;
 import br.mil.mar.casnav.mclm.misc.WebClient;
 import br.mil.mar.casnav.mclm.persistence.entity.DataLayer;
+import br.mil.mar.casnav.mclm.persistence.entity.DictionaryItem;
 import br.mil.mar.casnav.mclm.persistence.entity.NodeData;
+import br.mil.mar.casnav.mclm.persistence.exceptions.NotFoundException;
 
 public class LayerService {
 
@@ -47,11 +51,11 @@ public class LayerService {
 		String sql = "SELECT row_to_json( fc )::text As featurecollection " +  
 			"FROM ( SELECT 'FeatureCollection' As type, array_to_json( array_agg( f ) ) As features " + 
 			     "FROM (SELECT 'Feature' As type, " + 
-			     "ST_AsGeoJSON( " + dl.getTable().getGeometryColumnName() + " )::json As geometry, " +  
-			     "row_to_json((SELECT l FROM (SELECT " + dl.getPropertiesColumns() + ") As l)) As properties " +  
+			     "ST_AsGeoJSON( ST_Transform("+ dl.getTable().getGeometryColumnName() + ",4326) )::json As geometry, " +  
+			     "row_to_json((SELECT l FROM (SELECT " + dl.getPropertiesColumns() + "," + dl.getLabelColumn() + " as label) As l)) As properties " +  
 				 "FROM " + dl.getTable().getName() + " As l where " + dl.getWhereClause() + ") As f) as fc; ";
 
-		String result = "";
+		String jsonData = "";
 		
 		String connectionString = "jdbc:postgresql://" + dl.getTable().getServer().getServerAddress() +
 				":" + dl.getTable().getServer().getServerPort() + "/" + dl.getTable().getServer().getServerDatabase();
@@ -62,16 +66,44 @@ public class LayerService {
 		
 		if ( utes.size() > 0 ) {
 			UserTableEntity ute = utes.get(0);
-			result = ute.getData("featurecollection");
+			jsonData = ute.getData("featurecollection");
 		}
 		
-		return result;
+		DataLayerStylized dlsty = new DataLayerStylized( dl.getStyle(), jsonData );
+		JSONObject itemObj = new JSONObject( dlsty );
+		
+		return itemObj.toString();
 	}
 	
 	public String queryLayer( String targetUrl, String layerName ) throws Exception {
 		String result = "";
 		WebClient wc = new WebClient();
 		result = wc.doGet(  URLDecoder.decode( targetUrl, "UTF-8")   ); 
+		
+		/*
+		JSONObject layerDetail = new JSONObject( result );
+		JSONArray features = layerDetail.getJSONArray("features");
+		JSONObject featureZero = features.getJSONObject(0);
+		JSONObject properties = featureZero.getJSONObject("properties");
+		*/
+		
+		try {
+			DictionaryService ds = new DictionaryService();
+			List<DictionaryItem> dictItems = ds.getListByLayer( layerName );
+			
+			for ( DictionaryItem item : dictItems ) {
+				if ( item.getTranslatedName()!= null && !item.getTranslatedName().equals("") )
+					result = result.replace( "\"" + item.getOriginalName() + "\":", "\"" + item.getTranslatedName() + "\":" );
+			}
+			
+			
+		} catch ( NotFoundException nfe ) {
+			// Ignored
+		}
+		
+		
+		
+		
 		return result;
 	}
 	
@@ -115,16 +147,16 @@ public class LayerService {
 	
 	public String deleteLayer( int idNode ) throws Exception {
 		
-		String result = "{ \"success\": true, \"msg\": \"Opera��o efetuada com sucesso.\" }";
+		String result = "{ \"success\": true, \"msg\": \"Operação efetuada com sucesso.\" }";
 		
 		try {
 			NodeService ns = new NodeService();
 			NodeData node = ns.getNode(idNode);
 			
 			if ( node.getLayerType() == LayerType.FDR ) {
-				// � uma pasta. Apaga somente o n� SE ESTIVER VAZIO.
+				// É uma pasta. Apaga somente o nó SE ESTIVER VAZIO.
 				if ( node.getChildren() > 0 ) {
-					throw new Exception("A pasta n�o est� vazia.");
+					throw new Exception("A pasta não está vazia.");
 				} else {
 					ns.newTransaction();
 					ns.deleteNode(node);
@@ -135,14 +167,13 @@ public class LayerService {
 			
 			String layerName = node.getLayerName();
 			String workspaceName = "";
-			
+			boolean splited = false;
 			if ( layerName.contains(":") ) {
 				String[] workspaceAndLayer = layerName.split(":");
 				workspaceName = workspaceAndLayer[0];
 				layerName = workspaceAndLayer[1];
-			} else {
-				throw new Exception("Nome da camada malformado. Deve ser no padr�o 'workspace:layer' e est� '" + layerName + "'");
-			}
+				splited = true;
+			} 
 			
 			Configurator cfg = Configurator.getInstance();
 			String geoUser = cfg.getGeoserverUser();
@@ -153,9 +184,6 @@ public class LayerService {
 				String filePath = node.getServiceUrl();
 				String saveDirectory = PathFinder.getInstance().getPath() + "/" + filePath;
 				File fil = new File( saveDirectory );
-				
-				System.out.println( saveDirectory );
-				
 				fil.delete();
 			}
 				
@@ -174,15 +202,22 @@ public class LayerService {
 				
 			}
 
+			
 			if ( node.getLayerType() == LayerType.SHP ) {
+				if ( !splited ){
+					throw new Exception("Nome da camada malformado. Deve ser no padrão 'workspace:layer' e está '" + layerName + "'");
+				}
 				// http://localhost:8080/geoserver/rest/workspaces/<ws>/datastores/<ds>?recurse=true
 				serverRESTAPI = geoserverURL + "rest/workspaces/" + workspaceName + "/datastores/" + layerName + "?recurse=true";
 			}
-				
 			if ( node.getLayerType() == LayerType.TIF ) { 
+				if ( !splited ){
+					throw new Exception("Nome da camada malformado. Deve ser no padrão 'workspace:layer' e está '" + layerName + "'");
+				}
 				// http://localhost:8080/geoserver/rest/workspaces/my_ws/coveragestores/my_cover?recurse=true
 				serverRESTAPI = geoserverURL + "rest/workspaces/" + workspaceName + "/coveragestores/" + layerName + "?recurse=true";
 			}
+			
 		
 			ns.newTransaction();
 			ns.deleteNode(node);
@@ -195,15 +230,16 @@ public class LayerService {
 				if ( !serverRESTAPILayerGroup.equals("") ) {
 					res = wc.doRESTRequest( "DELETE", serverRESTAPI, "", geoUser, geoPassword );
 				} else {
-					// É um grupo de camadas...
+					// Ã‰ um grupo de camadas...
 					res = wc.doRESTRequest( "DELETE", serverRESTAPILayerGroup, "", geoUser, geoPassword );
 				}
-				
-				
+
 				
 				if ( res != 0 ) {
-					throw new Exception("Erro ao remover camada '" + layerName + "': Código " + res );
+					result = "{ \"success\": true, \"msg\": \"Sucesso, mas a camada original não foi removida do servidor de origem ('" + geoserverURL+ "').\" }";
+					//throw new Exception("Erro ao remover camada '" + layerName + "': Código " + res );
 				}
+				
 			}
 
 		} catch (Exception e) {
@@ -312,8 +348,8 @@ public class LayerService {
 		int res = createStoreFromWMSService( newStoreName, externalWorkspaceName, serverUrl );
 		
 		if ( res != RESTResponse.CREATED ) {
-			System.out.println( "Erro " + res + " recebido pelo GeoServer ao criar novo Store '"+newStoreName+"' para o serviço externo WMS." );
-			//throw new Exception( "Erro " + res + " recebido pelo GeoServer ao criar novo Store '"+newStoreName+"' para o serviço externo WMS." );
+			System.out.println( "Erro " + res + " recebido pelo GeoServer ao criar novo Store '"+newStoreName+"' para o serviÃ§o externo WMS." );
+			//throw new Exception( "Erro " + res + " recebido pelo GeoServer ao criar novo Store '"+newStoreName+"' para o serviÃ§o externo WMS." );
 		} else {
 			System.out.println( "Store '"+newStoreName+"' criado no Workspace " + externalWorkspaceName );
 		}
@@ -363,7 +399,7 @@ public class LayerService {
 	        	node.setServiceUrl( cfg.getGeoserverUrl() );
 	        	node.setLayerName( newLayerName );
 	        } else {
-	        	// Nao transfere para local. Seta a URL de servico como a ariginal.
+	        	// Nao transfere para local. Seta a URL de servico como a original.
 	        	node.setServiceUrl( node.getOriginalServiceUrl() );
 	        }
 			

@@ -35,24 +35,24 @@ Ext.define('MCLM.view.trabalho.TrabalhoTree', {
         xtype: 'toolbar',
         items: [{
         	iconCls: 'reload-icon',
-        	id: 'id802',
+        	id: 'clrWsBtn',
             handler : 'clearWorkspace'
         },{
         	xtype: 'tbseparator'
         },{
         	iconCls: 'save-icon',
-        	id: 'id800',
+        	id: 'svWsBtn',
             handler : 'saveScenery'
         },{
         	iconCls: 'copy-icon',
-        	id: 'id803',
+        	id: 'svCenaryAsBtn',
         	disabled:true,
             handler : 'cloneScenery'
         },{
         	xtype: 'tbseparator'
         },{
         	iconCls: 'scenery-icon',
-        	id: 'id801',
+        	id: 'mngCenaryBtn',
             handler : 'loadScenery'
         }]
     }],
@@ -67,25 +67,25 @@ Ext.define('MCLM.view.trabalho.TrabalhoTree', {
 		afterrender:function(){
 			
 		    Ext.tip.QuickTipManager.register({
-		        target: 'id800',
+		        target: 'svWsBtn',
 		        title: 'Salvar',
 		        text: 'Salva o conteúdo da área de trabalho / Cenário.',
 		        width: 150,
 		        dismissDelay: 5000 
 		    }, {
-		        target: 'id801',
+		        target: 'mngCenaryBtn',
 		        title: 'Gerenciar Cenários',
 		        text: 'Gerencia os Cenários (carregar, apagar, tornar público ou privado).',
 		        width: 150,
 		        dismissDelay: 5000 
 		    }, {
-		        target: 'id802',
+		        target: 'clrWsBtn',
 		        title: 'Limpar Área de trabalho',
 		        text: 'Limpa a Área de Trabalho. As modificações não gravadas no cenário atual serão perdidas.',
 		        width: 150,
 		        dismissDelay: 5000 
 		    }, {
-		        target: 'id803',
+		        target: 'svCenaryAsBtn',
 		        title: 'Salvar Cenário como...',
 		        text: 'Salva uma cópia do Cenário atual.',
 		        width: 150,

@@ -62,14 +62,16 @@ public class TreeNode {
 			if ( this.layerType.equals("SHP") ) this.iconCls = "shp-icon";
 			if ( this.layerType.equals("TIF") ) this.iconCls = "tif-icon";
 			if ( this.layerType.equals("DTA") ) {
-				
+				// Anexa um DataLayer ao no com os dados da camada de banco e seu estilo
 				try {
 					dss.newTransaction();
 					String[] dssData = this.layerName.split(":");
 					Integer idDataLayer = Integer.valueOf( dssData[1] );
 					this.dataLayer = dss.getDataLayer( idDataLayer );
+					//this.dataLayer.setStyle( null );
+					this.dataLayer.getTable().getServer().setTables( null );
 				} catch ( Exception e ) {
-					//
+					//e.printStackTrace();
 				}
 				this.iconCls = "cube-icon";
 				

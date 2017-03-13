@@ -70,9 +70,9 @@ public class SceneryNodeRepository extends BasicRepository {
 						NodeData layer = ndDao.getDO( newSceneryNode.getLayer().getIdNodeData() );
 						newSceneryNode.setLayer( layer );
 					} else {
-						// Necessário remover o objeto por causa do contexto de persistência.
-						// Quando chega aqui, "layer" representa uma pasta e não tem correspondente em
-						// "NodeData". Então só precisamos do "layerAlias" que é o nome da pasta e foi
+						// Necessario remover o objeto por causa do contexto de persistencia.
+						// Quando chega aqui, "layer" representa uma pasta e nao tem correspondente em
+						// "NodeData". Entao nao precisamos do "layerAlias" que e o nome da pasta e foi
 						// setado no construtor da classe "SceneryNode" durante 
 						// SceneryNodeService.updateOrCreateNodes : ( sn.setLayer( layer ) )
 						newSceneryNode.setLayer( null );

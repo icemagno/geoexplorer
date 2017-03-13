@@ -1,6 +1,7 @@
 package br.mil.mar.casnav.mclm.misc;
 
 import br.mil.mar.casnav.mclm.persistence.entity.DataLayer;
+import br.mil.mar.casnav.mclm.persistence.entity.Feicao;
 import br.mil.mar.casnav.mclm.persistence.entity.SceneryNode;
 import br.mil.mar.casnav.mclm.persistence.services.DataLayerService;
 
@@ -36,6 +37,7 @@ public class SceneryTreeNode {
 	private int layerStackIndex;
 	private int transparency;	
 	private DataLayer dataLayer;
+	private Feicao feicao;
 	
 	
 	public SceneryTreeNode( SceneryNode sn, DataLayerService dss ) {
@@ -79,6 +81,18 @@ public class SceneryTreeNode {
 			if ( this.layerType.equals("WMS") ) this.iconCls = "wms-icon";
 			if ( this.layerType.equals("SHP") ) this.iconCls = "shp-icon";
 			if ( this.layerType.equals("TIF") ) this.iconCls = "tif-icon";
+			
+			if ( this.layerType.equals("FEI") ) {
+				try {
+					dss.newTransaction();
+					String[] dssData = this.layerName.split(":");
+					Integer idFeicao = Integer.valueOf( dssData[1] );
+					this.feicao = dss.getFeicao( idFeicao );
+				} catch ( Exception e ) {
+					e.printStackTrace();
+				}
+				this.iconCls = "fei-icon";
+			}
 			
 			if ( this.layerType.equals("DTA") ) {
 				
@@ -209,6 +223,10 @@ public class SceneryTreeNode {
 	
 	public DataLayer getDataLayer() {
 		return dataLayer;
+	}
+	
+	public Feicao getFeicao() {
+		return feicao;
 	}
 	
 }

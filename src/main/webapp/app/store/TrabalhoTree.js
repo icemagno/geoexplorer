@@ -52,7 +52,6 @@ Ext.define('MCLM.store.TrabalhoTree', {
         	return true;
     	},
     	beforesync: function( operations ) {
-    		//
     		return true;
     	}
 	}     

@@ -55,7 +55,7 @@ public class SceneryService {
 	public String updateScenery(Integer idScenery, String mapCenter, Integer mapZoom, String mapaBase,
 			String servidorBase, String mapBbox, Boolean mapaBaseAtivo, Boolean gradeAtiva) throws Exception {
 		
-		String resp = "{ \"success\": true, \"msg\": \"Operação efetuada com sucesso.\" }";
+		String resp = "{ \"success\": true, \"msg\": \"Opera��o efetuada com sucesso.\" }";
 		
 		try {
 			Scenery oldScenery;

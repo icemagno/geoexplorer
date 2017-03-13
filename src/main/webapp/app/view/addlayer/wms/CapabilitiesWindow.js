@@ -6,7 +6,7 @@ Ext.define('MCLM.view.addlayer.wms.CapabilitiesWindow', {
 	height: 500,
     scrollable: false,
     frame : false,
-    
+    modal : true,
     requires: [
        'MCLM.view.addlayer.wms.CapabilitiesGrid',
        'MCLM.view.addlayer.wms.LayerPreviewPanel',

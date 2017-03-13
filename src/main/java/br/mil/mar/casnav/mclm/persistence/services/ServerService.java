@@ -4,6 +4,9 @@ import java.util.List;
 
 import org.json.JSONObject;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import br.mil.mar.casnav.mclm.misc.ExternalSourcesCollection;
 import br.mil.mar.casnav.mclm.misc.PostgresSourcesCollection;
 import br.mil.mar.casnav.mclm.misc.TablesCollection;
@@ -115,6 +118,21 @@ public class ServerService {
 		return rep.getTable( idTable );
 	}
 	
+	public String addTable( String tableName, String geometryColumnName, int idServer ) throws Exception {
+		Postgres server = getServerPGR( idServer );
+		
+		String result = "{ \"success\": true, \"msg\": \"Tabela " + tableName + " adicionada com sucesso ao servidor " + server.getName() + "\" }";
+		try {
+			PostgresTable table = new PostgresTable(tableName, geometryColumnName, server);
+			newTransaction();
+			rep.addTable( table );
+		} catch ( Exception ex ) {
+			ex.printStackTrace();
+			result = "{ \"error\": true, \"msg\": \""+ex.getMessage()+".\" }";	
+		}		
+		return result;
+	}
+	
 	public List<PostgresTable> getTablesList( ) throws Exception {
 		return rep.getListTables( );
 	}
@@ -123,20 +141,29 @@ public class ServerService {
 		List<Server> servers = getWMSList();
 		ExternalSourcesCollection esc = new ExternalSourcesCollection( servers );
 		JSONObject itemObj = new JSONObject( esc );
+		rep.closeSession();
 		return itemObj.toString();		
 	}	
 
 	public String getPGRAsJson() throws Exception {
-		List<Postgres> servers = getPGRList();
+		/*
+		{"servers":[{"serverDatabase":"siglmd","tables":[{"idTable":1,"geometryColumnName":"geom","name":"servicos.view_cidades_brasil"},{"idTable":2,"geometryColumnName":"geom","name":"servicos.view_bacias_hidrograficas"}],"serverUser":"geoserver","name":"Apolo","serverAddress":"10.5.115.21","serverPort":5432,"serverPassword":"G305erV31","idServer":3}],"totalCount":1}
+		*/
+		
+		List<Postgres> servers = getPGRList( );
 		PostgresSourcesCollection esc = new PostgresSourcesCollection( servers );
-		JSONObject itemObj = new JSONObject( esc );
-		return itemObj.toString();		
+		
+		Gson gson = new GsonBuilder().create();
+		String result = gson.toJson( esc ); 
+		
+		return result;		
 	}	
 	
 	public String getTablesAsJson() throws Exception {
 		List<PostgresTable> tables = getTablesList();
 		TablesCollection esc = new TablesCollection( tables );
 		JSONObject itemObj = new JSONObject( esc );
+		rep.closeSession();
 		return itemObj.toString();		
 	}	
 	

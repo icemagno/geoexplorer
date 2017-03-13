@@ -271,7 +271,7 @@ Ext.define('MCLM.view.cenarios.CenarioController', {
 		    		}
 		    		MCLM.Map.panTo( mapCenter, zoomLevel );
 		    		
-		    		var cloneSceneryButton = Ext.getCmp('id803'); 
+		    		var cloneSceneryButton = Ext.getCmp('svCenaryAsBtn'); 
 		    		cloneSceneryButton.enable();
 		    		
 		    	}

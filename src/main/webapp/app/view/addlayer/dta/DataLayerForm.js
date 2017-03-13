@@ -52,7 +52,27 @@ Ext.define('MCLM.view.addlayer.dta.DataLayerForm', {
     	width: 330,
     	name: 'propertiesColumns',
     	allowBlank : false,
-    }, {
+    },
+    {
+    	fieldLabel: 'Atributo de Exibição',
+    	width: 330,
+    	name: 'displayColumn',
+    	allowBlank : false,
+    },
+    {
+    	
+		xtype: 'combobox',
+		name: 'idFeatureStyle',
+		fieldLabel: 'Estilo da Camada',
+		displayField: 'featureStyleName',	    	
+		id: 'idFeatureStyle',
+		store: 'store.styles',	    	
+		editable : false,
+	    queryMode: 'local',
+	    valueField: 'idFeatureStyle',		
+		
+    },   
+    {
         fieldLabel: 'Parend ID',
         width: 350,
         xtype : 'hidden',
@@ -62,11 +82,11 @@ Ext.define('MCLM.view.addlayer.dta.DataLayerForm', {
     }],
 
     buttons: [{
-    	// Interceptado pelo controller 'MCLM.view.addlayer.Kml.UploadKmlController'	
+    	// Interceptado pelo controller 'MCLM.view.addlayer.dta.DataLayerController'	
         text: 'Fechar',
         id : 'closeDataLayerWindow'
       },{
-    	// Interceptado pelo controller 'MCLM.view.addlayer.Kml.UploadKmlController'	
+    	// Interceptado pelo controller 'MCLM.view.addlayer.dta.DataLayerController'	
         text: 'Enviar',
         id : 'dataLayerFormSubmit'
     }]

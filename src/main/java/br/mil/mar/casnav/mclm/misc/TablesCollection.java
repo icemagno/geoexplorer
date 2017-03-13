@@ -9,6 +9,11 @@ public class TablesCollection {
 	private int totalCount;
 
 	public TablesCollection( List<PostgresTable> tables ) {
+		
+		for ( PostgresTable table : tables ) {
+			table.getServer().setTables( null );
+		}
+		
 		this.tables = tables;
 		totalCount = tables.size();
 	}

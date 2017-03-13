@@ -21,7 +21,8 @@ Ext.define('MCLM.Map', {
 		graticule: null,
 		geoserverUrl: '',
 		highlight : null,
-		featureOverlay : null,
+		interrogatingFeatures : false,
+		
 		
 		getBaseMapName : function() {
 			return this.baseLayerName;
@@ -39,32 +40,8 @@ Ext.define('MCLM.Map', {
 			me = this;
 			this.init();
 			
-			
-			// ===================================================
-			/*
-			var draw = new ol.interaction.Draw({
-			  source: vectorSource,
-			  type: ('Polygon')
-			});
-			var select = new ol.interaction.Select();
-			select.setActive(false);
-			var selected = select.getFeatures();
-			var modify = new ol.interaction.Modify({
-			  features: selected
-			});
-			modify.setActive(false);
-			*/
-			// ===================================================
-			
-			
-			
-			
 			this.map = new ol.Map({
 				layers: [ this.baseLayer ],
-				
-				//interactions: ol.interaction.defaults().extend([draw, select, modify]),
-				
-				
 				target: container,
 				renderer: 'canvas',
 			    loadTilesWhileAnimating: true,
@@ -97,16 +74,19 @@ Ext.define('MCLM.Map', {
 				}
 			});	
 			
-			
 			this.map.on('pointermove', function(evt) {
 				if (evt.dragging) {
 					return;
 				}
-				var pixel = me.map.getEventPixel( evt.originalEvent );
-				me.displayFeatureInfo( pixel );
+			    var hit = this.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
+			        return true;
+			    });
+			    if ( hit && me.interrogatingFeatures ) {
+			        this.getTargetElement().style.cursor = 'pointer';
+			    } else {
+			        this.getTargetElement().style.cursor = '';
+			    }			    
 			});
-
-			this.map.addLayer( this.featureOverlay );
 			
 		},
 		// --------------------------------------------------------------------------------------------
@@ -136,8 +116,6 @@ Ext.define('MCLM.Map', {
 			
 			this.openSeaMapLayer = this.createOpenSeaMapLayer();
 			this.baseLayer = this.createBaseLayer();
-			this.featureOverlay = this.createFeatureOverlay();
-			
 		},
 		// --------------------------------------------------------------------------------------------
 		// Gera a Camada do OpenSeaMap
@@ -291,7 +269,6 @@ Ext.define('MCLM.Map', {
 				            'layers'	: layerName,
 				            'version'	: '1.1.1', 
 				            'format'	: 'image/png',
-				            //'viewparams': 'directed:false;numroutes:10;source_id:1369892;target_id:6450',
 				        },
 				        projection: ol.proj.get('EPSG:4326')
 				    })
@@ -366,98 +343,288 @@ Ext.define('MCLM.Map', {
 			});
 			return result;
 		},
+		replacePattern : function( subject, properties ) {
+			try {
+				Object.keys( properties ).forEach(function ( key ) {
+				    var val = properties[key];
+				    var pattern = "${" + key + "}";
+				    subject = subject.replace( pattern, val);
+				});
+			} catch ( err ) { }
+			return subject;
+		},
 		// --------------------------------------------------------------------------------------------
 		// Converte uma String GeoJSON para uma camada Vector
 		createVectorLayerFromGeoJSON : function( geojsonStr, node ) {
-			
-	    	var features = new ol.format.GeoJSON().readFeatures( geojsonStr, {
-	    	    featureProjection: 'EPSG:3857'
-	    	});		   	
-		   	
-			var vectorSource = new ol.source.Vector({
-			     features: features,
-			});			
-			
-
-			var customStyleFunction = function( feature, resolution ) {
-				
-		    	var featureStyle = new ol.style.Style({
-		    		stroke: new ol.style.Stroke({
-		    			color: 'red',
-		    			width: 2
-		    		})
-		    	});
-		    	
-		    	console.log( feature.getGeometry().getType() );
-		    	
-		    	return [ featureStyle ];
-			};
-			
-			var vectorLayer = new ol.layer.Vector({
-			      source: vectorSource,
-			      //style : customStyleFunction
-			});
-			
         	var dataLayer = node.get("dataLayer");
         	var tableName = dataLayer.tableName;
         	var database = dataLayer.database;
 			var serialId = node.get('serialId' );			
 			var layerName = node.get( 'layerName' );			
-			var layerAlias = node.get( 'layerAlias' );			
+			var layerAlias = node.get( 'layerAlias' );	
+			var layerStyle = geojsonStr.featureStyle;
+			var clustered = false;
+		
 			
+			// Carregas as features
+	    	var features = new ol.format.GeoJSON().readFeatures( geojsonStr.data, {
+	    	    featureProjection: 'EPSG:3857'
+	    	});		   	
+		   	
+	    	// Cria um source para as features
+			var vectorSource = new ol.source.Vector({
+			});	
+			var clusterFeatureSource = new ol.source.Vector({
+			});	
+
+			if ( features.length > 50000) {
+				Ext.Msg.alert('Aviso: Sobrecarga de Elementos na Camada de Dados', 'Esta camada possui elementos em excesso ('+features.length+'). Isso poderá causar queda no desempenho de seu navegador, ' + 
+						'sem relação com o desempenho do próprio sistema. Considere refinar a consulta da camada de dados para conter menos elementos. O número ideal vai depender da '+
+						'quantidade de memória de seu computador e da capacidade de seu navegador em processar grandes volumes de dados, mas este aviso será exibido ' +
+						'quando este valor ultrapassar 50.000 elementos.');
+			}
+			
+			// Separa pontos do resto para montar o cluster
+			for (var i = 0; i < features.length; i++) {
+			    if (features[i].getGeometry().getType() === 'Point') {
+			    	clusterFeatureSource.addFeature(features[i]);
+			    	clustered = true;
+			    } else {
+			    	
+			    	var center = features[i].getProperties().circleCenter;
+			    	var radius = features[i].getProperties().circleRadius;
+			    	
+			    	if ( center && radius ) {
+			    		// Trata-se de um circulo. Preciso criar uma Feature "na mao"
+			    		// pois o GeoJSON nao especifica circulos e substituir a atual
+			    		// ( features[i] ) pela nova ( theFeature ).
+			    		var theCircle = new ol.geom.Circle( center, radius );
+			    		var theFeature = new ol.Feature( theCircle );
+			    		
+			    		// Preciso levar as properiedades da feature antiga, mas manter a geometria da nova
+			    		var oldProperties = features[i].getProperties();
+			    		var newProperties = theFeature.getProperties();
+			    		
+			    		oldProperties.geometry = newProperties.geometry;
+			    		theFeature.setProperties( oldProperties, true );
+			    		
+			    		vectorSource.addFeature( theFeature );
+			    	} else {
+			    		vectorSource.addFeature( features[i] );
+			    	}
+			    }
+			}			
+			
+			if( clustered ) {
+				var clusterSource = new ol.source.Cluster({
+				    distance: 15,
+				    source: clusterFeatureSource
+				});
+			}
+			
+			// Estiliza as features baseado nos dados da tabela "FeatureStyle"
+			// que eh atributo da tabela "DataLayer", que eh atributo de "Node"
+			var customStyleFunction = function( feature, resolution ) {
+				
+				var featureGeomType = feature.getGeometry().getType();
+				var props = feature.getProperties();
+				var resultStyles = [];
+				
+				//console.log( me.replacePattern("A vaca caiu ${areakm2} e saiu voando até ${nome}...", props)  )
+
+				/*
+	        	var defaultStyle = new ol.style.Style({
+					fill: new ol.style.Fill({
+						color: '#CACACA'
+					}),
+					stroke: new ol.style.Stroke({
+						color: 'black',
+						width: 1
+					})
+				});				
+				resultStyles.push( defaultStyle );
+				*/
+				
+				
+				// ------------------------------------------------------------------------------
+				if ( featureGeomType == 'LineString' || featureGeomType == 'Line' ) {
+		        	var lineStyle = new ol.style.Style({
+						fill: new ol.style.Fill({
+							color: layerStyle.lineFillColor
+						}),
+						stroke: new ol.style.Stroke({
+							color: layerStyle.lineStrokeColor,
+							width: layerStyle.lineStrokeWidth,
+							lineDash: JSON.parse( layerStyle.lineLineDash ) 
+						})
+						
+					});	
+		        	resultStyles.push( lineStyle );
+				}
+				
+				// ------------------------------------------------------------------------------
+				if ( featureGeomType == 'Circle' )  {
+		        	var hexColor = layerStyle.iconColor;
+		        	var newColor = ol.color.asArray(hexColor);
+		        	newColor = newColor.slice();
+		        	newColor[3] = layerStyle.iconOpacity;	
+		        	
+		    		var circleStyle = new ol.style.Style({
+							fill: new ol.style.Fill({
+								color: newColor
+							}),
+							stroke: new ol.style.Stroke({
+								color: layerStyle.iconColor,
+								width: 2
+							})
+		    		});	
+		    		resultStyles.push( circleStyle );					
+				}
+		
+				
+				// ------------------------------------------------------------------------------
+		        if ( featureGeomType == 'MultiPolygon' || featureGeomType == 'Polygon' ) {
+
+		        	var hexColor = me.replacePattern(layerStyle.polygonFillColor, props);
+		        	var newColor = ol.color.asArray(hexColor);
+		        	newColor = newColor.slice();
+		        	newColor[3] = layerStyle.polygonFillOpacity;
+		        	
+		        	var polFill = newColor;
+		        	
+		        	var ptrHDist = layerStyle.ptrHDist;
+		        	var ptrVDist = layerStyle.ptrVDist;
+		        	var ptrLength = layerStyle.ptrLength;
+		        	var ptrHeight = layerStyle.ptrHeight;
+		        	var ptrWidth = layerStyle.ptrWidth;
+		        	
+		        	if ( ptrHDist && ptrVDist )
+		        		polFill = MCLM.Functions.makePattern( newColor, ptrHDist, ptrVDist, ptrLength, ptrHeight, ptrWidth );
+		        	
+		        	
+		        	var polygonStyle = new ol.style.Style({
+						fill: new ol.style.Fill({
+							color: polFill,
+						}),
+						stroke: new ol.style.Stroke({
+							color: me.replacePattern(layerStyle.polygonStrokeColor),
+							width: layerStyle.polygonStrokeWidth,
+							lineDash: JSON.parse( layerStyle.polygonLineDash ), // [10, 20, 0, 20]
+							strokeLinecap : layerStyle.polygonStrokeLinecap, // butt, round, square
+						})
+					});
+		        	resultStyles.push( polygonStyle );
+		        }		        	
+		        	
+				// ------------------------------------------------------------------------------
+		        // TEXT (Para todos)
+	        	var featureProperties = feature.getProperties();
+	        	if ( featureProperties.features ) {
+	        		// Eh um cluster de pontos...
+	        		if ( featureProperties.features.length > 0 ) {
+	        			featureProperties = featureProperties.features[0].getProperties();
+	        		}
+	        	}
+	        	
+	        	var label = featureProperties.label;
+	        	var font = layerStyle.textFont;
+	        	
+	        	if( label && font ) {
+	        		
+			        var featureText = new ol.style.Style({
+			            text: new ol.style.Text({
+			                text: label,
+			                offsetY: layerStyle.textOffsetY,
+			                offsetX: layerStyle.textOffsetX,
+			                font: layerStyle.textFont,
+			                scale : 1,
+			                stroke: new ol.style.Stroke({
+			                	color: layerStyle.textStrokeColor,
+			                	width: layerStyle.textStrokeWidth
+			                }),				                
+			                fill: new ol.style.Fill({
+			                    color: layerStyle.textFillColor
+			                }),
+			            })
+			        });		        	
+		        	resultStyles.push( featureText );
+	        	}
+
+				// ------------------------------------------------------------------------------
+				if ( featureGeomType == 'Point' ) {
+					
+		        	var hexColor = layerStyle.iconColor;
+		        	var newColor = ol.color.asArray(hexColor);
+		        	newColor = newColor.slice();
+		        	newColor[3] = layerStyle.iconOpacity;					
+					
+					if ( layerStyle.iconSrc ) {
+						// Se tiver icone (o caminho do icone) entao cria um estilo de icone
+				    	var pointStyle = new ol.style.Style({
+				    		  image: new ol.style.Icon(({
+				    			    anchor: JSON.parse( layerStyle.iconAnchor ),
+				    			    scale : layerStyle.iconScale,
+				    			    anchorXUnits: layerStyle.iconAnchorXUnits,
+				    			    anchorYUnits: layerStyle.iconAnchorYUnits,
+				    			    opacity: layerStyle.iconOpacity,
+				    			    color   : layerStyle.iconColor,
+				    			    rotation: layerStyle.iconRotation,
+				    			    src:  me.replacePattern(layerStyle.iconSrc, props)
+				    		  }))
+				    	});
+				    	
+					} else {
+						// Se nao, cria um circulo
+				    	var pointStyle = new ol.style.Style({
+				    		  image: new ol.style.Circle({
+					                radius: layerStyle.iconScale,
+					                fill: new ol.style.Fill({
+					                    color: newColor
+					                }),
+					                stroke: new ol.style.Stroke({
+					                    color: layerStyle.iconColor,
+					                    width: 2
+					                })
+				    		  })
+				    	});
+						
+						
+						
+					}
+			    	resultStyles.push( pointStyle );
+			    	//if ( resolution < 150 ) resultStyles.push( featureText );
+				}			        
+				// ------------------------------------------------------------------------------
+		        
+				
+				
+		    	return resultStyles;
+			};
+
+			
+			if ( clustered ) {
+				var vectorLayer = new ol.layer.Vector({
+					source: clusterSource,
+				    style : customStyleFunction
+				});
+			} else {
+				var vectorLayer = new ol.layer.Vector({
+				    source: vectorSource,
+				    style : customStyleFunction
+				});
+				
+			}
+
 			vectorLayer.set('alias', layerAlias);
 			vectorLayer.set('name', layerName);
 			vectorLayer.set('serialId', serialId );
 			vectorLayer.set('ready', true);
 			vectorLayer.set('baseLayer', false);	        
-	        
+			
 			MCLM.Map.removeLayer( serialId );
 			MCLM.Map.map.addLayer( vectorLayer );
 			
-		},
-		// --------------------------------------------------------------------------------------------
-		// Carrega as Features de uma String para a camada de Rotas.
-		loadRouteDataToRouteLayer : function( routeData ) {
-	   		if (  MCLM.Map.featureOverlay.getSource() ) MCLM.Map.featureOverlay.getSource().clear();
-	    	
-	    	var features = new ol.format.GeoJSON().readFeatures( routeData, {
-	    	    featureProjection: 'EPSG:3857'
-	    	});		   	
-		   	
-			var vectorSource = new ol.source.Vector({
-			     features: features,
-			});			
-			
-	    	var featureStyle = new ol.style.Style({
-	    		stroke: new ol.style.Stroke({
-	    			color: 'red',
-	    			width: 3
-	    		})
-	    	});
-			var vectorLayer = new ol.layer.Vector({
-			      source: vectorSource,
-			      style : featureStyle
-			});
-			
-			
-			vectorLayer.set('alias', 'routeLayer');
-			vectorLayer.set('name', 'routeLayer');
-			vectorLayer.set('serialId', 'routeLayer');
-			vectorLayer.set('ready', false);
-			vectorLayer.set('baseLayer', false);	        
-	        
-			MCLM.Map.removeLayerByName( 'routeLayer' );
-			
-			MCLM.Map.map.addLayer( vectorLayer );
-		},
-		// --------------------------------------------------------------------------------------------
-		// Converte as Features da camada de Rotas para uma String GeoJSON
-		convertRouteLayerToJson : function() {
-			var routeLayer = MCLM.Map.getLayerByName("routeLayer");
-			var source = routeLayer.getSource();
-			var writer = new ol.format.GeoJSON();
-			var geojsonStr = writer.writeFeatures( source.getFeatures() );
-			return geojsonStr; 
+			MCLM.Functions.hideMainLoadingIcon();
 		},
 		// --------------------------------------------------------------------------------------------
 		// Remove uma camada do mapa
@@ -633,6 +800,7 @@ Ext.define('MCLM.Map', {
 		 	}
 		},  
 		// --------------------------------------------------------------------------------------------
+		// Interroga o servidor de rotas para saber quais ruas estão mais perto do ponto clicado pelo usuário
 		getNearestRoads : function( center, type ) {
 			var coordinate = ol.proj.transform( center , 'EPSG:3857', 'EPSG:4326');			
 			
@@ -642,14 +810,13 @@ Ext.define('MCLM.Map', {
 		           'coordinate': coordinate
 		       },       
 		       success: function(response, opts) {
-		    	   
-		    	   var respText = Ext.decode(response.responseText); //JSON.parse(response.responseText);
+		    	   var respText = Ext.decode(response.responseText);
+		    	  
 		    	   var jsonObj = respText[0];
-		    	   var osmName = "<Sem Nome>";
+		    	   var osmName = "(Rua Sem Nome)";
 		    	   if ( jsonObj.osm_name != null ) osmName = jsonObj.osm_name;
 		    	   var source = jsonObj.source;
 		    	   var target = jsonObj.target;
-		    	   
 		    	   if( type == 'S' ) {
 		    		   $("#sourceAddrText").text( osmName );
 		    		   $("#sourceValue").val( source );
@@ -658,6 +825,7 @@ Ext.define('MCLM.Map', {
 		    		   $("#targetAddrText").text( osmName );
 		    		   $("#targetValue").val( target );
 		    	   }
+		    	   
 		       },
 		       failure: function(response, opts) {
 		    	   Ext.Msg.alert('Erro','Erro ao receber os dados da coordenada selecionada.' );
@@ -671,6 +839,7 @@ Ext.define('MCLM.Map', {
 			this.unbindMapClick();
 			this.onClickBindKey = this.map.on('click', function(event) {
 				me.getNearestRoads( event.coordinate, 'S' );
+				MCLM.RouteHelper.putStartIcon( event.coordinate );
 			});
 		},
 		// --------------------------------------------------------------------------------------------
@@ -680,13 +849,26 @@ Ext.define('MCLM.Map', {
 			this.unbindMapClick();
 			this.onClickBindKey = this.map.on('click', function(event) {
 				me.getNearestRoads( event.coordinate, 'T' );
+				MCLM.RouteHelper.putEndIcon( event.coordinate );
 			});
+		},
+		bindMapToInspectFeature : function() {
+			var me = this;
+			this.unbindMapClick();
+			this.onClickBindKey = this.map.on('click', function(event) {
+				var pixel = event.pixel;
+				MCLM.RouteHelper.inspectFeature( pixel );
+			});
+			this.interrogatingFeatures = true;
 		},
 		// --------------------------------------------------------------------------------------------
 		// Libera o click do mouse no mapa da ultima ferramenta ligada
 		unbindMapClick : function () {
 			if ( this.onClickBindKey ) {
-				this.map.unByKey( this.onClickBindKey );
+				// Removido por ser especifico do OL3
+				//this.map.unByKey( this.onClickBindKey );
+				// Novo metodo do OL4:
+				ol.Observable.unByKey( this.onClickBindKey );
 			}
 		},		
 		// --------------------------------------------------------------------------------------------
@@ -714,8 +896,13 @@ Ext.define('MCLM.Map', {
 				var layerName = layer.get("name");
 				var baseLayer = layer.get("baseLayer");
 				var found = false;
-				// Retire os comentarios para nao interrogar a camada de base
-				//if ( layerName && ( !baseLayer ) ) {
+				
+				var queryResultWindow = Ext.getCmp('queryResultWindow');
+				if ( !queryResultWindow ) queryResultWindow = Ext.create('MCLM.view.paineis.QueryResultWindow');
+				queryResultWindow.removeAll();
+				
+				
+				if ( layerName && ( !baseLayer ) ) {
 					try {
 						urlFeatureInfo = layer.getSource().getGetFeatureInfoUrl(
 							coordinate, viewResolution, projection,
@@ -724,12 +911,15 @@ Ext.define('MCLM.Map', {
 						found = true;
 						me.queryLayer( layerName, urlFeatureInfo );
 					} catch ( err ) { me.queryLayerError("Erro ao interrogar camada", layerName);  }
-				//}				
+				}				
 				//if( !found ) {
 				//	Ext.Msg.alert('Não é possível interrogar a camada de base','Não existem camadas a serem interrogadas.' );
 				//}
 			});
 		},
+		
+		
+		
 		// --------------------------------------------------------------------------------------------
 		// Interroga uma camada dada uma URL do tipo "REQUEST=GetFeatureInfo"
 		queryLayer : function( layerName, urlFeatureInfo ) {
@@ -743,38 +933,96 @@ Ext.define('MCLM.Map', {
 		           'layerName' : layerName 
 		       },       
 		       success: function(response, opts) {
-		    	   try {
-			    	   var jsonObj = JSON.parse(response.responseText);
-			    	   var rawData = [];
-			    	   for ( x=0; x<jsonObj.features.length;x++ ) {
-			    		   rawData.push( jsonObj.features[x].properties );
-			    	   }
-			    	   if ( rawData.length > 0 ) {
-			    		   
-			    		   
-			    		   
-			    		   var painelInferior = Ext.getCmp('painelInferior');
-			    		   painelInferior.update( JSON.stringify( rawData ) );
-			    		  //addGrid( layerName, rawData );
-			    		  //$('#waitForQueryResultIcon').css('display','none');
-			    		   
-			    		   
-			    		   
-			    	   }
-		    	   } catch ( err ) {
-		    		   me.queryLayerError( response, layerName );
+		    	  
+		    	   var jsonObj = JSON.parse(response.responseText);
+		    	   
+		    	   var rawData = [];
+		    	   for ( x=0; x<jsonObj.features.length;x++ ) {
+		    		   rawData.push( jsonObj.features[x].properties );
 		    	   }
+		    	   
+		    	   if ( rawData.length > 0 ) {
+		    		  me.addGrid( layerName, rawData );
+		    	   }
+
 		       },
 		       failure: function(response, opts) {
 		    	   me.queryLayerError( response, layerName );
 		       }
 			});				
 		},
+		getStoreColumnsFromJson : function ( obj ) {
+		    var keys = [];
+		    for (var key in obj) {
+		        if ( obj.hasOwnProperty(key) ) {
+		            keys.push({name : key});
+		        }
+		    }
+		    return keys;	
+		},
+
+		getGridColumnsFromJson : function( obj ) {
+		    var keys = [];
+		    for (var key in obj) {
+		        if ( obj.hasOwnProperty(key) ) {
+		            keys.push({text: key, dataIndex: key});
+		        }
+		    }
+		    return keys;	
+		},		
+		createGrid : function( layerName, store, columnNames ) {
+			var dummyGrid = Ext.create('Ext.grid.Panel', {
+				border: false,
+				title : layerName,
+				store : store,
+			    frame: false,
+			    margin: "10 0 0 0", 
+			    flex:1,
+			    loadMask: true,
+			    columns:columnNames,
+			    autoHeight:true
+			});
+			return dummyGrid;
+		},		
+		createStore : function ( storeData, columns ) {
+			var arrData = [];
+			var theData = storeData;
+			if ( !$.isArray( storeData ) ) {
+				arrData.push( storeData );
+				theData = arrData;
+			} 
+			
+			var store =  Ext.create('Ext.data.Store',{
+		        fields: columns,
+				autoLoad: true,
+				data: theData
+			}); 	
+			return store;
+		},
+		addGrid : function ( layerName, data ) {
+			
+			var storeColumns = this.getStoreColumnsFromJson( data[0] );   
+			var gridColumns = this.getGridColumnsFromJson( data[0] );
+
+			var store = this.createStore( data, storeColumns );
+			var grid = this.createGrid( layerName, store, gridColumns );
+			
+			var queryResultWindow = Ext.getCmp('queryResultWindow');
+			if ( !queryResultWindow ) queryResultWindow = Ext.create('MCLM.view.paineis.QueryResultWindow');
+			queryResultWindow.show();
+			
+			queryResultWindow.add( grid );
+			
+		},
+		
+		
+		
+		
 		// --------------------------------------------------------------------------------------------
 		// Exibe uma mensagem de erro da rotina "queryLayer"
 		queryLayerError : function( response, layerName ) {
-			//Ext.Msg.alert('Não é possível interrogar a camada de base','Não existem camadas a serem interrogadas.' );
-			console.log( "queryLayerError Error: " + response + " " + layerName );
+			// Ext.Msg.alert('Não é possível interrogar a camada de base','Não existem camadas a serem interrogadas.' );
+			// console.log( "queryLayerError Error: " + response + " " + layerName );
 		},
 		// --------------------------------------------------------------------------------------------
 		// Solicita uma camada do GeoServer em formato GeoJSON (Features)
@@ -791,29 +1039,31 @@ Ext.define('MCLM.Map', {
 	    	Ext.Ajax.setTimeout(120000);
 	    	
 			Ext.Ajax.request({
-		        url: 'getAsFeatures',
-	         	params: {
-			           'idDataLayer': idDataLayer,
-			           'bbox' : bbox
-			       },       
-			       success: function(response, opts) {
-			    	   var respText = Ext.decode(response.responseText);
-			    	   var layer = me.createVectorLayerFromGeoJSON( respText, node );
-			    	   
-			    	   // Adiciona ao Layer Stack
-			    	   var layerStackStore = Ext.getStore('store.layerStack');
-			    	   var stackGridPanel = Ext.getCmp('stackGridPanel');
-			    	   var layerStack = layerStackStore.getRange();
-			    	   layerStack.push( node.data );
-			    	   layerStackStore.loadData( layerStack );    				
-			    	   if ( stackGridPanel ) {
-			    		   stackGridPanel.getView().refresh();
-			    	   }
-			    	   
-			       },
-			       failure: function(response, opts) {
-			    	   Ext.Msg.alert('Erro','Erro ao receber dados.' );
-			       }
+				url: 'getAsFeatures',
+				params: {
+					'idDataLayer': idDataLayer,
+					'bbox' : bbox
+				},       
+				success: function(response, opts) {
+			    	MCLM.Functions.showMainLoadingIcon( 'Carregando Camada...');
+
+					var respText = Ext.decode(response.responseText);
+					var layer = me.createVectorLayerFromGeoJSON( respText, node );
+		    	   
+					//Adiciona ao Layer Stack
+					var layerStackStore = Ext.getStore('store.layerStack');
+					var stackGridPanel = Ext.getCmp('stackGridPanel');
+					var layerStack = layerStackStore.getRange();
+					layerStack.push( node.data );
+					layerStackStore.loadData( layerStack );    				
+					if ( stackGridPanel ) {
+						stackGridPanel.getView().refresh();
+					}
+				},
+				failure: function(response, opts) {
+					MCLM.Functions.hideMainLoadingIcon();
+					Ext.Msg.alert('Erro','Erro ao receber dados.' );
+				}
 			});			
 			
 			
@@ -822,35 +1072,6 @@ Ext.define('MCLM.Map', {
 		// --------------------------------------------------------------------------------------------
 		getLayers : function() {
 			return this.map.getLayers();
-		},
-		// --------------------------------------------------------------------------------------------
-		// Apenas para debug. Apagar assim que possível.
-		getLayersDetails : function () {
-			var layers = this.map.getLayers();
-			var length = layers.getLength();
-			
-			var result = [];
-			
-			console.log("CAMADAS EXISTENTES NO MAPA: -----------------------");
-			for (var i = 0; i < length; i++) {
-				var layerName = layers.item(i).get('name');
-				var serverUrl = layers.item(i).get('serverUrl');
-				var serialId = layers.item(i).get('serialId');
-				var alias = layers.item(i).get('alias');
-				var layerOpacity = layers.item(i).getOpacity();
-				
-				var layerDetail = {
-					layerName:layerName, 
-					serverUrl:serverUrl, 
-					serialId:serialId, 
-					alias:alias,
-					layerOpacity: layerOpacity
-				};
-				
-				result.push( layerDetail );
-				console.log( layers.item(i) );
-			}
-			console.log("---------------------------------------------------");
 		},
 		// --------------------------------------------------------------------------------------------
 		// Posiciona o centro do mapa em uma coordenada e zoom. Usado pela carga do cenário
@@ -868,71 +1089,59 @@ Ext.define('MCLM.Map', {
 			
 		},
 		// --------------------------------------------------------------------------------------------
-		// Realca uma Feature quando o mouse passa por cima
-		displayFeatureInfo : function( pixel ) {
+		// Adiciona uma feicao ao mapa
+		addFeicao : function( node ) {
+			var feicao = node.get("feicao");
+			var estilo = feicao.style;
+			var geomType = feicao.geomType;
+			var idFeicao = feicao.idFeicao;
+			var feicaoNome = feicao.nome;
+			var feicaoDescricao = feicao.descricao;
+			var featureCollection = Ext.decode( feicao.metadados );
 			
-			var feature = this.map.forEachFeatureAtPixel( pixel, function(feature) {
-				return feature;
-			});
-
-       
-	        if ( feature != this.highlight ) {
-
-	        	var detail = '';
-		    	
-	        	if ( this.highlight ) {
-	        		this.featureOverlay.getSource().removeFeature( this.highlight );
-	        	}
-	        	if ( feature ) {
-	        		this.featureOverlay.getSource().addFeature( feature );
-	        		
-	        		// Relativo a um segmento de rota ||===================
-	        		var osmName = feature.get('osm_name');
-	        		if ( osmName == 'null' ) osmName = "<Sem Nome>"; 
-	        		detail = feature.get('osm_id') + ': ' + osmName;
-	        		// ====================================================
-	        	}
-	        	this.highlight = feature;
-	        	
-	        	
-	        	// Tenta exibir as informações do segmento de rota, caso a Feature seja uma rota.
-	        	var roadDetailPanel = Ext.getCmp('roadDetailPanel');
-	        	if ( roadDetailPanel ) roadDetailPanel.update( detail );
-	        } 
-
+        	var dataLayer = {};
+        	dataLayer.tableName = feicaoNome ;
+        	dataLayer.database = geomType;
+        	node.set("dataLayer",dataLayer);
+        	
+			var jsonstr = {};
+			jsonstr.featureStyle = estilo;
+			jsonstr.data = feicao.metadados;	
+			
+			this.createVectorLayerFromGeoJSON( jsonstr, node );			
+		
 		},
 		// --------------------------------------------------------------------------------------------
-		// Cria um Layer para exibir o realce de uma Feature quando o mouse passar por cima 
-		createFeatureOverlay : function() {
+		// Remove uma feicao do mapa
+		removeFeicao : function(  node ) {
+			var feicao = node.get("feicao");
+			var geomType = feicao.geomType;
+			var idFeicao = feicao.idFeicao;
+			var nome = feicao.nome;
+			var serialId = node.get('serialId' );
 			
-	    	var featureOverlayStyle = new ol.style.Style({
-	    		fill: new ol.style.Fill({
-	    			color: '#FFE8AA'
-	    		}),
-	    		/*
-	    		stroke: new ol.style.Stroke({
-	    			color: '#FFD04F',
-	    			width: 1
-	    		})
-	    		*/
-	    	});		
-	    	
-			var vectorSource = new ol.source.Vector({});			
-			
-			var featureOverlay = new ol.layer.Vector({
-			      source: vectorSource,
-			      style : featureOverlayStyle
-			});
-			
-			featureOverlay.set('alias', 'FeatureOverlay' );
-			featureOverlay.set('name',  'FeatureOverlay' );
-			featureOverlay.set('serialId', 'FeatureOverlay' );
-			featureOverlay.set('ready', false);
-			featureOverlay.set('baseLayer', false);	
-			
-			
-			return featureOverlay;
+			MCLM.Map.removeLayer( serialId );
 		},
+		
+		// --------------------------------------------------------------------------------------------
+		// TESTE - APAGAR
+		showLayers : function () {
+			var layers = this.map.getLayers();
+			var length = layers.getLength();
+			for (var i = 0; i < length; i++) {
+				var layerName = layers.item(i).get('name');
+				
+				var alias = layers.item(i).get('alias');
+				var serverUrl = layers.item(i).get('serverUrl');
+				var serialId = layers.item(i).get('serialId');
+				var layerType = layers.item(i).get('layerType');				
+				
+				console.log( " > " + layerName + " | " + serialId + " (" + alias + ")");
+			}
+			return null;
+		},
+		
+		
 		
 	}
 

@@ -101,5 +101,20 @@ Ext.define('MCLM.view.paineis.ToolBarPrincipal', {
 	    height: MCLM.Globals.btnHeight,
 	    iconCls: 'route-icon',
         handler: 'calcRoute'
+    }, 
+    {
+    	xtype: 'button',
+    	id: 'btnStyle',
+	    width: MCLM.Globals.btnWidth,
+	    height: MCLM.Globals.btnHeight,
+	    iconCls: 'styles-icon',
+        handler: 'editStyles'
+    },{
+    	iconCls: 'draw-icon',
+	    width: MCLM.Globals.btnWidth,
+	    height: MCLM.Globals.btnHeight,
+    	xtype: 'button',
+    	id: 'drawFeicaoBtn',
+        handler : 'showDrawToolBar'
     }]
 });

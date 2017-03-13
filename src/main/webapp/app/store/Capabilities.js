@@ -19,6 +19,9 @@ Ext.define('MCLM.store.Capabilities', {
 	autoLoad: false,
 	listeners: {
         load: function(store, records, success, operation){
+        	
+        	MCLM.Functions.mainLog("Requisição '" + url + "' concluída.");
+        	
             var reader = store.getProxy().getReader();
             var response = operation.getResponse();
             var resp = JSON.parse( response.responseText );

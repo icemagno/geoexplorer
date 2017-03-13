@@ -3,6 +3,8 @@ package br.mil.mar.casnav.mclm.persistence.repository;
 import java.util.List;
 
 import br.mil.mar.casnav.mclm.persistence.entity.DataLayer;
+import br.mil.mar.casnav.mclm.persistence.entity.FeatureStyle;
+import br.mil.mar.casnav.mclm.persistence.entity.Feicao;
 import br.mil.mar.casnav.mclm.persistence.exceptions.DatabaseConnectException;
 import br.mil.mar.casnav.mclm.persistence.exceptions.DeleteException;
 import br.mil.mar.casnav.mclm.persistence.exceptions.InsertException;
@@ -38,6 +40,7 @@ public class DataLayerRepository extends BasicRepository {
 			fm.insertDO( dataLayer );
 			commit();
 		} catch (InsertException e) {
+			e.printStackTrace();
 			rollBack();
 			closeSession();
 			throw e;
@@ -87,5 +90,96 @@ public class DataLayerRepository extends BasicRepository {
 			throw e;			
 		}
 		closeSession();
+	}
+
+	public FeatureStyle getStyle(int idFeatureStyle) throws Exception {
+		DaoFactory<FeatureStyle> df = new DaoFactory<FeatureStyle>();
+		IDao<FeatureStyle> fm = df.getDao(this.session, FeatureStyle.class);
+		FeatureStyle style = null;
+		try {
+			style = fm.getDO( idFeatureStyle );
+		} catch ( Exception e ) {
+			closeSession();		
+			throw e;
+		} 
+		closeSession();		
+		return style;
+	}
+
+	public FeatureStyle insertFeatureStyle(FeatureStyle style) throws Exception {
+		DaoFactory<FeatureStyle> df = new DaoFactory<FeatureStyle>();
+		IDao<FeatureStyle> fm = df.getDao(this.session, FeatureStyle.class);
+		
+		try {
+			fm.insertDO( style );
+			commit();
+		} catch (InsertException e) {
+			rollBack();
+			closeSession();
+			throw e;
+		}
+		closeSession();
+		return style;
+	}
+
+	public FeatureStyle updateFeatureStyle(FeatureStyle style) throws Exception {
+		DaoFactory<FeatureStyle> df = new DaoFactory<FeatureStyle>();
+		IDao<FeatureStyle> fm = df.getDao(this.session, FeatureStyle.class);
+		
+		try {
+			fm.updateDO( style );
+			commit();
+		} catch (UpdateException e) {
+			rollBack();
+			closeSession();
+			throw e;
+		}
+		closeSession();
+		return style;
+	}
+
+	
+	public List<FeatureStyle> getStyleList() throws Exception {
+		DaoFactory<FeatureStyle> df = new DaoFactory<FeatureStyle>();
+		IDao<FeatureStyle> fm = df.getDao(this.session, FeatureStyle.class);
+		List<FeatureStyle> styles = null;
+		try {
+			styles = fm.getList("select * from feature_styles");
+		} catch ( Exception e ) {
+			closeSession();
+			throw e;
+		}
+		closeSession();
+		return styles;
+	}
+
+	public Feicao insertFeicao(Feicao feicao) throws Exception {
+		DaoFactory<Feicao> df = new DaoFactory<Feicao>();
+		IDao<Feicao> fm = df.getDao(this.session, Feicao.class);
+		
+		try {
+			fm.insertDO( feicao );
+			commit();
+		} catch (InsertException e) {
+			rollBack();
+			closeSession();
+			throw e;
+		}
+		closeSession();
+		return feicao;
+	}
+
+	public Feicao getFeicao(int idFeicao) throws Exception {
+		DaoFactory<Feicao> df = new DaoFactory<Feicao>();
+		IDao<Feicao> fm = df.getDao(this.session, Feicao.class);
+		Feicao feicao = null;
+		try {
+			feicao = fm.getDO( idFeicao );
+		} catch ( Exception e ) {
+			closeSession();		
+			throw e;
+		} 
+		closeSession();		
+		return feicao;
 	}		
 }

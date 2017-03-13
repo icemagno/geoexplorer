@@ -116,6 +116,7 @@ Ext.define('MCLM.view.paineis.LayerTreeController', {
 		    var menu_grid = new Ext.menu.Menu({ 
 		    	items: [
 				  { iconCls: 'add-scenery-icon', text: 'Copiar para Área de Trabalho', handler: function() { me.addToScenery(record); } },
+				  { iconCls: 'dictionary-icon', text: 'Configurar Dicionário', handler: function() { me.configDictionary(record); } },
 				  { xtype: 'menuseparator' },
 		          { iconCls: 'delete-icon', text: 'Apagar', handler: function() { me.askDeleteLayer( record ); } }
 		        ]
@@ -125,29 +126,65 @@ Ext.define('MCLM.view.paineis.LayerTreeController', {
 	    menu_grid.showAt( position );
 		e.stopEvent();    	
     },
+    // Edita o dicionario de dados para uma camada
+    configDictionary : function(record) {
+    	var data = record.data;
+    	
+    	var layerName = data.layerName;
+    	var layerType = data.layerType;
+    	var serviceUrl = data.serviceUrl;
+    	var idNodeData = data.idNodeData;
+    	
+    	var dictionaryStore = Ext.data.StoreManager.lookup('store.dictionary');
+    	dictionaryStore.load({
+    			params:{
+    				'layerName': layerName,
+    				'serviceUrl' : serviceUrl,
+    				'idNodeData' : idNodeData
+    			},
+    			callback: function(records, operation, success) {
+    				if ( records.length > 0 ) {
+    					var dictWindow = Ext.create('MCLM.view.dicionario.DictWindow');
+    					dictWindow.show();		            	   
+    				}
+    			}
+    	});    	
+    	
+    },
     // Adiciona para o cenario atual / area de trabalho
     addToScenery : function( record ) {
     	var trabalhoTree = Ext.getCmp('trabalhoTree');
     	var root = trabalhoTree.getRootNode();
     	
-    	var copy = record.copy();    
+    	// clona o no da arvore
+    	var copy = record.copy();
+    	
     	var y = 0;
+    	// pega o maior id do cenario 
     	root.cascadeBy( function(n) { 
     		var temp = n.get('id');
     		if ( temp > y ) y = temp;
     	});
+    	// incrementa
     	y++;
+    	// troca o id que era da arvore pelo proximo id livre do cenario
     	copy.set('id', y);
+    	// o pai agora eh root
     	copy.set('idNodeParent', 0);
+    	// nao e somente leitura
     	copy.set('readOnly', false);
+    	// adiciona o novo no ao root do cenario
     	root.appendChild( copy );
-    	
+    	// se o novo no estava marcado na arvore principal, marca ele e o pai no cenario
     	if ( copy.get( 'checked' ) ) {
     		copy.set( 'selected', true );
     		root.set( 'checked', true );
     	}
+
+   	
     	
     },
+    
     // Adiciona uma nova pasta na arvore 
     addNewFolder : function( record ) {
 		var data = record.data;
@@ -323,6 +360,9 @@ Ext.define('MCLM.view.paineis.LayerTreeController', {
     	dataLayerWindow.setTitle( title );
 
     	dataLayerWindow.show();	
+    	
+    	var stylesStore = Ext.getStore('store.styles');
+    	stylesStore.load();
 
     	var layerFolderID = Ext.getCmp('layerFolderID');
 		layerFolderID.setValue( data.id );
@@ -399,6 +439,14 @@ Ext.define('MCLM.view.paineis.LayerTreeController', {
     viewready: function (tree) {
         var view = tree.getView();
         var dd = view.findPlugin('treeviewdragdrop');
+
+        view.on({
+            'drop': function () {
+        		var layerTreeStore = Ext.data.StoreManager.lookup('store.layerTree');
+        		layerTreeStore.sync();
+
+            }
+        });
         
         dd.dragZone.onBeforeDrag = function (data, e) {
             var rec = view.getRecord(e.getTarget(view.itemSelector));

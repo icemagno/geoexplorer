@@ -22,7 +22,7 @@ Ext.define('MCLM.store.PostgreSource', {
 	
 	listeners: {
         load: function(store, records){
-        	
+        	//
     	}			
 	}
 }); 

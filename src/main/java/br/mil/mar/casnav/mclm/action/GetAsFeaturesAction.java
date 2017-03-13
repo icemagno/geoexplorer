@@ -20,7 +20,7 @@ import br.mil.mar.casnav.mclm.persistence.services.LayerService;
 @ParentPackage("default")
 public class GetAsFeaturesAction {
 	private Integer idDataLayer;
-	private String bbox;
+	//private String bbox;
 	
 	public String execute(){
 
@@ -44,9 +44,11 @@ public class GetAsFeaturesAction {
 		return "ok";
 	}
 
+	/*
 	public void setBbox(String bbox) {
 		this.bbox = bbox;
 	}
+	*/
 	
 	public void setIdDataLayer(Integer idDataLayer) {
 		this.idDataLayer = idDataLayer;

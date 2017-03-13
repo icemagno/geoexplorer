@@ -8,7 +8,7 @@ Ext.define('MCLM.view.addlayer.dta.DataLayerWindow', {
         'MCLM.view.addlayer.dta.DataLayerForm',
 	],	    
     controller : 'dataLayer',	
-	
+    modal : true,	
 	width : 500,
 	height: 380,
     scrollable: false,

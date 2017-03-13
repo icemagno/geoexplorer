@@ -28,6 +28,7 @@ public class NewDataLayerAction extends BasicActionClass {
 			HttpServletRequest request = (HttpServletRequest)ActionContext.getContext().get(StrutsStatics.HTTP_REQUEST);
 			String dataLayerName = request.getParameter("dataLayerName");
 			String hint = request.getParameter("hint");
+			String displayColumn = request.getParameter("displayColumn");
 			
 			String institute = request.getParameter("institute");
 			String whereClause = request.getParameter("whereClause");
@@ -35,10 +36,12 @@ public class NewDataLayerAction extends BasicActionClass {
 			
 			Integer layerFolderID = Integer.valueOf( request.getParameter("layerFolderID") );
 			Integer idTable = Integer.valueOf( request.getParameter("idTable") );
+			Integer idFeatureStyle = Integer.valueOf( request.getParameter("idFeatureStyle") );
+			
 			
 			DataLayerService dss = new DataLayerService();
 			String result = dss.insertDataLayer(dataLayerName, hint, idTable, institute, layerFolderID,  
-					whereClause, propertiesColumns);
+					whereClause, propertiesColumns, displayColumn, idFeatureStyle);
 				
 				
 			HttpServletResponse response = (HttpServletResponse)ActionContext.getContext().get(StrutsStatics.HTTP_RESPONSE);

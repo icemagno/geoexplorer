@@ -8,7 +8,7 @@ Ext.define('MCLM.view.addlayer.kml.UploadKmlWindow', {
         'MCLM.view.addlayer.kml.UploadKmlForm',
 	],	    
     controller : 'uploadKml',	
-	
+    modal : true,
 	width : 500,
 	height: 250,
     scrollable: false,

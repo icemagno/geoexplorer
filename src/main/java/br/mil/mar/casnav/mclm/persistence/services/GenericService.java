@@ -18,6 +18,10 @@ public class GenericService {
 	public GenericService() throws DatabaseConnectException {
 		this.rep = new GenericRepository();
 	}
+	
+	public void closeSession() {
+		rep.closeSession();		
+	}
 
 	@SuppressWarnings("rawtypes")
 	public List<UserTableEntity> genericFetchList(String query) throws Exception {

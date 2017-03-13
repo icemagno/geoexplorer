@@ -1,3 +1,43 @@
+#mainLogDisplayContainer {
+	width:350px;
+	height:65px;
+	position:absolute;
+	bottom:7px;
+	right:5px;
+	cursor : pointer;
+	display : none;
+	/*border:1px solid black;*/
+	background: rgba(255, 255, 255, 0.4); 	
+}
+
+#mainLogDisplayTable td {
+	font-size:9px;	
+	 text-align: right;
+}
+
+#colorpickerHolder { 
+	width: 356px;
+	height: 178px;
+	/*border : 1px solid black;*/
+}
+
+#polyClrPickerHolder { 
+	width: 356px;
+	height: 178px;
+	/*border : 1px solid black;*/
+}
+
+#iconSrcContainer {
+	left: 105px !important; 
+	top: 30px !important;
+	position : absolute !important;
+	border : 1px solid #C2C2C2 !important;
+}
+
+#stylePreviewMapID{
+    background-image: url('../img/map-preview-background.png');
+}
+
 .routeText {
 	font-weight: bold;
 	font-size : 11px;
@@ -113,6 +153,11 @@
 	background-repeat: no-repeat;
 }
 
+.fei-icon {
+	background-image: url('../img/polygon.svg') !important;
+	background-repeat: no-repeat;
+}
+
 .lock-icon {
 	background-image: url('../img/lock.svg') !important;
 	background-repeat: no-repeat;
@@ -178,8 +223,242 @@
 	background-repeat: no-repeat;
 }
 
-.postgres-icon {
-	background-image: url('../img/server.svg') !important;
+.add-server-icon {
+	background-image: url('../img/add-server.svg') !important;
 	background-repeat: no-repeat;
 }
 
+.delete-server-icon {
+	background-image: url('../img/delete-server.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.dictionary-icon {
+	background-image: url('../img/dictionary.svg') !important;
+	background-repeat: no-repeat;
+}
+
+
+.pgtable-icon {
+	background-image: url('../img/add-table.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.remove-pgtable-icon {
+	background-image: url('../img/delete-table.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.styles-icon {
+	background-image: url('../img/style.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.draw-icon {
+	background-image: url('../img/pencil.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.circle-tool {
+	background-image: url('../img/circle.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.point-tool {
+	background-image: url('../img/point.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.square-tool {
+	background-image: url('../img/square.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.line-tool {
+	background-image: url('../img/line.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.rectangle-tool {
+	background-image: url('../img/rectangle.svg') !important;
+	background-repeat: no-repeat;
+}
+
+.polygon-tool {
+	background-image: url('../img/polygon.svg') !important;
+	background-repeat: no-repeat;
+}
+
+/*
+	Botoes do seletor de Pontos de Interesse da Rota
+*/
+
+.police-button {
+	background-image: url('../img/police-button.png') !important;
+	background-repeat: no-repeat;
+	background-size: 25px 30px;
+	width : 28px;
+	height : 32px; 
+}
+
+.toll-button {
+	background-image: url('../img/toll-button.png') !important;
+	background-repeat: no-repeat;
+	background-size: 33px 33px;
+	background-size: 25px 30px;
+	width : 28px;
+	height : 32px; 
+}
+
+.prf-button {
+	background-image: url('../img/prf-button.png') !important;
+	background-repeat: no-repeat;
+	background-size: 33px 33px;
+	background-size: 25px 30px;
+	width : 28px;
+	height : 32px; 
+}
+
+.estadio-button {
+	background-image: url('../img/estadio-button.png') !important;
+	background-repeat: no-repeat;
+	background-size: 33px 33px;
+	background-size: 25px 30px;
+	width : 28px;
+	height : 32px; 
+}
+
+.hospital-button {
+	background-image: url('../img/hospital-button.png') !important;
+	background-repeat: no-repeat;
+	background-size: 33px 33px;
+	background-size: 25px 30px;
+	width : 28px;
+	height : 32px; 
+}
+
+.obras-button {
+	background-image: url('../img/obras-button.png') !important;
+	background-repeat: no-repeat;
+	background-size: 33px 33px;
+	background-size: 25px 30px;
+	width : 28px;
+	height : 32px; 
+}
+
+.rodoviaria-button {
+	background-image: url('../img/rodoviaria-button.png') !important;
+	background-repeat: no-repeat;
+	background-size: 33px 33px;
+	background-size: 25px 30px;
+	width : 28px;
+	height : 32px; 
+}
+
+.helipad-button {
+	background-image: url('../img/helipad-button.png') !important;
+	background-repeat: no-repeat;
+	background-size: 33px 33px;
+	background-size: 25px 30px;
+	width : 28px;
+	height : 32px; 
+}
+
+.blood-button {
+	background-image: url('../img/blood-button.png') !important;
+	background-repeat: no-repeat;
+	background-size: 33px 33px;
+	background-size: 25px 30px;
+	width : 28px;
+	height : 32px; 
+}
+
+.clinic-button {
+	background-image: url('../img/clinic-button.png') !important;
+	background-repeat: no-repeat;
+	background-size: 33px 33px;
+	background-size: 25px 30px;
+	width : 28px;
+	height : 32px; 
+}
+
+.ponte-button {
+	background-image: url('../img/ponte-button.png') !important;
+	background-repeat: no-repeat;
+	background-size: 33px 33px;
+	background-size: 25px 30px;
+	width : 28px;
+	height : 32px; 
+}
+
+.gasolina-button {
+	background-image: url('../img/gasolina-button.png') !important;
+	background-repeat: no-repeat;
+	background-size: 33px 33px;
+	background-size: 25px 30px;
+	width : 28px;
+	height : 32px; 
+}
+
+.prison-button {
+	background-image: url('../img/prison-button.png') !important;
+	background-repeat: no-repeat;
+	background-size: 33px 33px;
+	background-size: 25px 30px;
+	width : 28px;
+	height : 32px; 
+}
+
+.airport-button {
+	background-image: url('../img/airport-button.png') !important;
+	background-repeat: no-repeat;
+	background-size: 33px 33px;
+	background-size: 25px 30px;
+	width : 28px;
+	height : 32px; 
+}
+
+.levelcrossing-button {
+	background-image: url('../img/levelcrossing-button.png') !important;
+	background-repeat: no-repeat;
+	background-size: 33px 33px;
+	background-size: 25px 30px;
+	width : 28px;
+	height : 32px; 
+}
+
+.school-button {
+	background-image: url('../img/school-button.png') !important;
+	background-repeat: no-repeat;
+	background-size: 33px 33px;
+	background-size: 25px 30px;
+	width : 28px;
+	height : 32px; 
+}
+
+.railway-button {
+	background-image: url('../img/railway-button.png') !important;
+	background-repeat: no-repeat;
+	background-size: 33px 33px;
+	background-size: 25px 30px;
+	width : 28px;
+	height : 32px; 
+}
+
+.port-button {
+	background-image: url('../img/port-button.png') !important;
+	background-repeat: no-repeat;
+	background-size: 33px 33px;
+	background-size: 25px 30px;
+	width : 28px;
+	height : 32px; 
+}
+
+.trainstation-button {
+	background-image: url('../img/trainstation-button.png') !important;
+	background-repeat: no-repeat;
+	background-size: 33px 33px;
+	background-size: 25px 30px;
+	width : 28px;
+	height : 32px; 
+}
