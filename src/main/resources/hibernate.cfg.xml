@@ -27,17 +27,17 @@
 		<!-- <property name="hibernate.c3p0.debugUnreturnedConnectionStackTraces">false</property> --> 
 		<!--  <property name="hibernate.c3p0.unreturnedConnectionTimeout">20</property>   -->
 		                                
-		<mapping class="br.mil.mar.casnav.mclm.persistence.entity.Config"/>
-		<mapping class="br.mil.mar.casnav.mclm.persistence.entity.NodeData"/>
-		<mapping class="br.mil.mar.casnav.mclm.persistence.entity.Scenery"/>
-		<mapping class="br.mil.mar.casnav.mclm.persistence.entity.SceneryNode"/>
-		<mapping class="br.mil.mar.casnav.mclm.persistence.entity.Server"/>
-		<mapping class="br.mil.mar.casnav.mclm.persistence.entity.Postgres"/>
-		<mapping class="br.mil.mar.casnav.mclm.persistence.entity.PostgresTable"/>
-		<mapping class="br.mil.mar.casnav.mclm.persistence.entity.DataLayer"/>		
-		<mapping class="br.mil.mar.casnav.mclm.persistence.entity.DictionaryItem"/>		
-		<mapping class="br.mil.mar.casnav.mclm.persistence.entity.FeatureStyle"/>		
-		<mapping class="br.mil.mar.casnav.mclm.persistence.entity.Feicao"/>		
+		<mapping class="br.com.cmabreu.geoexplorer.persistence.entity.Config"/>
+		<mapping class="br.com.cmabreu.geoexplorer.persistence.entity.NodeData"/>
+		<mapping class="br.com.cmabreu.geoexplorer.persistence.entity.Scenery"/>
+		<mapping class="br.com.cmabreu.geoexplorer.persistence.entity.SceneryNode"/>
+		<mapping class="br.com.cmabreu.geoexplorer.persistence.entity.Server"/>
+		<mapping class="br.com.cmabreu.geoexplorer.persistence.entity.Postgres"/>
+		<mapping class="br.com.cmabreu.geoexplorer.persistence.entity.PostgresTable"/>
+		<mapping class="br.com.cmabreu.geoexplorer.persistence.entity.DataLayer"/>		
+		<mapping class="br.com.cmabreu.geoexplorer.persistence.entity.DictionaryItem"/>		
+		<mapping class="br.com.cmabreu.geoexplorer.persistence.entity.FeatureStyle"/>		
+		<mapping class="br.com.cmabreu.geoexplorer.persistence.entity.Feicao"/>		
 		
 	</session-factory> 
 </hibernate-configuration>

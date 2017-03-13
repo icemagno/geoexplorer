@@ -30,7 +30,7 @@ Ext.define('MCLM.store.LayerTree', {
     },
    
     root: {
-        text: 'APOLO',
+        text: 'GeoExplorer',
         id: 0,
         index:0,
         //expanded: true,
