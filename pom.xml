@@ -2,12 +2,12 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   
-	<groupId>br.mil.mar.casnav</groupId>
-	<artifactId>mclm</artifactId>
+	<groupId>br.com.cmabreu</groupId>
+	<artifactId>geoexplorer</artifactId>
 	<version>1.0</version>
 	<packaging>war</packaging>
-	<name>MCLM</name>
-	<url>http://zodiac.cmabreu.com.br</url>
+	<name>GeoExplorer</name>
+	<url>http://www.cmabreu.com.br</url>
 
 	<properties>
 		<jdk.version>1.8</jdk.version>
@@ -173,7 +173,7 @@
 
 	
 	<build>
-		<finalName>mclm</finalName>
+		<finalName>geoexplorer</finalName>
 		<plugins>
 		
 			<plugin>
