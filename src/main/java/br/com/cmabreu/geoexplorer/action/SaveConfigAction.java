@@ -26,7 +26,7 @@ public class SaveConfigAction extends BasicActionClass {
 		
 		try { 
 			
-			String result = "{ \"success\": true, \"msg\": \"Configuração atualizada com sucesso.\" }";
+			String result = "{ \"success\": true, \"msg\": \"ConfiguraÃ§Ã£o atualizada com sucesso.\" }";
 			
 			try {
 				HttpServletRequest request = (HttpServletRequest)ActionContext.getContext().get(StrutsStatics.HTTP_REQUEST);

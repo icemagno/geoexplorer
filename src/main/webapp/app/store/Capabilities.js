@@ -20,7 +20,7 @@ Ext.define('MCLM.store.Capabilities', {
 	listeners: {
         load: function(store, records, success, operation){
         	
-        	MCLM.Functions.mainLog("Requisição '" + url + "' concluída.");
+        	MCLM.Functions.mainLog("Requisição concluída.");
         	
             var reader = store.getProxy().getReader();
             var response = operation.getResponse();
