@@ -25,23 +25,23 @@ Ext.define('MCLM.Map', {
 		
 		
 		getBaseMapName : function() {
-			return this.baseLayerName;
+			return MCLM.Map.baseLayerName;
 		},
 		getBaseServerURL : function() {
-			return this.geoserverUrl;
+			return MCLM.Map.geoserverUrl;
 		},
 		isBaseMapActive : function() {
-			return this.baseLayer.getVisible();
+			return MCLM.Map.baseLayer.getVisible();
 		},
 		
 		// --------------------------------------------------------------------------------------------
 		// Cria o Mapa Principal e Camadas auxiliares
 		loadMap : function( container ) {
-			me = this;
-			this.init();
+			me = MCLM.Map;
+			MCLM.Map.init();
 			
-			this.map = new ol.Map({
-				layers: [ this.baseLayer ],
+			MCLM.Map.map = new ol.Map({
+				layers: [ MCLM.Map.baseLayer ],
 				target: container,
 				renderer: 'canvas',
 			    loadTilesWhileAnimating: true,
@@ -59,11 +59,11 @@ Ext.define('MCLM.Map', {
 		           })
 		        
 				]),
-				view: this.theView
+				view: MCLM.Map.theView
 			});	
 			
 			// Quando o mapa for arrastado ou o zoom mudar dispara o metodo updateMapCenter()
-			this.map.getView().on('propertychange', function(e) {
+			MCLM.Map.map.getView().on('propertychange', function(e) {
 				switch (e.key) {  
 					case 'center':
 						me.updateMapCenter();
@@ -74,17 +74,17 @@ Ext.define('MCLM.Map', {
 				}
 			});	
 			
-			this.map.on('pointermove', function(evt) {
+			MCLM.Map.map.on('pointermove', function(evt) {
 				if (evt.dragging) {
 					return;
 				}
-			    var hit = this.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
+			    var hit = MCLM.Map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
 			        return true;
 			    });
 			    if ( hit && me.interrogatingFeatures ) {
-			        this.getTargetElement().style.cursor = 'pointer';
+			        MCLM.Map.getTargetElement().style.cursor = 'pointer';
 			    } else {
-			        this.getTargetElement().style.cursor = '';
+			        MCLM.Map.getTargetElement().style.cursor = '';
 			    }			    
 			});
 			
@@ -94,7 +94,7 @@ Ext.define('MCLM.Map', {
 		init : function() {
 			var config = MCLM.Globals.config;
 			
-			this.graticule = new ol.Graticule({
+			MCLM.Map.graticule = new ol.Graticule({
 				strokeStyle: new ol.style.Stroke({
 					color: 'rgba(255,120,0,0.9)',
 					width: 1.5,
@@ -102,20 +102,20 @@ Ext.define('MCLM.Map', {
 				})
 			});			
 			
-			this.geoserverUrl = config.geoserverUrl;
-			this.baseLayerName = config.baseLayer;
-			this.mapZoom = config.mapZoom; 
-			this.mapCenter = config.mapCenter;
-			this.queryFactorRadius = config.queryFactorRadius;				
-			this.arrayMapCenter = JSON.parse("[" + this.mapCenter + "]");
+			MCLM.Map.geoserverUrl = config.geoserverUrl;
+			MCLM.Map.baseLayerName = config.baseLayer;
+			MCLM.Map.mapZoom = config.mapZoom; 
+			MCLM.Map.mapCenter = config.mapCenter;
+			MCLM.Map.queryFactorRadius = config.queryFactorRadius;				
+			MCLM.Map.arrayMapCenter = JSON.parse("[" + MCLM.Map.mapCenter + "]");
 
-			this.theView = new ol.View({
-				center: ol.proj.transform( this.arrayMapCenter, 'EPSG:4326', 'EPSG:3857'),
-				zoom: this.mapZoom
+			MCLM.Map.theView = new ol.View({
+				center: ol.proj.transform( MCLM.Map.arrayMapCenter, 'EPSG:4326', 'EPSG:3857'),
+				zoom: MCLM.Map.mapZoom
 			});			
 			
-			this.openSeaMapLayer = this.createOpenSeaMapLayer();
-			this.baseLayer = this.createBaseLayer();
+			MCLM.Map.openSeaMapLayer = MCLM.Map.createOpenSeaMapLayer();
+			MCLM.Map.baseLayer = MCLM.Map.createBaseLayer();
 		},
 		// --------------------------------------------------------------------------------------------
 		// Gera a Camada do OpenSeaMap
@@ -142,22 +142,22 @@ Ext.define('MCLM.Map', {
 			
 			var landLayer = new ol.layer.Tile({
 			    source: new ol.source.TileWMS({
-			        url: this.geoserverUrl,
+			        url: MCLM.Map.geoserverUrl,
 			        isBaseLayer : true,
 			        projection: ol.proj.get('EPSG:4326'),
 			        params: {
-			            'LAYERS': this.baseLayerName, 
+			            'LAYERS': MCLM.Map.baseLayerName, 
 			            'FORMAT': 'image/png'
 			        }
 			    })
 			});	
-			landLayer.set('name', this.baseLayerName );
+			landLayer.set('name', MCLM.Map.baseLayerName );
 			landLayer.set('alias', 'Camada Base' );
-			landLayer.set('serverUrl', this.geoserverUrl );
+			landLayer.set('serverUrl', MCLM.Map.geoserverUrl );
 			landLayer.set('serialId', 'mclm_landlayer_cmoa');
 			landLayer.set('ready', false);
 			landLayer.set('baseLayer', true);
-			this.bindTileEvent( landLayer );	
+			MCLM.Map.bindTileEvent( landLayer );	
 			
 			return landLayer;
 		},
@@ -199,11 +199,11 @@ Ext.define('MCLM.Map', {
 		// --------------------------------------------------------------------------------------------
 		// Atualiza algumas coisas quando o mapa eh arrastado ou o zoom muda
 		updateMapCenter : function() {
-			var center = this.map.getView().getCenter();
+			var center = MCLM.Map.map.getView().getCenter();
 			var center2 = ol.proj.transform([center[0], center[1]], 'EPSG:3857', 'EPSG:4326');
 			mapCenterLong = center2[0];
 			mapCenterLat = center2[1];
-			mapZoom = this.map.getView().getZoom();
+			mapZoom = MCLM.Map.map.getView().getZoom();
 
 			// Atualiza os atributos de mapa na tela de editar configuração
 			// para facilitar ao usuario editar estes valores.
@@ -216,7 +216,7 @@ Ext.define('MCLM.Map', {
 		// --------------------------------------------------------------------------------------------
 		// Retorna o centro do mapa
 		getMapCenter : function() {
-			var center = this.map.getView().getCenter();
+			var center = MCLM.Map.map.getView().getCenter();
 			var center2 = ol.proj.transform([center[0], center[1]], 'EPSG:3857', 'EPSG:4326');
 			mapCenterLong = center2[0];
 			mapCenterLat = center2[1];
@@ -225,13 +225,46 @@ Ext.define('MCLM.Map', {
 		// --------------------------------------------------------------------------------------------
 		// Retorna o zoom atual do mapa
 		getMapZoom : function() {
-			return this.map.getView().getZoom();
+			return MCLM.Map.map.getView().getZoom();
 		},
+		
+		
+		
+	    testeApagar : function ( serverUrl, serverLayers ) {
+	    	
+	    	console.log( serverUrl + "  ---- " + serverLayers );
+	    	
+	    	var newLayer = new ol.layer.Tile({
+	    	    source: new ol.source.TileWMS({
+	    	        url: serverUrl,
+	    	        isBaseLayer : false,
+	    	        params: {
+	    	        	tiled: true,
+	    	            'layers': serverLayers,
+	    	            'VERSION': '1.1.1', 
+	    	            'format': 'image/png'
+	    	        },
+	    	        projection: ol.proj.get('EPSG:4326')
+	    	    })
+	    	});	
+	    	newLayer.set('name', 'preview_layer');
+	    	MCLM.Map.map.addLayer( newLayer );
+	    	
+	    	return newLayer;
+	    },		
+		
+		
+		
+		
+		
+		
+		
 		// --------------------------------------------------------------------------------------------
 		// Adiciona uma nova camada ao mapa
 		addLayer : function( node ) {
 			var serverUrl = node.get('serviceUrl');
 			var layerName = node.get('layerName');
+			
 			var layerAlias = node.get('layerAlias');
 			var data = node.data;
 			var serialId = node.get('serialId');
@@ -242,7 +275,7 @@ Ext.define('MCLM.Map', {
             var layerStackIndex = node.get('layerStackIndex');			
 			
             if( layerType == 'DTA' ) {
-            	this.getLayerAsFeatures( node );
+            	MCLM.Map.getLayerAsFeatures( node );
             	return false;
             }
             
@@ -260,20 +293,22 @@ Ext.define('MCLM.Map', {
 				
 			} else {
 				
-				var newLayer = new ol.layer.Tile({
-				    source: new ol.source.TileWMS({
-				        url: serverUrl,
-				        isBaseLayer : false,
-				        params: {
-				        	'tiled'		: true,
-				            'layers'	: layerName,
-				            'version'	: '1.1.1', 
-				            'format'	: 'image/png',
-				        },
-				        projection: ol.proj.get('EPSG:4326')
-				    })
-				});
 				
+		    	var newLayer = new ol.layer.Tile({
+		    	    source: new ol.source.TileWMS({
+		    	        url: serverUrl,
+		    	        isBaseLayer : false,
+		    	        params: {
+		    	        	tiled: true,
+		    	            'layers': layerName,
+		    	            'VERSION': '1.1.1', 
+		    	            'format': 'image/png'
+		    	        },
+		    	        projection: ol.proj.get('EPSG:4326')
+		    	    })
+		    	});	
+				
+				//newLayer = MCLM.Map.testeApagar(serverUrl, layerName);
 			}
 			
 			if ( transparency == 0 ) transparency = 1;
@@ -286,8 +321,8 @@ Ext.define('MCLM.Map', {
 			newLayer.set('ready', false);
 			newLayer.set('baseLayer', false);
 			
-			this.bindTileEvent( newLayer );
-			this.map.addLayer( newLayer );
+			MCLM.Map.bindTileEvent( newLayer );
+			MCLM.Map.map.addLayer( newLayer );
 
 			if ( layerStackIndex > 0 ) me.setNewIndex( layerName, layerStackIndex );
 			
@@ -307,7 +342,7 @@ Ext.define('MCLM.Map', {
 		// Checa se uma camada estah sendo exibida no mapa ou nao
 		isLayerEnabled : function( layerName ) {
 			var achou = false;
-			this.map.getLayers().forEach( function ( layer ) {
+			MCLM.Map.map.getLayers().forEach( function ( layer ) {
 				if( layer.get("name") == layerName ) {
 					achou = true;
 				}
@@ -316,27 +351,27 @@ Ext.define('MCLM.Map', {
 		},
 		setMapGridVisibility : function( visible ) {
 			if ( visible ) {
-				this.graticule.setMap( this.map );
-				this.graticuleEnabled = true;
+				MCLM.Map.graticule.setMap( MCLM.Map.map );
+				MCLM.Map.graticuleEnabled = true;
 			} else {
-				this.graticule.setMap( null );
-				this.graticuleEnabled = false;
+				MCLM.Map.graticule.setMap( null );
+				MCLM.Map.graticuleEnabled = false;
 			}	
 		},
 		// --------------------------------------------------------------------------------------------
 		// Liga / desliga a grade de coordenadas
 		toggleMapGrid : function () {
-			this.setMapGridVisibility( !this.graticuleEnabled );
+			MCLM.Map.setMapGridVisibility( !MCLM.Map.graticuleEnabled );
 		},		
 		isGraticuleActive : function() {
-			return this.graticuleEnabled;
+			return MCLM.Map.graticuleEnabled;
 		},
 		// --------------------------------------------------------------------------------------------
 		// Retorna uma camada dado seu nome
 		getLayerByName : function ( layerName ) {
-			var me = this;
+			var me = MCLM.Map;
 			var result = null;
-			this.map.getLayers().forEach( function ( layer ) {
+			MCLM.Map.map.getLayers().forEach( function ( layer ) {
 				if( layer.get("name") == layerName ) {
 					result = layer;
 				}
@@ -629,8 +664,8 @@ Ext.define('MCLM.Map', {
 		// --------------------------------------------------------------------------------------------
 		// Remove uma camada do mapa
 		removeLayerByName : function ( layerName ) {
-			var me = this;
-			this.map.getLayers().forEach( function ( layer ) {
+			var me = MCLM.Map;
+			MCLM.Map.map.getLayers().forEach( function ( layer ) {
 				if( layer.get("name") == layerName ) {
 					me.map.removeLayer( layer );	
 					return;
@@ -638,8 +673,8 @@ Ext.define('MCLM.Map', {
 			});
 		},
 		removeLayer : function ( serialId ) {
-			var me = this;
-			this.map.getLayers().forEach( function ( layer ) {
+			var me = MCLM.Map;
+			MCLM.Map.map.getLayers().forEach( function ( layer ) {
 				if( layer.get("serialId") == serialId ) {
 					me.map.removeLayer( layer );	
 					return;
@@ -664,19 +699,19 @@ Ext.define('MCLM.Map', {
 		// --------------------------------------------------------------------------------------------
 		// Liga/ Desliga o mapa do OpenSeaMap
 		toggleSeaMapLayer : function() {
-			if ( this.isLayerEnabled('OpenSeaMap') ) {
-				this.removeLayer( 'mclm_openseamap_cmoa' );
+			if ( MCLM.Map.isLayerEnabled('OpenSeaMap') ) {
+				MCLM.Map.removeLayer( 'mclm_openseamap_cmoa' );
 			} else {
-				this.map.addLayer( this.openSeaMapLayer );	
+				MCLM.Map.map.addLayer( MCLM.Map.openSeaMapLayer );	
 			}
 		},		
 		// --------------------------------------------------------------------------------------------
 		// Liga/ Desliga o mapa do OpenSeaMap
 		toggleBaseLayer : function() {
-			if ( this.baseLayer.getVisible() ) {
-				this.baseLayer.setVisible(false);
+			if ( MCLM.Map.baseLayer.getVisible() ) {
+				MCLM.Map.baseLayer.setVisible(false);
 			} else {
-				this.baseLayer.setVisible(true);
+				MCLM.Map.baseLayer.setVisible(true);
 			}
 		},		
 		// --------------------------------------------------------------------------------------------
@@ -694,7 +729,7 @@ Ext.define('MCLM.Map', {
 		// --------------------------------------------------------------------------------------------
 		// Retorna uma camada do mapa dado o seu nome
 		findByName : function (name) {
-			var layers = this.map.getLayers();
+			var layers = MCLM.Map.map.getLayers();
 			var length = layers.getLength();
 			for (var i = 0; i < length; i++) {
 				var layerName = layers.item(i).get('name');
@@ -707,7 +742,7 @@ Ext.define('MCLM.Map', {
 		// --------------------------------------------------------------------------------------------
 		// Retorna uma camada do mapa dado o seu serialId
 		findBySerialID : function ( serial ) {
-			var layers = this.map.getLayers();
+			var layers = MCLM.Map.map.getLayers();
 			var length = layers.getLength();
 			for (var i = 0; i < length; i++) {
 				var serialId = layers.item(i).get('serialId');
@@ -720,13 +755,13 @@ Ext.define('MCLM.Map', {
 		// --------------------------------------------------------------------------------------------
 		// Marca uma camada como selecionada.
 		selectLayer : function ( layerName ) {
-			this.selectedLayer = this.findByName( layerName );
+			MCLM.Map.selectedLayer = MCLM.Map.findByName( layerName );
 		},
 		// --------------------------------------------------------------------------------------------
 		// Pega a opacidade da camada selecionada
 		getSelectedLayerOpacity: function () {
-			if ( this.selectedLayer ) {
-				return this.selectedLayer.getOpacity();
+			if ( MCLM.Map.selectedLayer ) {
+				return MCLM.Map.selectedLayer.getOpacity();
 			} else {
 				return 0;
 			}
@@ -734,8 +769,8 @@ Ext.define('MCLM.Map', {
 		// --------------------------------------------------------------------------------------------
 		// Ajusta a opacidade da camada selecionada
 		setSelectedLayerOpacity : function ( opacity ) {
-			if ( this.selectedLayer ) {
-				this.selectedLayer.setOpacity( opacity );
+			if ( MCLM.Map.selectedLayer ) {
+				MCLM.Map.selectedLayer.setOpacity( opacity );
 			} else {
 				Ext.Msg.alert('Nenhuma Camada Selecionada','Selecione uma camada para alterar sua opacidade.' );
 			}
@@ -743,18 +778,18 @@ Ext.define('MCLM.Map', {
 		// --------------------------------------------------------------------------------------------
 		// Retorna o indice de uma camada no mapa
 		getLayerIndex : function( layer ) {
-			var layers = this.map.getLayers();
-			var index = this.indexOf(layers, layer);
+			var layers = MCLM.Map.map.getLayers();
+			var index = MCLM.Map.indexOf(layers, layer);
 			return index;
 		},
 		// --------------------------------------------------------------------------------------------
 		// Modifica o indice de uma camada no mapa (nivel)
 		setNewIndex : function ( layerName , newIndex ) {
-			var layer = this.findByName( layerName );
-			var layers = this.map.getLayers();
+			var layer = MCLM.Map.findByName( layerName );
+			var layers = MCLM.Map.map.getLayers();
 			if ( layer ) {
 				var length = layers.getLength();
-				var index = this.getLayerIndex(layer);
+				var index = MCLM.Map.getLayerIndex(layer);
 			    var layer = layers.removeAt( index );
 			    layers.insertAt( newIndex, layer );
 			} 
@@ -762,7 +797,7 @@ Ext.define('MCLM.Map', {
 		// --------------------------------------------------------------------------------------------
 		// Retorna o bounding box atual do mapa
 		getMapCurrentBbox : function () {
-			var extent = this.map.getView().calculateExtent( this.map.getSize() );
+			var extent = MCLM.Map.map.getView().calculateExtent( MCLM.Map.map.getSize() );
 		    var bottomLeft = ol.proj.transform( ol.extent.getBottomLeft( extent ), 'EPSG:3857', 'EPSG:4326' );
 		    var topRight = ol.proj.transform( ol.extent.getTopRight( extent ), 'EPSG:3857', 'EPSG:4326' );
 			return bottomLeft + "," + topRight;
@@ -771,7 +806,7 @@ Ext.define('MCLM.Map', {
 		// Retorna a URL para pegar a imagem PNG de uma camada 'layerName' do servidor 'serviceUrl'
 		// Usa o BBOX atual da viewport do mapa
 		getLayerImagePreview : function ( layerName, serviceUrl) {
-			var	bbox = this.getMapCurrentBbox();
+			var	bbox = MCLM.Map.getMapCurrentBbox();
 			var thumImg = serviceUrl + "/?service=WMS&srs=EPSG:4326&width=238&height=150&version=1.3&transparent=true&request=GetMap&layers="+layerName+"&format=image/png&bbox="+bbox;
 			return thumImg;
 		},		
@@ -791,12 +826,12 @@ Ext.define('MCLM.Map', {
 		// --------------------------------------------------------------------------------------------
 		// Liga / desliga ferramenta de consulta de camada
 	    toggleQueryTool : function () {
-			if ( !this.queryToolEnabled ) {
-				this.bindMapToQueryTool() ;
-				this.queryToolEnabled = true;
+			if ( !MCLM.Map.queryToolEnabled ) {
+				MCLM.Map.bindMapToQueryTool() ;
+				MCLM.Map.queryToolEnabled = true;
 		 	} else {
-		 		this.unbindMapClick();
-		 		this.queryToolEnabled = false;
+		 		MCLM.Map.unbindMapClick();
+		 		MCLM.Map.queryToolEnabled = false;
 		 	}
 		},  
 		// --------------------------------------------------------------------------------------------
@@ -835,9 +870,9 @@ Ext.define('MCLM.Map', {
 		// --------------------------------------------------------------------------------------------
 		// Um clique no mapa seleciona a origem da rota
 		bindMapToGetSourceAddress : function() {
-			var me = this;
-			this.unbindMapClick();
-			this.onClickBindKey = this.map.on('click', function(event) {
+			var me = MCLM.Map;
+			MCLM.Map.unbindMapClick();
+			MCLM.Map.onClickBindKey = MCLM.Map.map.on('click', function(event) {
 				me.getNearestRoads( event.coordinate, 'S' );
 				MCLM.RouteHelper.putStartIcon( event.coordinate );
 			});
@@ -845,38 +880,38 @@ Ext.define('MCLM.Map', {
 		// --------------------------------------------------------------------------------------------
 		// Um clique no mapa seleciona o destino da rota
 		bindMapToGetTargetAddress : function() {
-			var me = this;
-			this.unbindMapClick();
-			this.onClickBindKey = this.map.on('click', function(event) {
+			var me = MCLM.Map;
+			MCLM.Map.unbindMapClick();
+			MCLM.Map.onClickBindKey = MCLM.Map.map.on('click', function(event) {
 				me.getNearestRoads( event.coordinate, 'T' );
 				MCLM.RouteHelper.putEndIcon( event.coordinate );
 			});
 		},
 		bindMapToInspectFeature : function() {
-			var me = this;
-			this.unbindMapClick();
-			this.onClickBindKey = this.map.on('click', function(event) {
+			var me = MCLM.Map;
+			MCLM.Map.unbindMapClick();
+			MCLM.Map.onClickBindKey = MCLM.Map.map.on('click', function(event) {
 				var pixel = event.pixel;
 				MCLM.RouteHelper.inspectFeature( pixel );
 			});
-			this.interrogatingFeatures = true;
+			MCLM.Map.interrogatingFeatures = true;
 		},
 		// --------------------------------------------------------------------------------------------
 		// Libera o click do mouse no mapa da ultima ferramenta ligada
 		unbindMapClick : function () {
-			if ( this.onClickBindKey ) {
+			if ( MCLM.Map.onClickBindKey ) {
 				// Removido por ser especifico do OL3
-				//this.map.unByKey( this.onClickBindKey );
+				//MCLM.Map.map.unByKey( MCLM.Map.onClickBindKey );
 				// Novo metodo do OL4:
-				ol.Observable.unByKey( this.onClickBindKey );
+				ol.Observable.unByKey( MCLM.Map.onClickBindKey );
 			}
 		},		
 		// --------------------------------------------------------------------------------------------
 		// Liga o click do mouse no mapa com o metodo de consulta de camada
 		bindMapToQueryTool : function () {
 			MCLM.Map.unbindMapClick();
-			var me = this;
-			this.onClickBindKey = this.map.on('click', function(event) {
+			var me = MCLM.Map;
+			MCLM.Map.onClickBindKey = MCLM.Map.map.on('click', function(event) {
 				me.queryMap( event.coordinate );
 			});
 			
@@ -887,12 +922,12 @@ Ext.define('MCLM.Map', {
 			var layerNames = "";
 			var content = [];
 			var urlFeatureInfo = "";
-			var viewResolution = this.theView.getResolution();	
-			var projection = this.theView.getProjection();
-			var queryFactorRadius = this.queryFactorRadius;
-			var featureCount = this.featureCount;
-			var me = this;
-			this.map.getLayers().forEach( function (layer) {
+			var viewResolution = MCLM.Map.theView.getResolution();	
+			var projection = MCLM.Map.theView.getProjection();
+			var queryFactorRadius = MCLM.Map.queryFactorRadius;
+			var featureCount = MCLM.Map.featureCount;
+			var me = MCLM.Map;
+			MCLM.Map.map.getLayers().forEach( function (layer) {
 				var layerName = layer.get("name");
 				var baseLayer = layer.get("baseLayer");
 				var found = false;
@@ -925,7 +960,7 @@ Ext.define('MCLM.Map', {
 		queryLayer : function( layerName, urlFeatureInfo ) {
 			
 			var encodedUrl = encodeURIComponent( urlFeatureInfo );
-			var me = this;
+			var me = MCLM.Map;
 			Ext.Ajax.request({
 		       url: 'queryLayer',
 		       params: {
@@ -1001,11 +1036,11 @@ Ext.define('MCLM.Map', {
 		},
 		addGrid : function ( layerName, data ) {
 			
-			var storeColumns = this.getStoreColumnsFromJson( data[0] );   
-			var gridColumns = this.getGridColumnsFromJson( data[0] );
+			var storeColumns = MCLM.Map.getStoreColumnsFromJson( data[0] );   
+			var gridColumns = MCLM.Map.getGridColumnsFromJson( data[0] );
 
-			var store = this.createStore( data, storeColumns );
-			var grid = this.createGrid( layerName, store, gridColumns );
+			var store = MCLM.Map.createStore( data, storeColumns );
+			var grid = MCLM.Map.createGrid( layerName, store, gridColumns );
 			
 			var queryResultWindow = Ext.getCmp('queryResultWindow');
 			if ( !queryResultWindow ) queryResultWindow = Ext.create('MCLM.view.paineis.QueryResultWindow');
@@ -1028,13 +1063,13 @@ Ext.define('MCLM.Map', {
 		// Solicita uma camada do GeoServer em formato GeoJSON (Features)
 		// Quando o Node representar uma Camada de Dados (tipo DTA)
 		getLayerAsFeatures : function( node ) {
-			var me = this;
+			var me = MCLM.Map;
         	var dataLayer = node.get("dataLayer");
 			var serialId = node.get('serialId' );
 
 			var idDataLayer = dataLayer.idDataLayer;
 
-			var	bbox = this.getMapCurrentBbox();
+			var	bbox = MCLM.Map.getMapCurrentBbox();
 
 	    	Ext.Ajax.setTimeout(120000);
 	    	
@@ -1071,7 +1106,7 @@ Ext.define('MCLM.Map', {
 		},
 		// --------------------------------------------------------------------------------------------
 		getLayers : function() {
-			return this.map.getLayers();
+			return MCLM.Map.map.getLayers();
 		},
 		// --------------------------------------------------------------------------------------------
 		// Posiciona o centro do mapa em uma coordenada e zoom. Usado pela carga do cenário
@@ -1081,7 +1116,7 @@ Ext.define('MCLM.Map', {
 			var lon = Number( coord[1].trim() );
 			var coordinate = ol.proj.transform([lat, lon], 'EPSG:4326', 'EPSG:3857');
 			
-			this.theView.animate({
+			MCLM.Map.theView.animate({
 				  zoom		: zoom,
 				  center	: coordinate,
 				  duration	: 2000,
@@ -1108,7 +1143,7 @@ Ext.define('MCLM.Map', {
 			jsonstr.featureStyle = estilo;
 			jsonstr.data = feicao.metadados;	
 			
-			this.createVectorLayerFromGeoJSON( jsonstr, node );			
+			MCLM.Map.createVectorLayerFromGeoJSON( jsonstr, node );			
 		
 		},
 		// --------------------------------------------------------------------------------------------
@@ -1126,7 +1161,7 @@ Ext.define('MCLM.Map', {
 		// --------------------------------------------------------------------------------------------
 		// TESTE - APAGAR
 		showLayers : function () {
-			var layers = this.map.getLayers();
+			var layers = MCLM.Map.map.getLayers();
 			var length = layers.getLength();
 			for (var i = 0; i < length; i++) {
 				var layerName = layers.item(i).get('name');
