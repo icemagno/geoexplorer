@@ -147,7 +147,7 @@ Ext.define('MCLM.Map', {
 			        projection: ol.proj.get('EPSG:4326'),
 			        params: {
 			            'LAYERS': MCLM.Map.baseLayerName, 
-			            'FORMAT': 'image/png'
+			            'FORMAT': 'image/png8'
 			        }
 			    })
 			});	
@@ -242,7 +242,7 @@ Ext.define('MCLM.Map', {
 	    	        	tiled: true,
 	    	            'layers': serverLayers,
 	    	            'VERSION': '1.1.1', 
-	    	            'format': 'image/png'
+	    	            'format': 'image/png8'
 	    	        },
 	    	        projection: ol.proj.get('EPSG:4326')
 	    	    })
@@ -302,7 +302,7 @@ Ext.define('MCLM.Map', {
 		    	        	tiled: true,
 		    	            'layers': layerName,
 		    	            'VERSION': '1.1.1', 
-		    	            'format': 'image/png'
+		    	            'format': 'image/png8'
 		    	        },
 		    	        projection: ol.proj.get('EPSG:4326')
 		    	    })
@@ -807,20 +807,20 @@ Ext.define('MCLM.Map', {
 		// Usa o BBOX atual da viewport do mapa
 		getLayerImagePreview : function ( layerName, serviceUrl) {
 			var	bbox = MCLM.Map.getMapCurrentBbox();
-			var thumImg = serviceUrl + "/?service=WMS&srs=EPSG:4326&width=238&height=150&version=1.3&transparent=true&request=GetMap&layers="+layerName+"&format=image/png&bbox="+bbox;
+			var thumImg = serviceUrl + "/?service=WMS&srs=EPSG:4326&width=238&height=150&version=1.3&transparent=true&request=GetMap&layers="+layerName+"&format=image/png8&bbox="+bbox;
 			return thumImg;
 		},		
 		// --------------------------------------------------------------------------------------------
 		// Retorna a URL para pegar a imagem PNG de uma camada 'layerName' do servidor 'serviceUrl'
 		// Usa o BBOX atual da viewport do mapa
 		getSceneryImagePreview : function ( layerName, serviceUrl, bbox) {
-			var thumImg = serviceUrl + "/?service=WMS&srs=EPSG:4326&width=238&height=150&version=1.3&transparent=true&request=GetMap&layers="+layerName+"&format=image/png&bbox="+bbox;
+			var thumImg = serviceUrl + "/?service=WMS&srs=EPSG:4326&width=238&height=150&version=1.3&transparent=true&request=GetMap&layers="+layerName+"&format=image/png8&bbox="+bbox;
 			return thumImg;
 		},		
 		// --------------------------------------------------------------------------------------------
 		//Retorna a URL para pegar a imagem PNG da legenda de uma camada 'layerName' do servidor 'serviceUrl'
 		getLayerLegendImage : function ( layerName, serviceUrl ) {
-			var url = serviceUrl + "/?service=WMS&version=1.3&request=GetLegendGraphic&format=image/png&layer=" + layerName;
+			var url = serviceUrl + "/?service=WMS&version=1.3&request=GetLegendGraphic&format=image/png8&layer=" + layerName;
 			return url;
 		},
 		// --------------------------------------------------------------------------------------------
