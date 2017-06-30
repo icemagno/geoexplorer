@@ -155,13 +155,35 @@ Ext.define('MCLM.Map', {
 			MCLM.Map.theView = new ol.View({
 				center: ol.proj.transform( MCLM.Map.arrayMapCenter, 'EPSG:4326', 'EPSG:3857'),
 				zoom: MCLM.Map.mapZoom
+			});	
+			
+			
+			MCLM.Map.theView.on('change:resolution', function( evt ) {
+				MCLM.Map.updateScale();
 			});			
 			
 			MCLM.Map.openSeaMapLayer = MCLM.Map.createOpenSeaMapLayer();
 			MCLM.Map.baseLayer = MCLM.Map.createBaseLayer();
 			
-			console.log( config );
 			$("#serverHostName").html( config.serverHostName );
+			MCLM.Map.updateScale();
+			
+		},
+		updateScale : function() {
+			var resolution = MCLM.Map.theView.getResolution()
+			var units = MCLM.Map.theView.getProjection().getUnits();
+			var dpi = 25.4 / 0.28;
+			var mpu = ol.proj.METERS_PER_UNIT[units];
+			var scale = resolution * mpu * 39.37 * dpi;
+			if (scale >= 9500 && scale <= 950000) {
+				scale = Math.round(scale / 1000) + "K";
+			} else if (scale >= 950000) {
+				scale = Math.round(scale / 1000000) + "M";
+			} else {
+				scale = Math.round(scale);
+			}
+			
+			$("#mapScale").html("1 : " + scale);
 		},
 		// --------------------------------------------------------------------------------------------
 		// Gera a Camada do OpenSeaMap
@@ -195,6 +217,7 @@ Ext.define('MCLM.Map', {
 			            'LAYERS': MCLM.Map.baseLayerName, 
 			            'FORMAT': 'image/png8',
 	    	            'tiled': true,
+	    	            'antialias' : 'full',
 	    	            'VERSION': '1.3.0', 
 			            	
 			        }
@@ -932,6 +955,7 @@ Ext.define('MCLM.Map', {
 		bindMapToGetSourceAddress : function() {
 			var me = MCLM.Map;
 			MCLM.Map.unbindMapClick();
+			$("#painelCentral").css('cursor','copy');
 			MCLM.Map.onClickBindKey = MCLM.Map.map.on('click', function(event) {
 				me.getNearestRoads( event.coordinate, 'S' );
 				MCLM.RouteHelper.putStartIcon( event.coordinate );
@@ -942,6 +966,7 @@ Ext.define('MCLM.Map', {
 		bindMapToGetTargetAddress : function() {
 			var me = MCLM.Map;
 			MCLM.Map.unbindMapClick();
+			$("#painelCentral").css('cursor','copy');
 			MCLM.Map.onClickBindKey = MCLM.Map.map.on('click', function(event) {
 				me.getNearestRoads( event.coordinate, 'T' );
 				MCLM.RouteHelper.putEndIcon( event.coordinate );
@@ -951,6 +976,7 @@ Ext.define('MCLM.Map', {
 		// --------------------------------------------------------------------------------------------
 		// Libera o click do mouse no mapa da ultima ferramenta ligada
 		unbindMapClick : function () {
+			$("#painelCentral").css('cursor','default');
 			if ( MCLM.Map.onClickBindKey ) {
 				ol.Observable.unByKey( MCLM.Map.onClickBindKey );
 			}
@@ -959,6 +985,9 @@ Ext.define('MCLM.Map', {
 		bindMapToQueryPhoto : function () {
 			MCLM.Map.unbindMapClick();
 			var me = MCLM.Map;
+			
+			$("#painelCentral").css('cursor','crosshair');
+			
 			me.onClickBindKey = me.map.on('click', function(event) {
 				
 				var featureHit = false;
@@ -989,6 +1018,9 @@ Ext.define('MCLM.Map', {
 		bindMapToQueryTool : function () {
 			MCLM.Map.unbindMapClick();
 			var me = MCLM.Map;
+			
+			$("#painelCentral").css('cursor','help');
+			
 			me.onClickBindKey = me.map.on('click', function(event) {
 
 				me.queryMap( event.coordinate );

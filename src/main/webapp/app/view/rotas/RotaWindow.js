@@ -92,10 +92,9 @@ Ext.define('MCLM.view.rotas.RotaWindow', {
 			
 	    	MCLM.Globals.routeBlinkEnabled = false;
 	    	$("#selectTargetIcon").css("display","none");  
-	    	MCLM.Map.unbindMapClick();
 	    	MCLM.Globals.selectRouteActiveIcon = 'selectSourceIcon';
-	    	
 	    	MCLM.RouteHelper.clear();
+	    	MCLM.Map.unbindMapClick();
 		},
 		
 		afterrender: function(component, eOpts) {
