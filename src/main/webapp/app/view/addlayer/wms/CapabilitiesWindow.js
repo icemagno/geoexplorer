@@ -12,6 +12,7 @@ Ext.define('MCLM.view.addlayer.wms.CapabilitiesWindow', {
        'MCLM.view.addlayer.wms.LayerPreviewPanel',
        'MCLM.view.addlayer.wms.ServersCombo',
        'MCLM.view.addlayer.wms.CapabilitiesController',
+       
 	],	    
 	controller : 'capabilities',
 	

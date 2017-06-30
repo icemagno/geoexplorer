@@ -34,19 +34,25 @@ Ext.define('MCLM.view.addlayer.wms.LayerDetailForm', {
         name: 'institute',
     },{
         fieldLabel: 'Camada',
-        width: 350,
-        xtype : 'hidden',
+        width: 330,
         name: 'layerName',
         id:'layerNameID',
-        readOnly: true,
         allowBlank : false,
+        listeners:{
+            change: function() {
+            	//
+            },
+        }        
     },{
         fieldLabel: 'Servidor',
         width: 350,
-        xtype : 'hidden',
         name: 'serverUrl',
         id:'serverUrlID',
-        readOnly: true,
+        listeners:{
+            change: function() {
+            	// 
+            },
+        }           
     },{
         fieldLabel: 'Parend ID',
         width: 350,

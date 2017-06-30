@@ -152,7 +152,6 @@ Ext.define('MCLM.view.draw.DrawToolBarController', {
 	  		  Ext.Msg.alert('Erro','Não implementado ainda.' );
 	  		  break;
 	  	  case 'CE':
-	  		  
 		  		Ext.Ajax.request({
 				       url: 'newFeicao',
 				       params: {
@@ -160,9 +159,6 @@ Ext.define('MCLM.view.draw.DrawToolBarController', {
 				           'idFeatureStyle' : idFeatureStyle
 				       },       
 				       success: function(response, opts) {
-				    	   
-				    	   console.log( response.responseText );
-				    	   
 				    	   var respObj = Ext.decode( response.responseText );
 				    	   
 				    	   if( respObj.success ) {
@@ -175,10 +171,30 @@ Ext.define('MCLM.view.draw.DrawToolBarController', {
 				    		   var idLayer = respObj.idLayer;
 				    		   var newFeicao = respObj.feicao;
 				    		   
+				    		   
+				    		   // **************************************************
+			                	var layerTree = Ext.getCmp('layerTree');
+					    		var rootMaintree = layerTree.getRootNode();
+					    		var feicaoRootNode = null;
+					    		
+					    		rootMaintree.cascadeBy( function(n) { 
+					    			if ( n.get('layerType') == 'CRN' ) {
+					    				feicaoRootNode = n;
+					    			}
+					    		});					    		
+					    		
+					    		if ( feicaoRootNode.get('expanded')  ) {
+							  		var layerTreeStore = Ext.getStore('store.layerTree');
+							  		layerTreeStore.load( { node: feicaoRootNode } );
+					    		}
+				    		   // **************************************************
+				    		   
+				    		   
 				    		   var newId = 0;
 				    		   root.cascadeBy( function(n) { 
-						    		var temp = n.get('id');
-						    		if ( temp > newId ) newId = temp;
+				    			   console.log( n );
+				    			   var temp = n.get('id');
+				    			   if ( temp > newId ) newId = temp;
 				    		   });
 				    		   newId++;
 				    		   

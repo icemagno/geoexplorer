@@ -12,8 +12,17 @@ Ext.define('MCLM.view.dicionario.DictGrid', {
     columns:[
 	     {text:'Nome Original', dataIndex:'originalName', width:200},
 	     {text:'Nome Traduzido', dataIndex:'translatedName', width:200, editor: 'textfield'},
-	     {text:'Descrição', dataIndex:'description', width:200, editor: 'textfield'},
+	     {text:'Descrição', dataIndex:'description', width:260, editor: 'textfield'},
 	     {text:'Tipo de Dado', dataIndex:'dataType', width:100},
+	     {text:'Visível', dataIndex:'visible', width:50, xtype: 'booleancolumn', editor: {
+	    	 xtype: 'checkboxfield',
+	    	 allowBlank: false
+	     }, falseText:'Não', trueText: 'Sim'},
+	     {text:'Identificador', dataIndex:'primaryKey', width:80, xtype: 'booleancolumn', editor: {
+	    	 xtype: 'checkboxfield',
+	    	 allowBlank: false
+	     }, falseText:'Não', trueText: 'Sim'}
+	     
 	     
     ],
     
@@ -33,7 +42,7 @@ Ext.define('MCLM.view.dicionario.DictGrid', {
     }],
     
     listeners: {
-
+    	
 		afterrender:function(){
 			
 		    Ext.tip.QuickTipManager.register({

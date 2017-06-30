@@ -29,8 +29,34 @@ Ext.define('MCLM.view.addlayer.wms.CapabilitiesController', {
             '#submitNewLayerForm' : {
             	click: this.submitForm 
             },
+            '#serverUrlID' : {
+            	change: this.serverUrlIDChange 
+            },
+            '#layerNameID' : {
+            	change: this.layerNameIDChange 
+            },
         });
     }, 
+    
+    serverUrlIDChange : function() {
+		var serverUrlForm = Ext.getCmp('serverUrlID');
+		var serverUrl = serverUrlForm.getValue( );
+		
+		var layerNameForm = Ext.getCmp('layerNameID');
+		var layerName = layerNameForm.getValue();
+		
+		this.addLayerToPreviewPanel( serverUrl + "wms/", layerName  );
+    	
+    },
+    layerNameIDChange : function() {
+		var serverUrlForm = Ext.getCmp('serverUrlID');
+		var serverUrl = serverUrlForm.getValue( );
+		
+		var layerNameForm = Ext.getCmp('layerNameID');
+		var layerName = layerNameForm.getValue();
+		
+		this.addLayerToPreviewPanel( serverUrl + "wms/", layerName  );
+    },
     
     
     onClearFilters: function () {
@@ -42,20 +68,21 @@ Ext.define('MCLM.view.addlayer.wms.CapabilitiesController', {
     	var capabilitiesGrid = Ext.getCmp('capabilitiesGrid');
     	var me = this;
     	
-    	if ( capabilitiesGrid.getSelectionModel().hasSelection() ) {
-			var row = capabilitiesGrid.getSelectionModel().getSelection()[0];
-			var serverUrlGrid = row.get('serverUrl');
-			var layerNameGrid = row.get('layerName');
+		var tituloForm = Ext.getCmp('tituloID');
+		var titulo = tituloForm.getValue( );
+		
+		var serverUrlForm = Ext.getCmp('serverUrlID');
+		var serverUrl = serverUrlForm.getValue( );
+		
+		var layerNameForm = Ext.getCmp('layerNameID');
+		var layerName = layerNameForm.getValue();
+			
+		
+		//if ( !layerName || !serverUrl || !titulo ) {	
 			
 			var layerTree = Ext.getCmp('layerTree');
 			var selectedTreeNode = layerTree.getSelectionModel().getSelection()[0];
 			var layerFolderID = selectedTreeNode.data.id;
-			
-			var serverUrlForm = Ext.getCmp('serverUrlID');
-			serverUrlForm.setValue( serverUrlGrid );
-			
-			var layerNameForm = Ext.getCmp('layerNameID');
-			layerNameForm.setValue( layerNameGrid );
 			
 			var layerParentForm = Ext.getCmp('parentFolderID');
 			layerParentForm.setValue( layerFolderID );
@@ -78,9 +105,9 @@ Ext.define('MCLM.view.addlayer.wms.CapabilitiesController', {
 	        	Ext.Msg.alert('Dados inválidos', 'Por favor, corrija os erros assinalados.')
 	        }
             
-	  } else {     
-		  Ext.Msg.alert('Nenhuma Camada selecionada', 'Por favor, selecione uma camada e tente novamente.')
-	  }
+		//} else {     
+		//	Ext.Msg.alert('Nenhuma Camada selecionada', 'Por favor, selecione uma camada e tente novamente.')
+		//}
     	
 	},
     // ---------------------------------------------------------------------------------------------------------------
@@ -99,7 +126,13 @@ Ext.define('MCLM.view.addlayer.wms.CapabilitiesController', {
     	var serverUrl = record.get('serverUrl');
     	
 		var tituloForm = Ext.getCmp('tituloID');
-		tituloForm.setValue( titulo );            	
+		tituloForm.setValue( titulo );     
+		
+		var layerNameForm = Ext.getCmp('layerNameID');
+		layerNameForm.setValue( layerName );
+		
+		var serverUrlForm = Ext.getCmp('serverUrlID');
+		serverUrlForm.setValue( serverUrl );
 
 		var descriptionForm = Ext.getCmp('descriptionID');
 		descriptionForm.setValue( layerName );
@@ -109,7 +142,7 @@ Ext.define('MCLM.view.addlayer.wms.CapabilitiesController', {
 		var origemForm = Ext.getCmp('instituteID');
 		origemForm.setValue( comboValue ); 				
 		
-    	this.addLayerToPreviewPanel( serverUrl + "wms/", layerName  );
+    	this.addLayerToPreviewPanel( serverUrl + "wms/", layerName  );  
     	
     },    
     // Fecha a janela. Interceptado do botao 'fechar' no form 'MCLM.view.addlayer.wms.LayerDetailForm' 
@@ -138,7 +171,7 @@ Ext.define('MCLM.view.addlayer.wms.CapabilitiesController', {
     	        url: geoserverUrl,
     	        params: {
     	            'LAYERS': baseLayerName, 
-    	            'FORMAT': 'image/png'
+    	            'FORMAT': 'image/png8'
     	        }
     	    })
     	});			
@@ -163,7 +196,7 @@ Ext.define('MCLM.view.addlayer.wms.CapabilitiesController', {
     	        	tiled: true,
     	            'layers': serverLayers,
     	            'VERSION': '1.1.1', 
-    	            'format': 'image/png'
+    	            'FORMAT': 'image/png8'
     	        },
     	        projection: ol.proj.get('EPSG:4326')
     	    })
@@ -171,7 +204,32 @@ Ext.define('MCLM.view.addlayer.wms.CapabilitiesController', {
     	newLayer.set('name', 'preview_layer');
     	
     	MCLM.Globals.mapLayerPreview.addLayer( newLayer );
+    	this.bindTileEvent( newLayer );
+    	
+    	
     },
+	bindTileEvent : function( layer ) {
+		
+		
+		layer.getSource().on('tileloadstart', function(event) {
+			$("#alert_preview").css("display","block");
+			layer.set('ready', false);
+			
+		});
+	
+		layer.getSource().on('tileloadend', function(event) {
+			$("#alert_preview").css("display","none");
+			layer.set('ready', true);
+			
+		});
+		
+		layer.getSource().on('tileloaderror', function(event) {
+			$("#alert_preview").css("display","none");
+			layer.set('ready', false);
+			
+		});
+		
+	},    
     // ---------------------------------------------------------------------------------------------------------------
     // remove a camada do mapa na tela de preview
     removeLayerFromPreviewPanel : function () {

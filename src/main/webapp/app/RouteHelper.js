@@ -16,11 +16,13 @@ Ext.define('MCLM.RouteHelper', {
 		routeAsWKT : null,
 		maxRouteSeq : 0,
 		poiStyles : [],
+		routeExtent : null,
 		
 		clear : function() {
 			MCLM.Map.removeLayerByName('routeLayer');
 			MCLM.Map.removeLayerByName('routeMarker');
 			MCLM.Map.removeLayerByName('poiLayer');
+			
 			MCLM.Map.interrogatingFeatures = false;
 			this.activeRouteLayer = null;
 			this.poiLayer = null;
@@ -147,6 +149,8 @@ Ext.define('MCLM.RouteHelper', {
 	    		this.vectorSource.addFeature( features[i] );
 	    	}
 	    	
+	    	this.routeExtent = this.vectorSource.getExtent();
+	    	
 	    	this.dirty = true;
 	    	this.swapped = false;
 		},
@@ -158,6 +162,7 @@ Ext.define('MCLM.RouteHelper', {
 			this.vectorSource = new ol.source.Vector();
 			this.poiSource = new ol.source.Vector();
 			
+			
 			// Estilo da rota
 	    	var routeStyle = new ol.style.Style({
 	    		stroke: new ol.style.Stroke({
@@ -167,6 +172,7 @@ Ext.define('MCLM.RouteHelper', {
 	    	});	
 	    	
 			var customStyleFunction = function( feature, resolution ) {
+				
 				var me = MCLM.RouteHelper;
 				
 				var featureGeomType = feature.getGeometry().getType();
@@ -176,8 +182,8 @@ Ext.define('MCLM.RouteHelper', {
 				var iconName = props.iconName; 
 				
 				if ( featureGeomType == 'Point') {
-					// Estilo dos simbolos dos POI
 					var pointStyle = me.poiStyles[featureId];
+					// Estilo dos simbolos dos POI
 					if ( !pointStyle ) {
 			        	pointStyle = new ol.style.Style({
 							image: new ol.style.Icon(({
@@ -191,7 +197,7 @@ Ext.define('MCLM.RouteHelper', {
 				    	});
 			        	me.poiStyles[featureId] = pointStyle;
 					}
-			    	resultStyles.push( pointStyle );
+					resultStyles.push( pointStyle );
 				}
 				
 				
@@ -218,7 +224,7 @@ Ext.define('MCLM.RouteHelper', {
 				source: this.vectorSource,
 				style: routeStyle
 			});			
-			
+
 			this.poiLayer = new ol.layer.Vector({
 				source: this.poiSource,
 				style: customStyleFunction
@@ -235,7 +241,6 @@ Ext.define('MCLM.RouteHelper', {
 			this.poiLayer.set('serialId', 'poiLayer');
 			this.poiLayer.set('baseLayer', false);
 			this.poiLayer.set('ready', true);
-			
 			
 			MCLM.Map.removeLayerByName('routeLayer');
 			MCLM.Map.map.addLayer( this.activeRouteLayer );
@@ -256,6 +261,7 @@ Ext.define('MCLM.RouteHelper', {
 			MCLM.Map.map.addLayer( this.vectorLayerMarker );			
 		    				
 		},
+		
 		inspectFeature : function( pixel ) {
 	        var features = [];
 	        MCLM.Map.map.forEachFeatureAtPixel( pixel, function(feature, layer) {
@@ -409,6 +415,16 @@ Ext.define('MCLM.RouteHelper', {
 	    	
 	    },
 	    
+	    inspectRoute : function( feature ) {
+	    	//
+	    },
+	    
+	    
+	    addFeatureToPoiLayer( feature ) {
+			this.poiSource.addFeature( feature );
+			
+		}, 
+		
 	    getPointsNearRoute : function( geom, criteria, source, featureId ) {
 	    	var me = MCLM.RouteHelper;
 	    	
@@ -443,7 +459,7 @@ Ext.define('MCLM.RouteHelper', {
  		    		   // Transforma poligono e linha em ponto -------------------------------
  		    		   var featureGeomType = features[i].getGeometry().getType();
  		    		   if ( featureGeomType == 'Polygon' || featureGeomType == 'LineString' ) {
- 		    			   var oldGeom = features[i].getGeometry()
+ 		    			   var oldGeom = features[i].getGeometry();
  		    			   var oldExtent = oldGeom.getExtent();
  		    			   var props = features[i].getProperties();
  		    			   
@@ -452,7 +468,7 @@ Ext.define('MCLM.RouteHelper', {
 	    				   // Lilnhas: coloca o icone no inicio da linha
  		    			   if ( featureGeomType == 'LineString' ) {
  		    				   center = oldGeom.getFirstCoordinate();
- 		    				   me.poiSource.addFeature( features[i] );
+ 		    				   me.addFeatureToPoiLayer( features[i] );
  		    			   }
  		    			   
  		    			   var point = new ol.geom.Point( center );
@@ -464,9 +480,9 @@ Ext.define('MCLM.RouteHelper', {
  		    			   feature.setProperties( props );
  		    			   feature.set("featureId", "P_" + featureId );
  		    			   
- 		    			   me.poiSource.addFeature( feature );
+ 		    			   me.addFeatureToPoiLayer( feature );
  		    		   } else {
- 		    			   me.poiSource.addFeature( features[i] );
+ 		    			   me.addFeatureToPoiLayer( features[i] );
  		    		   }
  		    		   // ---------------------------------------------------------------------
  		    		   

@@ -6,5 +6,5 @@ Ext.define("MCLM.Globals", {
          btnWidth : 32,  
          currentScenery : -1,
          routeBlinkEnabled : false,
-         selectRouteActiveIcon : 'selectSourceIcon'
+         selectRouteActiveIcon : 'selectSourceIcon',
  });

@@ -45,15 +45,23 @@ Ext.define('MCLM.view.paineis.LayerTreeController', {
     	var tree = Ext.getCmp('layerTree');
     	tree.collapseAll();
     },
+
+    onReloadTree : function( button ) {
+    	var layerTree = Ext.getCmp('layerTree');
+		var rootMaintree = layerTree.getRootNode();
+		
+  		var layerTreeStore = Ext.getStore('store.layerTree');
+  		layerTreeStore.load( { node: rootMaintree } );		
+    },
+    
     
     // Responde ao clique em um no. Mostra os detalhes do no painel abaixo da arvore
     onLayerTreeItemClick : function( view, record, item, index, e ) {
 		var tempData = [];
 		tempData.push( record.data );
-
 		var layerDetailStore = Ext.data.StoreManager.lookup('store.LayerDetail');
 		layerDetailStore.loadData( tempData );
-		
+    	
 		if( record.data.readOnly ) {
 			$("#id_lock_icon").css("display","block");
 		}
@@ -113,19 +121,53 @@ Ext.define('MCLM.view.paineis.LayerTreeController', {
 		        ]
 		    });
 		} else {
-		    var menu_grid = new Ext.menu.Menu({ 
-		    	items: [
-				  { iconCls: 'add-scenery-icon', text: 'Copiar para Área de Trabalho', handler: function() { me.addToScenery(record); } },
-				  { iconCls: 'dictionary-icon', text: 'Configurar Dicionário', handler: function() { me.configDictionary(record); } },
-				  { xtype: 'menuseparator' },
-		          { iconCls: 'delete-icon', text: 'Apagar', handler: function() { me.askDeleteLayer( record ); } }
-		        ]
-		    });
+			var data = record.data;
+			/*
+			if ( data.layerType == 'WMS' ) {
+			    var menu_grid = new Ext.menu.Menu({ 
+			    	items: [
+					  { iconCls: 'add-scenery-icon', text: 'Copiar para Área de Trabalho', handler: function() { me.addToScenery(record); } },
+					  { iconCls: 'dictionary-icon', text: 'Configurar Dicionário', handler: function() { me.configDictionary(record); } },
+					  { iconCls: 'datawindow-icon', text: 'Criar Janela de Dados', handler: function() { me.configDataWindow(record); } },
+					  { xtype: 'menuseparator' },
+			          { iconCls: 'delete-icon', text: 'Apagar', handler: function() { me.askDeleteLayer( record ); } }
+			        ]
+			    });
+			} else
+			*/
+			if ( data.layerType == 'FEI' ) {
+			    var menu_grid = new Ext.menu.Menu({ 
+			    	items: [
+			    	  { iconCls: 'goto-icon', text: 'Ir para...', handler: function() { me.goToFeicao( record ); } },
+					  { xtype: 'menuseparator' },
+			          { iconCls: 'delete-icon', text: 'Apagar', handler: function() { me.askDeleteLayer( record ); } }
+			        ]
+			    });
+			} else {
+			
+			    var menu_grid = new Ext.menu.Menu({ 
+			    	items: [
+					  { iconCls: 'add-scenery-icon', text: 'Copiar para Área de Trabalho', handler: function() { me.addToScenery(record); } },
+					  { iconCls: 'dictionary-icon', text: 'Configurar Dicionário', handler: function() { me.configDictionary(record); } },
+					  { iconCls: 'datawindow-icon', text: 'Criar Janela de Dados', handler: function() { me.configDataWindow(record); } },
+					  { xtype: 'menuseparator' },
+			          { iconCls: 'delete-icon', text: 'Apagar', handler: function() { me.askDeleteLayer( record ); } }
+			        ]
+			    });
+			}
 		}
 	    var position = [e.getX()-10, e.getY()-10];
 	    menu_grid.showAt( position );
 		e.stopEvent();    	
     },
+    
+    // Configura / Cria Janela de Dados
+    configDataWindow : function(record) {
+		var configDataWindow = Ext.create('MCLM.view.datawindow.ConfigDataWindow');
+		configDataWindow.nodeData = record.data; 
+		configDataWindow.show();	
+    },
+    
     // Edita o dicionario de dados para uma camada
     configDictionary : function(record) {
     	var data = record.data;
@@ -138,7 +180,7 @@ Ext.define('MCLM.view.paineis.LayerTreeController', {
     	var dictionaryStore = Ext.data.StoreManager.lookup('store.dictionary');
     	dictionaryStore.load({
     			params:{
-    				'layerName': layerName,
+    				'layerName' : layerName,
     				'serviceUrl' : serviceUrl,
     				'idNodeData' : idNodeData
     			},
@@ -146,6 +188,8 @@ Ext.define('MCLM.view.paineis.LayerTreeController', {
     				if ( records.length > 0 ) {
     					var dictWindow = Ext.create('MCLM.view.dicionario.DictWindow');
     					dictWindow.show();		            	   
+    				}  else {
+    					Ext.Msg.alert('Dicionário não encontrado','Não foi possível encontrar os dados de dicionário para esta camada.' );
     				}
     			}
     	});    	
@@ -208,6 +252,24 @@ Ext.define('MCLM.view.paineis.LayerTreeController', {
 		trabalhoAddFolder.setValue( 'false' );      
 		
     	Ext.getCmp('newFolderName').focus(true, 100);    	
+    },
+    
+    goToFeicao : function ( record ) {
+		var parentNode = record.parentNode;
+		var data = record.data;
+		var layerName = data.layerName;
+		var checked = record.get('checked');
+		
+		if ( !checked ) {
+			Ext.Msg.alert('Zoom em Feição', 'Marque a Feição para que ela apareça no mapa antes.');
+			return true;
+			
+		} 
+		
+		var layer = MCLM.Map.getLayerByName( layerName );
+		var source = layer.getSource();
+		MCLM.Map.theView.fit( source.getExtent(), {duration: 2000, maxZoom: 12});
+		
     },
     
     // Pergunta se quer deletar uma camada / no da arvore
@@ -422,17 +484,27 @@ Ext.define('MCLM.view.paineis.LayerTreeController', {
 		var checked = node.get('checked');
 		var layerName = node.get('layerName');
 		var serialId = node.get('serialId');
+		var layerType = node.get('layerType' );
 		
 		if ( layerName == "" ) return;
 		
 		if( checked == true ) {
-			// adiciona a camada no mapa
-			var layer = MCLM.Map.addLayer( node );
-			this.fireEvent('mountImagePreview');
+			if( layerType == "FEI") {
+				var layer = MCLM.Map.addFeicao( node );
+			} else {
+				// adiciona a camada no mapa
+				var layer = MCLM.Map.addLayer( node );
+				this.fireEvent('mountImagePreview');
+			}
 		} else {
-			// Remove a camada do mapa
-			MCLM.Map.removeLayer( serialId );
-			this.fireEvent('mountImagePreview');
+			if( layerType == "FEI") {
+				MCLM.Map.removeFeicao( node );
+			} else {
+				// Remove a camada do mapa
+				MCLM.Map.removeLayer( serialId );
+				// Interceptado por MCLM.view.stack.LayerStackController
+				this.fireEvent('mountImagePreview');
+			}
 		}	
 	},
 	

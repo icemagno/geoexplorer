@@ -13,6 +13,17 @@ Ext.define('MCLM.view.main.MainController', {
 	toggleMapGrid : function( button ) {
 		MCLM.Map.toggleMapGrid();
 	},
+
+	showRestTools : function( button ) {
+    	var restToolsWindow = Ext.getCmp('restToolsWindow');
+    	if ( restToolsWindow ) return;
+    	
+    	restToolsWindow = Ext.create('MCLM.view.tools.RestToolsWindow');
+    	restToolsWindow.show();    	
+    	restToolsWindow.alignTo(Ext.getBody(), "tr-tr", [-90, 10]);
+    	
+	},
+	
 	// --------------------------------------------------------------------------------------------
 	manageServers : function( button ) {
     	var serversWindow = Ext.getCmp('serversWindow');
@@ -28,9 +39,6 @@ Ext.define('MCLM.view.main.MainController', {
     	serversWindow.show();
 	},
 	// --------------------------------------------------------------------------------------------
-	toggleSeaMapLayer : function( button ) {
-		MCLM.Map.toggleSeaMapLayer();
-	},
 	toggleBaseLayer : function( button ) {
 		MCLM.Map.toggleBaseLayer();
 	},
@@ -48,13 +56,9 @@ Ext.define('MCLM.view.main.MainController', {
     	var rotaWindow = Ext.getCmp('rotaWindow');
     	if ( rotaWindow ) return;
     	rotaWindow = Ext.create('MCLM.view.rotas.RotaWindow');
-    	
     	rotaWindow.alignTo(Ext.getBody(), "tl-tl", [0, 0]);    	
-    	
     	rotaWindow.show();
-    	
     	MCLM.Globals.routeBlinkEnabled = true;
-    	
     },
 	// --------------------------------------------------------------------------------------------
     editStyles : function() {

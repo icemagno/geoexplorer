@@ -11,7 +11,7 @@
 	<package name="default" extends="struts-default">
 	
 	 	<interceptors> 
-			<interceptor name="autorizador" class="br.com.cmabreu.geoexplorer.interceptor.ClientAccessInterceptor" />
+			<interceptor name="autorizador" class="br.mil.mar.casnav.mclm.interceptor.ClientAccessInterceptor" />
 			
 			<interceptor-stack name="seguranca">  
 				<interceptor-ref name="autorizador" />

@@ -23,6 +23,14 @@ Ext.define('MCLM.view.servers.NewPostgreTableForm', {
             invalidText: '',
 	    },
 	    {
+            fieldLabel: 'Atributo de Identificação (PK)',
+            width: 350,
+            msgTarget: 'under',
+            name: 'idColumnName',
+            allowBlank : false,
+            invalidText: '',
+	    },
+	    {
             width: 350,
             name: 'idServer',
             id:'newPostgreTableIdServer',

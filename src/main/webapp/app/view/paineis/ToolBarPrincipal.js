@@ -1,12 +1,15 @@
 Ext.define('MCLM.view.paineis.ToolBarPrincipal', {
 	extend: 'Ext.toolbar.Toolbar',
 	xtype: 'toolBarPrincipal',
-    dock: 'right',
+	dock: 'right',
     overflowHandler: 'scroller',
     border : false,
     style: {
         background: '#FFFFFF'
-    },    
+    }, 
+    
+    
+    
     items: [
     {
     	// Config
@@ -38,27 +41,6 @@ Ext.define('MCLM.view.paineis.ToolBarPrincipal', {
         handler: 'manageServers'
     }, 
     {
-    	// Clima
-    	xtype: 'button',
-    	id: 'id113',
-	    width: MCLM.Globals.btnWidth,
-	    height: MCLM.Globals.btnHeight,
-	    iconCls: 'forecast-icon',
-        handler: function() {
-        	//showTemperatureMap();
-        }
-    }, 
-    {
-    	// OpenSeaMap
-    	xtype: 'button',
-    	id: 'id114',
-	    width: MCLM.Globals.btnWidth,
-	    height: MCLM.Globals.btnHeight,
-	    iconCls: 'buoy-icon',
-	    enableToggle: true,
-        handler: 'toggleSeaMapLayer',
-    }, 
-    {
     	// Grade de coordenadas
     	xtype: 'button',
     	id: 'id115',
@@ -68,6 +50,7 @@ Ext.define('MCLM.view.paineis.ToolBarPrincipal', {
 	    enableToggle: true,
         handler: 'toggleMapGrid'
     }, 
+
     {
     	// Lista de Camadas
     	xtype: 'button',
@@ -116,5 +99,12 @@ Ext.define('MCLM.view.paineis.ToolBarPrincipal', {
     	xtype: 'button',
     	id: 'drawFeicaoBtn',
         handler : 'showDrawToolBar'
+    },{
+    	iconCls: 'cloud-icon',
+	    width: MCLM.Globals.btnWidth,
+	    height: MCLM.Globals.btnHeight,
+    	xtype: 'button',
+    	id: 'showRestToolsBtn',
+        handler : 'showRestTools'
     }]
 });

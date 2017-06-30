@@ -37,6 +37,12 @@ Ext.define('MCLM.view.paineis.LayerTree', {
         sortable: true,
         width : 50,
         align: 'left'
+    },{
+        text: 'Camada',
+        dataIndex: 'layerName',
+        sortable: true,
+        width : 60,
+        align: 'left'
     }],     
     rootVisible: true,
 
@@ -54,10 +60,14 @@ Ext.define('MCLM.view.paineis.LayerTree', {
         	iconCls: 'plus-icon',
         	id: 'id011',
             handler : 'onTreeExpandAll'
-        }, {
+        },{
         	iconCls: 'minus-icon',
         	id: 'id012',
             handler : 'onTreeCollapseAll'
+        },{
+        	iconCls: 'reload-icon',
+        	id: 'reloadTreeBtn',
+            handler : 'onReloadTree'
         },{
             labelWidth: 150,
             xtype: 'triggerfield',

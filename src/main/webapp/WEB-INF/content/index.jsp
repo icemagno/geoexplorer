@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=10, user-scalable=yes">
 
-    <title>GeoExplorer by Carlos Magno Abreu</title>
+    <title>MCLM</title>
 
 	<script type="text/javascript" src="extjs/ext-all.js"></script>
 	

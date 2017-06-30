@@ -9,6 +9,8 @@ Ext.define('MCLM.Application', {
        'MCLM.Functions',
        'MCLM.DrawHelper',
        'MCLM.RouteHelper',
+       'MCLM.ClimaHelper',
+       'MCLM.view.photo.PhotoHelper',
        
     ],
     
@@ -26,6 +28,7 @@ Ext.define('MCLM.Application', {
        'MCLM.store.PostgreTable',
        'MCLM.store.Dictionary',
        'MCLM.store.Styles',
+       'MCLM.store.DataPanels',
     ],
    
     launch: function () {
@@ -86,7 +89,7 @@ Ext.define('MCLM.Application', {
 				    		$("#"+MCLM.Globals.selectRouteActiveIcon).fadeTo(250, 0.2).fadeTo(250, 1.0); 
 				    	}, 1000);					    	
 				
-				
+				/* 5. */ MCLM.view.photo.PhotoHelper.init();		// inicializa o Mapilary
 		        // ---------------------------------------------
 			},
 			failure: function(response, opts) {

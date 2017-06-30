@@ -9,7 +9,6 @@ Ext.define('MCLM.view.trabalho.TrabalhoTree', {
 	requires: [
 	   'MCLM.view.trabalho.TrabalhoTreeController'
 	],     
-	
 	controller : 'trabalho',
     
     scrollable: true,

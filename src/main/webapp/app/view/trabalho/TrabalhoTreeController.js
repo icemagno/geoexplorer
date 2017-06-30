@@ -180,13 +180,31 @@ Ext.define('MCLM.view.trabalho.TrabalhoTreeController', {
     // Mosta o menu de contexto quando clica com botao direito do mouse em um no da arvore
     onContextMenu : function( tree, record, item, index, e, eOpts ) {
     	var me = this;
-	    var menu_grid = new Ext.menu.Menu({ 
-	    	items: [
-  	          { iconCls: 'add-folder-icon', text: 'Criar Nova Pasta', handler: function() { me.addNewFolder(record); } },
-	          { xtype: 'menuseparator' },
-	          { iconCls: 'delete-icon', text: 'Remover', handler: function() { me.askDeleteLayer( record ); } },
-	        ]
-	    });
+    	var data = record.data;
+    	
+		if ( data.layerType == 'FEI' ) {
+
+		    var menu_grid = new Ext.menu.Menu({ 
+		    	items: [
+		    	  { iconCls: 'goto-icon', text: 'Ir para...', handler: function() { me.goToFeicao( record ); } },
+	  	          { iconCls: 'add-folder-icon', text: 'Criar Nova Pasta', handler: function() { me.addNewFolder(record); } },
+				  { xtype: 'menuseparator' },
+		          { iconCls: 'delete-icon', text: 'Apagar', handler: function() { me.askDeleteLayer( record ); } }
+		        ]
+		    });
+			
+			
+		} else {    	
+    	
+		    var menu_grid = new Ext.menu.Menu({ 
+		    	items: [
+	  	          { iconCls: 'add-folder-icon', text: 'Criar Nova Pasta', handler: function() { me.addNewFolder(record); } },
+		          { xtype: 'menuseparator' },
+		          { iconCls: 'delete-icon', text: 'Remover', handler: function() { me.askDeleteLayer( record ); } },
+		        ]
+		    });
+		}
+		
 	    var position = [e.getX()-10, e.getY()-10];
 	    menu_grid.showAt( position );
 		e.stopEvent();    	
@@ -390,6 +408,24 @@ Ext.define('MCLM.view.trabalho.TrabalhoTreeController', {
 		record.parentNode.removeChild(record);
 	},
 
+    goToFeicao : function ( record ) {
+		var parentNode = record.parentNode;
+		var data = record.data;
+		var layerName = data.layerName;
+		var checked = record.get('checked');
+		
+		if ( !checked ) {
+			Ext.Msg.alert('Zoom em Feição', 'Marque a Feição para que ela apareça no mapa antes.');
+			return true;
+			
+		} 
+		
+		var layer = MCLM.Map.getLayerByName( layerName );
+		var source = layer.getSource();
+		MCLM.Map.theView.fit( source.getExtent(), {duration: 2000, maxZoom: 14});
+		
+    },
+	
     
 	// Responde a mudanca de estado de um no ( selecionado/nao selecionado )
 	toggleNode: function( node ) {

@@ -13,7 +13,8 @@ Ext.define('MCLM.view.servers.PostgreTablesGrid', {
     autoScroll: true,
     columns:[
 	     {text:'Nome', dataIndex:'name', width:200},
-	     {text:'Geometria', dataIndex:'geometryColumnName', width:200},
+	     {text:'Geometria', dataIndex:'geometryColumnName', width:100},
+	     {text:'Chave Primária', dataIndex:'idColumnName', width:100},
     ],
     
     dockedItems: [{

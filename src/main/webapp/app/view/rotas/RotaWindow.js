@@ -50,10 +50,6 @@ Ext.define('MCLM.view.rotas.RotaWindow', {
         	iconCls: 'save-icon',
         	id: 'idAddRoute',
             handler : 'addRouteToCurrentScenery'
-        },{
-        	iconCls: 'query-icon',
-        	id: 'idQueryFeature',
-            handler : 'bindMapToInspectFeature'
         }]
     }],	    
 	
@@ -74,10 +70,7 @@ Ext.define('MCLM.view.rotas.RotaWindow', {
 	listeners: {
 		
 		close : function() {
-			Ext.tip.QuickTipManager.unregister('idQueryFeature');
 			Ext.tip.QuickTipManager.unregister('idAddRoute');
-			
-			
 			Ext.tip.QuickTipManager.unregister('estadio-button');
 			Ext.tip.QuickTipManager.unregister('toll-button');
 			Ext.tip.QuickTipManager.unregister('hospital-button');
@@ -111,12 +104,6 @@ Ext.define('MCLM.view.rotas.RotaWindow', {
 		        target: 'idAddRoute',
 		        title: 'Adicionar Rota ao Cenário',
 		        text: 'Adiciona a rota atual ao Cenário na Área de Trabalho.',
-		        width: 190,
-		        dismissDelay: 5000 
-		    },{
-		        target: 'idQueryFeature',
-		        title: 'Interrogar Ponto de Interrese',
-		        text: 'Exibe informações sobre os pontos de interesse próximos à rota.',
 		        width: 190,
 		        dismissDelay: 5000 
 		    },{

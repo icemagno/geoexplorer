@@ -19,7 +19,7 @@ Ext.define('MCLM.view.paineis.AbaCatalogo', {
     maxWidth: 300,
     
 	items: [{
-		flex:3,
+		flex:5,
 		xtype: 'view.layerTree'
 	},{
 		flex:1,

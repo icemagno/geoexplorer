@@ -2,7 +2,7 @@ Ext.define('MCLM.Map', {
 	
 	statics: {
 		map: null,
-		featureCount : 100,
+		featureCount : 500,
 		queryToolEnabled : false,
 		mousePosition: null,
 		selectedLayer: null,
@@ -10,6 +10,9 @@ Ext.define('MCLM.Map', {
 		theMiniView: null,
 		onClickBindKey: null,
 		graticuleEnabled: false,
+		aeroTrafficEnabled: false,
+		shipTrafficEnabled: false,
+		streetPhotoEnabled : false,
 		arrayMapCenter: null,
 		mapZoom: 5,
 		mapCenterLat: 0,
@@ -22,7 +25,10 @@ Ext.define('MCLM.Map', {
 		geoserverUrl: '',
 		highlight : null,
 		interrogatingFeatures : false,
-		
+		aircraftHelper : null,
+		shipsHelper : null,
+		canPhoto : true,
+		statusBar : null,
 		
 		getBaseMapName : function() {
 			return MCLM.Map.baseLayerName;
@@ -34,6 +40,24 @@ Ext.define('MCLM.Map', {
 			return MCLM.Map.baseLayer.getVisible();
 		},
 		
+		updateAeroTraffic : function() {
+			if ( MCLM.Map.aeroTrafficEnabled ) {
+				MCLM.Map.aircraftHelper.getAircraftsBbox();
+			}
+		},
+		updateMaritmTraffic : function() {
+			if ( MCLM.Map.shipTrafficEnabled ) {
+				MCLM.Map.shipsHelper.getShips();
+			}
+		},	
+		toDefault : function() {
+			var zoom = MCLM.Map.mapZoom;
+			MCLM.Map.panTo( MCLM.Map.arrayMapCenter[0] + ',' + MCLM.Map.arrayMapCenter[1], zoom);
+		},
+		toWorld : function() {
+			var map = MCLM.Map.map;
+			MCLM.Map.map.getView().fit([-16716960.433033716, -7413397.061675084, 23358056.252544772, 10745594.873977667]);	
+		},
 		// --------------------------------------------------------------------------------------------
 		// Cria o Mapa Principal e Camadas auxiliares
 		loadMap : function( container ) {
@@ -54,7 +78,19 @@ Ext.define('MCLM.Map', {
 		               projection: 'EPSG:4326',
 		               coordinateFormat: function(coordinate) {
 		            	   var coord = ol.coordinate.toStringHDMS( coordinate );
-		            	   return coord;
+
+		            	   var template = '{y}  {x}';
+		            	   var mapCoord = ol.coordinate.format(coordinate, template, 6);
+		            	   
+			    		   var lat = coordinate[0];
+			    		   var lon = coordinate[1];		            	   
+		            	   var utmCoord = MCLM.Functions.latLonToUTM( lon, lat );
+		            	   
+		            	   $("#coord_map").html( mapCoord );
+		            	   $("#coord_hdms").html( coord );
+		            	   $("#coord_utm").html( utmCoord );
+		            	   
+		            	   return "";
 		               }
 		           })
 		        
@@ -78,17 +114,24 @@ Ext.define('MCLM.Map', {
 				if (evt.dragging) {
 					return;
 				}
-			    var hit = MCLM.Map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
+			    var hit = MCLM.Map.map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
 			        return true;
 			    });
-			    if ( hit && me.interrogatingFeatures ) {
-			        MCLM.Map.getTargetElement().style.cursor = 'pointer';
-			    } else {
-			        MCLM.Map.getTargetElement().style.cursor = '';
-			    }			    
+			    
+			    MCLM.Map.map.getTargetElement().style.cursor = hit ? 'pointer' : '';
+			    
 			});
 			
+			MCLM.Map.aircraftHelper = Ext.create('MCLM.view.aircraft.AircraftHelper');
+			MCLM.Map.aircraftHelper.init();
+			setInterval( MCLM.Map.updateAeroTraffic , 10000); // 10 segundos			
+
+			MCLM.Map.shipsHelper = Ext.create('MCLM.view.ships.ShipsHelper');
+			MCLM.Map.shipsHelper.init();
+			setInterval( MCLM.Map.updateMaritmTraffic , 300000); // 5 minutos			
+			
 		},
+		
 		// --------------------------------------------------------------------------------------------
 		// Inicializa todas as variáveis e configuracoes
 		init : function() {
@@ -116,6 +159,9 @@ Ext.define('MCLM.Map', {
 			
 			MCLM.Map.openSeaMapLayer = MCLM.Map.createOpenSeaMapLayer();
 			MCLM.Map.baseLayer = MCLM.Map.createBaseLayer();
+			
+			console.log( config );
+			$("#serverHostName").html( config.serverHostName );
 		},
 		// --------------------------------------------------------------------------------------------
 		// Gera a Camada do OpenSeaMap
@@ -147,7 +193,10 @@ Ext.define('MCLM.Map', {
 			        projection: ol.proj.get('EPSG:4326'),
 			        params: {
 			            'LAYERS': MCLM.Map.baseLayerName, 
-			            'FORMAT': 'image/png8'
+			            'FORMAT': 'image/png8',
+	    	            'tiled': true,
+	    	            'VERSION': '1.3.0', 
+			            	
 			        }
 			    })
 			});	
@@ -228,40 +277,13 @@ Ext.define('MCLM.Map', {
 			return MCLM.Map.map.getView().getZoom();
 		},
 		
-		
-		
-	    testeApagar : function ( serverUrl, serverLayers ) {
-	    	
-	    	console.log( serverUrl + "  ---- " + serverLayers );
-	    	
-	    	var newLayer = new ol.layer.Tile({
-	    	    source: new ol.source.TileWMS({
-	    	        url: serverUrl,
-	    	        isBaseLayer : false,
-	    	        params: {
-	    	        	tiled: true,
-	    	            'layers': serverLayers,
-	    	            'VERSION': '1.1.1', 
-	    	            'format': 'image/png8'
-	    	        },
-	    	        projection: ol.proj.get('EPSG:4326')
-	    	    })
-	    	});	
-	    	newLayer.set('name', 'preview_layer');
-	    	MCLM.Map.map.addLayer( newLayer );
-	    	
-	    	return newLayer;
-	    },		
-		
-		
-		
-		
-		
-		
-		
-		// --------------------------------------------------------------------------------------------
+    	// --------------------------------------------------------------------------------------------
 		// Adiciona uma nova camada ao mapa
 		addLayer : function( node ) {
+			
+			var idDataWindow = node.get('idDataWindow');
+			var idNodeData = node.get('idNodeData');
+			
 			var serverUrl = node.get('serviceUrl');
 			var layerName = node.get('layerName');
 			
@@ -269,7 +291,13 @@ Ext.define('MCLM.Map', {
 			var data = node.data;
 			var serialId = node.get('serialId');
 			var version = node.get('version');
-			var layerType = node.get('layerType');		
+			var layerType = node.get('layerType');
+			
+			var filter = node.get("filter");
+			var cql = null;
+			if( filter ) {
+				cql = filter.filter;
+			}
 			
             var transparency = node.get('transparency') / 10;
             var layerStackIndex = node.get('layerStackIndex');			
@@ -284,40 +312,55 @@ Ext.define('MCLM.Map', {
 				var kmlFileUrl = window.location + "/" + serverUrl; 
 				var newLayer = new ol.layer.Vector({
 					  source: new ol.source.Vector({
-						    url: kmlFileUrl,
-						    isBaseLayer : false,
-						    projection: ol.proj.get('EPSG:4326'),
-						    format: new ol.format.KML()
+						  url: kmlFileUrl,
+						  isBaseLayer : false,
+						  projection: ol.proj.get('EPSG:4326'),
+						  format: new ol.format.KML()
 					  })
 				});				
 				
 			} else {
 				
+				var paramsRel = {
+	    	        	tiled: true,
+	    	            'layers': layerName,
+	    	            'VERSION': '1.1.1', 
+	    	            'FORMAT': 'image/png8'
+	    	    }
+				if ( cql ) {
+					paramsRel = {
+		    	        	tiled: true,
+		    	            'layers': layerName,
+		    	            'cql_filter': cql,
+		    	            'VERSION': '1.1.1', 
+		    	            'FORMAT': 'image/png8'
+		    	    }					
+				}
 				
 		    	var newLayer = new ol.layer.Tile({
 		    	    source: new ol.source.TileWMS({
 		    	        url: serverUrl,
 		    	        isBaseLayer : false,
-		    	        params: {
-		    	        	tiled: true,
-		    	            'layers': layerName,
-		    	            'VERSION': '1.1.1', 
-		    	            'format': 'image/png8'
-		    	        },
-		    	        projection: ol.proj.get('EPSG:4326')
+		    	        params: paramsRel,
+		    	        projection: ol.proj.get('EPSG:4326'),
+		    	        
 		    	    })
 		    	});	
 				
-				//newLayer = MCLM.Map.testeApagar(serverUrl, layerName);
+		    	
+		    	//console.log( "URL Camada " + layerName + " " + serverUrl );
+		    	
 			}
 			
 			if ( transparency == 0 ) transparency = 1;
 			newLayer.setOpacity( transparency );
 			newLayer.set('name', layerName);
 			newLayer.set('alias', layerAlias);
+			newLayer.set('idNodeData', idNodeData);
 			newLayer.set('serverUrl', serverUrl);
 			newLayer.set('serialId', serialId);
 			newLayer.set('layerType', layerType);
+			newLayer.set('idDataWindow', idDataWindow);
 			newLayer.set('ready', false);
 			newLayer.set('baseLayer', false);
 			
@@ -358,6 +401,36 @@ Ext.define('MCLM.Map', {
 				MCLM.Map.graticuleEnabled = false;
 			}	
 		},
+		
+		toggleStreetPhoto : function() {
+			MCLM.Map.streetPhotoEnabled = !MCLM.Map.streetPhotoEnabled;
+			if ( MCLM.Map.streetPhotoEnabled ) {
+				MCLM.Map.bindMapToQueryPhoto();
+			} else {
+				MCLM.Map.unbindMapClick();
+			}
+		},
+		
+		// --------------------------------------------------------------------------------------------
+		// Liga / desliga controle de tráfego maritimo
+		toggleShipTraffic : function () {
+			MCLM.Map.shipTrafficEnabled = !MCLM.Map.shipTrafficEnabled ;
+			if ( !MCLM.Map.shipTrafficEnabled ) {
+				MCLM.Map.shipsHelper.deleteShips();
+			} else {
+				MCLM.Map.shipsHelper.getShips();
+			}
+		},	
+		// --------------------------------------------------------------------------------------------
+		// Liga / desliga controle de tráfego aéreo
+		toggleAeroTraffic : function () {
+			MCLM.Map.aeroTrafficEnabled = !MCLM.Map.aeroTrafficEnabled ;
+			if ( !MCLM.Map.aeroTrafficEnabled ) {
+				MCLM.Map.aircraftHelper.deleteAircrafts();
+			} else {
+				MCLM.Map.aircraftHelper.getAircraftsBbox();
+			}
+		},		
 		// --------------------------------------------------------------------------------------------
 		// Liga / desliga a grade de coordenadas
 		toggleMapGrid : function () {
@@ -467,20 +540,6 @@ Ext.define('MCLM.Map', {
 				
 				//console.log( me.replacePattern("A vaca caiu ${areakm2} e saiu voando até ${nome}...", props)  )
 
-				/*
-	        	var defaultStyle = new ol.style.Style({
-					fill: new ol.style.Fill({
-						color: '#CACACA'
-					}),
-					stroke: new ol.style.Stroke({
-						color: 'black',
-						width: 1
-					})
-				});				
-				resultStyles.push( defaultStyle );
-				*/
-				
-				
 				// ------------------------------------------------------------------------------
 				if ( featureGeomType == 'LineString' || featureGeomType == 'Line' ) {
 		        	var lineStyle = new ol.style.Style({
@@ -561,14 +620,14 @@ Ext.define('MCLM.Map', {
 	        		}
 	        	}
 	        	
-	        	var label = featureProperties.label;
+	        	var mclm_label_column = featureProperties.mclm_label_column;
 	        	var font = layerStyle.textFont;
 	        	
-	        	if( label && font ) {
+	        	if( mclm_label_column && font ) {
 	        		
 			        var featureText = new ol.style.Style({
 			            text: new ol.style.Text({
-			                text: label,
+			                text: mclm_label_column,
 			                offsetY: layerStyle.textOffsetY,
 			                offsetX: layerStyle.textOffsetX,
 			                font: layerStyle.textFont,
@@ -627,7 +686,6 @@ Ext.define('MCLM.Map', {
 						
 					}
 			    	resultStyles.push( pointStyle );
-			    	//if ( resolution < 150 ) resultStyles.push( featureText );
 				}			        
 				// ------------------------------------------------------------------------------
 		        
@@ -660,6 +718,8 @@ Ext.define('MCLM.Map', {
 			MCLM.Map.map.addLayer( vectorLayer );
 			
 			MCLM.Functions.hideMainLoadingIcon();
+			
+			return vectorLayer;
 		},
 		// --------------------------------------------------------------------------------------------
 		// Remove uma camada do mapa
@@ -887,32 +947,112 @@ Ext.define('MCLM.Map', {
 				MCLM.RouteHelper.putEndIcon( event.coordinate );
 			});
 		},
-		bindMapToInspectFeature : function() {
-			var me = MCLM.Map;
-			MCLM.Map.unbindMapClick();
-			MCLM.Map.onClickBindKey = MCLM.Map.map.on('click', function(event) {
-				var pixel = event.pixel;
-				MCLM.RouteHelper.inspectFeature( pixel );
-			});
-			MCLM.Map.interrogatingFeatures = true;
-		},
+
 		// --------------------------------------------------------------------------------------------
 		// Libera o click do mouse no mapa da ultima ferramenta ligada
 		unbindMapClick : function () {
 			if ( MCLM.Map.onClickBindKey ) {
-				// Removido por ser especifico do OL3
-				//MCLM.Map.map.unByKey( MCLM.Map.onClickBindKey );
-				// Novo metodo do OL4:
 				ol.Observable.unByKey( MCLM.Map.onClickBindKey );
 			}
 		},		
+		// --------------------------------------------------------------------------------------------
+		bindMapToQueryPhoto : function () {
+			MCLM.Map.unbindMapClick();
+			var me = MCLM.Map;
+			me.onClickBindKey = me.map.on('click', function(event) {
+				
+				var featureHit = false;
+				me.map.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
+					
+					var layerName = layer.get("alias");
+					var att = feature.getProperties();					
+					
+					if ( (layerName == 'photoLayer') && me.streetPhotoEnabled ) {
+						var imageUrl = "https://d1cuyjsrcm0gby.cloudfront.net/"+att.key+"/thumb-320.jpg";
+						MCLM.view.photo.PhotoHelper.viewPhoto( imageUrl );
+						featureHit = true;
+						return true;
+					}
+				});
+				
+				if ( me.streetPhotoEnabled && !featureHit ) {
+					MCLM.view.photo.PhotoHelper.getPhotosCloseTo( event.coordinate );
+					return true;
+				}					
+				
+			});
+		},
+		
+		
 		// --------------------------------------------------------------------------------------------
 		// Liga o click do mouse no mapa com o metodo de consulta de camada
 		bindMapToQueryTool : function () {
 			MCLM.Map.unbindMapClick();
 			var me = MCLM.Map;
-			MCLM.Map.onClickBindKey = MCLM.Map.map.on('click', function(event) {
+			me.onClickBindKey = me.map.on('click', function(event) {
+
 				me.queryMap( event.coordinate );
+				var featureHit = false;
+				var externalLayerName = "";
+				me.map.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
+					var columnRefs = {};
+					var layerName = layer.get("alias");
+					var att = feature.getProperties();
+					
+					if ( (layerName == 'aircraftLayer') && aeroTrafficEnabled ) {
+						me.aircraftHelper.showAircraftDetails( att );
+						featureHit = true;
+						return true;
+					}
+					
+					if ( layerName == 'climaLayer' ) {
+						MCLM.ClimaHelper.showDetails( feature, event.coordinate );
+						return true;
+					}
+					
+					if ( layerName == 'poiLayer' ) {
+						MCLM.RouteHelper.inspectFeature( event.pixel );
+						featureHit = true;
+						return true;
+					}
+
+					if ( !att.features ) {
+						MCLM.Functions.mainLog("Não existem dados na camada " + layerName );
+					} else {
+					
+						featureHit = true;
+						
+						externalLayerName = layerName;
+						var data = [];
+				        att.features.forEach( function( feature ) {
+	
+				        	// Zera os valores de todas as colunas
+				        	for(var p in columnRefs) {
+				        	    if(columnRefs.hasOwnProperty(p)) columnRefs[p] = '';
+				        	}
+				        	
+				        	var keys = feature.getKeys();
+			        		for( y=0; y < keys.length; y++ ) {
+			        			var value = feature.get( keys[y] );
+			        			if( (keys[y] != 'geometry') ) {
+			        				// Seta o valor para a coluna
+			        				columnRefs[ keys[y] ] = value;
+					        		
+			        			}
+			        		}
+			        		
+			        		// Passa para a verdadeira. Isso tudo é para manter o numero de colunas igual
+			        		// caso uma feature venha com uma coluna e outra não.
+			        		var tempData = JSON.parse( JSON.stringify( columnRefs ) );
+			        		data.push( tempData );
+	
+				        });
+				        			        
+				        me.addGrid( externalLayerName, data );
+					}
+					
+			    });				
+				
 			});
 			
 		}, 		
@@ -927,24 +1067,31 @@ Ext.define('MCLM.Map', {
 			var queryFactorRadius = MCLM.Map.queryFactorRadius;
 			var featureCount = MCLM.Map.featureCount;
 			var me = MCLM.Map;
+			
+		
+			var queryResultWindow = Ext.getCmp('queryResultWindow');
+			if ( !queryResultWindow ) queryResultWindow = Ext.create('MCLM.view.paineis.QueryResultWindow');
+			queryResultWindow.removeAll();
+			// ------------------
+			
+			
 			MCLM.Map.map.getLayers().forEach( function (layer) {
 				var layerName = layer.get("name");
+				var layerAlias = layer.get("alias");
 				var baseLayer = layer.get("baseLayer");
+				
+				var idNodeData = layer.get("idNodeData");
+				var idDataWindow = layer.get("idDataWindow");
 				var found = false;
-				
-				var queryResultWindow = Ext.getCmp('queryResultWindow');
-				if ( !queryResultWindow ) queryResultWindow = Ext.create('MCLM.view.paineis.QueryResultWindow');
-				queryResultWindow.removeAll();
-				
 				
 				if ( layerName && ( !baseLayer ) ) {
 					try {
 						urlFeatureInfo = layer.getSource().getGetFeatureInfoUrl(
-							coordinate, viewResolution, projection,
-					        {'buffer':queryFactorRadius, 'QUERY_LAYERS': layerName,  'INFO_FORMAT': 'application/json', 'FEATURE_COUNT': featureCount} 
+							coordinate, viewResolution, projection,  
+							{'buffer':queryFactorRadius, 'QUERY_LAYERS': layerName,  'INFO_FORMAT': 'application/json', 'FEATURE_COUNT': featureCount} 
 						);
 						found = true;
-						me.queryLayer( layerName, urlFeatureInfo );
+						me.queryLayer( layerName, urlFeatureInfo, layerAlias, idNodeData, idDataWindow  );
 					} catch ( err ) { me.queryLayerError("Erro ao interrogar camada", layerName);  }
 				}				
 				//if( !found ) {
@@ -957,35 +1104,50 @@ Ext.define('MCLM.Map', {
 		
 		// --------------------------------------------------------------------------------------------
 		// Interroga uma camada dada uma URL do tipo "REQUEST=GetFeatureInfo"
-		queryLayer : function( layerName, urlFeatureInfo ) {
+		queryLayer : function( layerName, urlFeatureInfo, layerAlias, idNodeData, idDataWindow ) {
 			
+			MCLM.Functions.mainLog("Interrogando " + layerAlias + "...");
 			var encodedUrl = encodeURIComponent( urlFeatureInfo );
 			var me = MCLM.Map;
 			Ext.Ajax.request({
 		       url: 'queryLayer',
 		       params: {
 		           'targetUrl': encodedUrl,
-		           'layerName' : layerName 
+		           'layerName' : layerName, 
+		           'idNodeData' : idNodeData, 
+		           'idDataWindow' : idDataWindow
 		       },       
 		       success: function(response, opts) {
+		    	  MCLM.Functions.mainLog("[OK] " + layerAlias);
 		    	  
-		    	   var jsonObj = JSON.parse(response.responseText);
+		    	  var jsonObj = JSON.parse(response.responseText);
 		    	   
-		    	   var rawData = [];
-		    	   for ( x=0; x<jsonObj.features.length;x++ ) {
-		    		   rawData.push( jsonObj.features[x].properties );
-		    	   }
+		    	  var rawData = [];
+		    	  for ( x=0; x<jsonObj.features.length;x++ ) {
+		    		  var tempObj = jsonObj.features[x].properties;
+		    		 
+		    		  var feicaoMeta = {};
+		    		  var feicaoMetaFeatures = [];
+		    		  feicaoMetaFeatures.push( jsonObj.features[x] );
+		    		  feicaoMeta["features"] = feicaoMetaFeatures;
+		    		  feicaoMeta["type"] = "FeatureCollection";
+		    		  
+		    		  tempObj["mclm_metadata_property"] = Ext.encode( feicaoMeta );
+		    		  rawData.push( tempObj );
+		    	  }
 		    	   
-		    	   if ( rawData.length > 0 ) {
-		    		  me.addGrid( layerName, rawData );
-		    	   }
+		    	  if ( rawData.length > 0 ) {
+		    		 me.addGrid( layerAlias, rawData );
+		    	  }
 
 		       },
 		       failure: function(response, opts) {
+		    	   MCLM.Functions.mainLog("[ERRO] " + layerAlias);
 		    	   me.queryLayerError( response, layerName );
 		       }
 			});				
 		},
+		
 		getStoreColumnsFromJson : function ( obj ) {
 		    var keys = [];
 		    for (var key in obj) {
@@ -995,30 +1157,46 @@ Ext.define('MCLM.Map', {
 		    }
 		    return keys;	
 		},
-
+		
 		getGridColumnsFromJson : function( obj ) {
 		    var keys = [];
 		    for (var key in obj) {
 		        if ( obj.hasOwnProperty(key) ) {
-		            keys.push({text: key, dataIndex: key});
+		        	if ( key.startsWith("mclm_pk_")  ) { keys.push({text: key, width:0, dataIndex: key, hidden : true}) } else
+		        	if ( key == 'mclm_label_column' ) { keys.push({text: key, width:0, dataIndex: key, hidden : true}) } else
+	        		if ( key == 'mclm_metadata_property' ) { keys.push({text: key, width:0, dataIndex: key, hidden : true}) } else
+		        	if ( key == 'node_data' ) { keys.push({text: key, width:0, dataIndex: key, hidden : true}) } else
+		        	if ( key == 'data_window' ) { keys.push({text: key, width:0, dataIndex: key, hidden : true}) } else
+		        		keys.push({text: key, width:150, dataIndex: key}); 
 		        }
 		    }
 		    return keys;	
-		},		
+		},
+		
 		createGrid : function( layerName, store, columnNames ) {
 			var dummyGrid = Ext.create('Ext.grid.Panel', {
 				border: false,
 				title : layerName,
 				store : store,
 			    frame: false,
-			    margin: "10 0 0 0", 
+			    margin: "0 0 0 0", 
 			    flex:1,
 			    loadMask: true,
 			    columns:columnNames,
-			    autoHeight:true
+			    autoHeight:true,
+			    
+			    listeners: {
+			    	itemclick: function(dv, record, item, index, e) {
+			    		var selectedRec = dv.getSelectionModel().getSelection()[0];  
+			    		MCLM.Functions.openWindowData( selectedRec.data );
+			    	}
+			    }
+			    
 			});
 			return dummyGrid;
-		},		
+		},
+		
+		
 		createStore : function ( storeData, columns ) {
 			var arrData = [];
 			var theData = storeData;
@@ -1066,24 +1244,31 @@ Ext.define('MCLM.Map', {
 			var me = MCLM.Map;
         	var dataLayer = node.get("dataLayer");
 			var serialId = node.get('serialId' );
-
+			var idNodeData = node.get('idNodeData' );
+			var idDataWindow = node.get('idDataWindow' );
 			var idDataLayer = dataLayer.idDataLayer;
-
 			var	bbox = MCLM.Map.getMapCurrentBbox();
 
 	    	Ext.Ajax.setTimeout(120000);
-	    	
 			Ext.Ajax.request({
 				url: 'getAsFeatures',
 				params: {
 					'idDataLayer': idDataLayer,
+					'idDataWindow': idDataWindow,
+					'idNodeData': idNodeData,
 					'bbox' : bbox
 				},       
 				success: function(response, opts) {
 			    	MCLM.Functions.showMainLoadingIcon( 'Carregando Camada...');
 
-					var respText = Ext.decode(response.responseText);
-					var layer = me.createVectorLayerFromGeoJSON( respText, node );
+			    	try {
+						var respText = Ext.decode(response.responseText);
+						var layer = me.createVectorLayerFromGeoJSON( respText, node );
+			    	} catch ( error ) {
+						MCLM.Functions.hideMainLoadingIcon();
+						Ext.Msg.alert('Erro','Erro ao receber dados: ' + response.responseText );
+						return true;
+			    	} 
 		    	   
 					//Adiciona ao Layer Stack
 					var layerStackStore = Ext.getStore('store.layerStack');
@@ -1143,7 +1328,7 @@ Ext.define('MCLM.Map', {
 			jsonstr.featureStyle = estilo;
 			jsonstr.data = feicao.metadados;	
 			
-			MCLM.Map.createVectorLayerFromGeoJSON( jsonstr, node );			
+			return MCLM.Map.createVectorLayerFromGeoJSON( jsonstr, node );			
 		
 		},
 		// --------------------------------------------------------------------------------------------
@@ -1157,6 +1342,17 @@ Ext.define('MCLM.Map', {
 			
 			MCLM.Map.removeLayer( serialId );
 		},
+		
+		getLayerByAlias : function ( layerAlias ) {
+			var me = MCLM.Map;
+			var result = null;
+			MCLM.Map.map.getLayers().forEach( function ( layer ) {
+				if( layer.get("alias") == layerAlias ) {
+					result = layer;
+				}
+			});
+			return result;
+		},		
 		
 		// --------------------------------------------------------------------------------------------
 		// TESTE - APAGAR
