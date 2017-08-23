@@ -29,7 +29,7 @@ Ext.define('MCLM.view.config.ConfigForm', {
             fieldLabel: 'Servidor de Mapa',
             width: 350,
             name: 'geoserverUrl',
-            allowBlank : false,
+            allowBlank : true,
             invalidText: 'Teste',
         },
         {
@@ -181,11 +181,18 @@ Ext.define('MCLM.view.config.ConfigForm', {
             inputValue: 'true',
             invalidText: 'Teste',
         },{
-            fieldLabel: 'Criar Camadas externas no servidor local',
+            fieldLabel: 'Criar camadas externas no Servidor local',
             width: 350,
             xtype: 'checkbox',
             inputValue: 'true',
             name: 'externalLayersToLocalServer',
+            invalidText: 'Teste'
+        },{
+            fieldLabel: 'Atualizar Dicionário quando servidor iniciar',
+            width: 350,
+            xtype: 'checkbox',
+            inputValue: 'true',
+            name: 'scanDictAtStartup',
             invalidText: 'Teste'
         },{
             fieldLabel: 'Pasta para arquivos SHP',
@@ -199,15 +206,79 @@ Ext.define('MCLM.view.config.ConfigForm', {
             allowBlank : false,
             name: 'externalWorkspaceName',
             invalidText: 'Teste'
+        },{
+	        xtype: 'container',
+	        layout: 'vbox',    
+	        padding: '0, 0, 0, 0',
+		    items: [{
+			    xtype: 'container',
+			    layout: 'hbox',    
+			    padding: '0',
+			    items: [{        	
+		            fieldLabel: 'Cor de fundo',
+		            xtype: 'textfield',
+		            labelWidth: 200,
+		            width: 310,
+		            allowBlank : false,
+		            name: 'mapBackgroudColor',
+		            id: 'mapBackgroudColor',
+		            readOnly : true,
+		            listeners : {
+		            	'change' : function( textfield,newValue,oldValue ) {
+		            		$("#previewColorPickerImage").css('background-color', newValue );
+		            	}
+		            }
+			    },{
+			        xtype: 'component',
+			        autoEl: 'div',
+			        width : 25,
+			        height:25,
+			        id : 'callColorPickerImage',
+			        style : 'margin-left:3px',
+			        html : '<img style="cursor:pointer;width:25px;height:25px" src="img/back-arrow.svg">',
+		    },{
+		        xtype: 'component',
+		        autoEl: 'div',
+		        width : 45,
+		        height:25,
+		        style : 'margin-left:3px',
+		        html : '<div id="previewColorPickerImage" style="margin-left:10px; border:1px solid #cacaca; width:25px;height:25px"></div>',
+	    }]
         }],
+
+        
+        
+    }],  
+        
+        
     buttons: [{
           text: 'Fechar',
           handler: 'onCloseConfigForm'
     	},{
           text: 'Gravar',
           handler : 'onSubmitConfigForm'
-    }]
+    }],
+    
+    listeners: {
+	    afterrender : function ( cmp ) {
 
+	    	Ext.getCmp('callColorPickerImage').getEl().on('click', function() {
+	    		var colorPickerWindow = Ext.getCmp('colorPickerWindow');
+	    		if ( !colorPickerWindow ) {
+	    			colorPickerWindow = Ext.create('MCLM.view.tools.ColorPickerWindow');
+	    		}
+	    		colorPickerWindow.show();
+	    	
+	    		var mapBackgroudColor = Ext.getCmp('mapBackgroudColor');
+	    		colorPickerWindow.init( mapBackgroudColor.getValue()  , mapBackgroudColor );
+	    		
+	    	});
+	    	
+	    }    
+
+    }
+    
+    
 });	
 	
 	

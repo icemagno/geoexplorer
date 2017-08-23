@@ -44,7 +44,7 @@ public class BasicRepository {
 			if ( session != null ) {
 				tx = session.beginTransaction();
 			} else {
-				//
+				System.out.println("ConnFactory.getSession failure");
 			}
 		} else {
 			//

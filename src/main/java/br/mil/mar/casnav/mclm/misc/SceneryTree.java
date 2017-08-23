@@ -20,7 +20,7 @@ public class SceneryTree {
 	private String bbox;		
 	private Boolean baseMapActive;	
 	private Boolean isPublic;	    
-	private Integer idUser;	
+	private String cpfUser;	
     private List<SceneryTreeNode> nodes;
 	private Boolean graticule;
 
@@ -35,7 +35,7 @@ public class SceneryTree {
 		this.description = scenery.getDescription();
 		this.baseMapActive = scenery.getBaseMapActive();
 		this.isPublic = scenery.getIsPublic();
-		this.idUser = scenery.getIdUser();
+		this.cpfUser = scenery.getCpfUser();
 		this.graticule = scenery.getGraticule();
 		this.bbox = scenery.getMapBbox();
 		
@@ -90,10 +90,6 @@ public class SceneryTree {
 		return isPublic;
 	}
 
-	public Integer getIdUser() {
-		return idUser;
-	}
-
 	public List<SceneryTreeNode> getNodes() {
 		return nodes;
 	}
@@ -114,5 +110,8 @@ public class SceneryTree {
 		return bbox;
 	}
 	
+	public String getCpfUser() {
+		return cpfUser;
+	}
 	
 }

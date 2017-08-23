@@ -4,6 +4,7 @@ Ext.define('MCLM.view.main.TelaPrincipal', {
 	plugins: 'viewport',
 	
     requires: [
+       'MCLM.view.paineis.PainelSuperior',
        'MCLM.view.paineis.PainelInferior',
        'MCLM.view.paineis.PainelCentral',
        'MCLM.view.paineis.AbaTrabalho',
@@ -51,6 +52,8 @@ Ext.define('MCLM.view.main.TelaPrincipal', {
         xtype: 'painelDireito', collapsible: false
     },{
         xtype: 'painelInferior', collapsible: false
+    },{
+        xtype: 'painelSuperior', collapsible: false
     }]
 });
 

@@ -46,7 +46,9 @@ Ext.define("MCLM.view.geocode.GeoCodeHelper", {
         this.coordenadas = coordenadas;
 
         this.geocodeView = new ol.View({
-            center: ol.proj.transform([-55.37109375, -17.39257927105777], 'EPSG:4326', 'EPSG:3857'),
+            //center: ol.proj.transform([-55.37109375, -17.39257927105777], 'EPSG:4326', 'EPSG:3857'),
+            center: [-55.37109375, -17.39257927105777],
+            projection: 'EPSG:4326',
             zoom: 3
         })
 
@@ -82,7 +84,8 @@ Ext.define("MCLM.view.geocode.GeoCodeHelper", {
             /**
              * Transformando a coordenada do Evento para a projeção correta para exibição.
              */
-            var clickedCoordinate = ol.proj.transform(event.coordinate, 'EPSG:3857', 'EPSG:4326');
+            //var clickedCoordinate = ol.proj.transform(event.coordinate, 'EPSG:3857', 'EPSG:4326');
+            var clickedCoordinate = event.coordinate;
             me.clickedCoordinate = clickedCoordinate;
             me.getAddressFromPoint(event.coordinate);
         });
@@ -95,7 +98,8 @@ Ext.define("MCLM.view.geocode.GeoCodeHelper", {
         var lat = Number(coord[0].trim());
         var lon = Number(coord[1].trim());
         this.clickedCoordinate = [lat, lon];
-        var coordinate = ol.proj.transform(this.clickedCoordinate, 'EPSG:4326', 'EPSG:3857');
+        //var coordinate = ol.proj.transform(this.clickedCoordinate, 'EPSG:4326', 'EPSG:3857');
+        var coordinate = this.clickedCoordinate;
         this.getAddressFromPoint(coordenadas);
         this.panTo(coordenadas, this.panToZoom);
         this.putIcon(coordinate);
@@ -105,7 +109,8 @@ Ext.define("MCLM.view.geocode.GeoCodeHelper", {
         var coord = center.split(",");
         var lat = Number(coord[0].trim());
         var lon = Number(coord[1].trim());
-        var coordinate = ol.proj.transform([lat, lon], 'EPSG:4326', 'EPSG:3857');
+        //var coordinate = ol.proj.transform([lat, lon], 'EPSG:4326', 'EPSG:3857');
+        var coordinate = center;
 
         this.geocodeView.animate({
             zoom: zoom,
@@ -212,7 +217,8 @@ Ext.define("MCLM.view.geocode.GeoCodeHelper", {
     },
 
     getAddressFromPoint: function (center) {
-        var coordinate = ol.proj.transform(center, 'EPSG:3857', 'EPSG:4326');
+        //var coordinate = ol.proj.transform(center, 'EPSG:3857', 'EPSG:4326');
+        var coordinate = center;
         var me = this;
         $("#alert_geocode").css("display", "block");
 

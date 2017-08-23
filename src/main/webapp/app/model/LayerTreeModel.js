@@ -17,7 +17,7 @@ Ext.define('MCLM.model.LayerTreeModel', {
 		{ name: 'layerStackIndex', type: 'int' },
 		{ name: 'readOnly', type: 'boolean' },
 		{ name: 'idNodeData', type: 'string' },
-		{ name: 'checked', type: 'boolean' },
+		/*{ name: 'checked', type: 'boolean' },*/
 		{ name: 'selected', type: 'boolean' }
     ],
 

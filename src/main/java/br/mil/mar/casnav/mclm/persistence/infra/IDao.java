@@ -16,4 +16,5 @@ public interface IDao<T> {
 	 void executeQuery(String criteria, boolean withCommit) throws Exception;
 	 public List<?> genericAccess(String hql) throws Exception;
 	 int getCount(String tableName, String criteria) throws Exception;
+	 void deleteList( List<T> list ) throws DeleteException;
 }

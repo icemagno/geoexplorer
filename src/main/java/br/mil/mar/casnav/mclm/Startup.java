@@ -1,15 +1,16 @@
 package br.mil.mar.casnav.mclm;
 
-import java.util.Set;
-import java.util.concurrent.ScheduledExecutorService;
+import java.io.File;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
+import org.apache.commons.io.FileUtils;
+
 import br.mil.mar.casnav.mclm.misc.Configurator;
-import br.mil.mar.casnav.mclm.misc.LayerType;
+import br.mil.mar.casnav.mclm.misc.PathFinder;
 import br.mil.mar.casnav.mclm.persistence.entity.Config;
 import br.mil.mar.casnav.mclm.persistence.entity.NodeData;
 import br.mil.mar.casnav.mclm.persistence.exceptions.NotFoundException;
@@ -21,27 +22,22 @@ import br.mil.mar.casnav.mclm.persistence.services.NodeService;
 
 @WebListener
 public class Startup implements ServletContextListener {
-	private ScheduledExecutorService scheduler;
+	//private ScheduledExecutorService scheduler;
 	
-    private void loggerDebug( String log ) {
-    	System.out.println( log );
-    }
-    
 	@Override
     public void contextInitialized(ServletContextEvent event) {
     	ServletContext context = event.getServletContext();
     	String path = context.getRealPath("/");
     	System.setProperty("rootPath", path );
 
-    	
     	try {
        
-    		// Isso inicia o monitor de conexoes. Serve para verificar connection leaks
-    		/*
-    		ScheduledExecutorService  scheduler = Executors.newSingleThreadScheduledExecutor();
-    		Cron cron = new Cron();
-    		scheduler.scheduleAtFixedRate( cron , 0, 1, TimeUnit.MINUTES);
-    		*/
+    		String imagesPath = PathFinder.getInstance().getPath() + "/tempmaps/";
+    		FileUtils.deleteDirectory( new File(imagesPath) );
+    		
+    		//ScheduledExecutorService  scheduler = Executors.newSingleThreadScheduledExecutor();
+    		//Cron cron = new Cron();
+    		//scheduler.scheduleAtFixedRate( cron , 0, 1, TimeUnit.MINUTES);
     		
     		
     		String configFile = path + "WEB-INF/classes/config.xml";
@@ -64,44 +60,23 @@ public class Startup implements ServletContextListener {
     			System.out.println("Nenhum registro encontrado na tabela de configuração.");
     		}
     		
-
-    		 
-    		
-    		// Verifica novamente se todas as camadas estao com o dicionorio carregado.
-    		// Pode acontecer de no momento do cadastro da camada o link WMS esteja 
-    		// fora do ar e n�o seja possivel buscar os atributos, entao tentamos novamente agora
-    		// O ideal seria deixar para o usuario atualizar isso quando necessario.
     		
     		NodeService ns = new NodeService();
-    		Set<NodeData> nodes = ns.getList();
-    		DictionaryService ds = new DictionaryService();
-
+    		NodeData node = ns.getFeicaoRootNode();
+			Configurator.getInstance().setFeicaoRootNode( node );
     		
+    		// Verifica novamente se todas as camadas estao com o dicionario carregado.
+    		// Pode acontecer de no momento do cadastro da camada o link WMS esteja 
+    		// fora do ar e não seja possivel buscar os atributos, entao tentamos novamente agora
+    		// O ideal seria deixar para o usuario atualizar isso quando necessario.
     		
-    		for( NodeData node : nodes ) {
-    			if ( node.getLayerType() == LayerType.CRN) Configurator.getInstance().setFeicaoRootNode( node );
-    			/*
-				ds.newTransaction();
-				try {
-					ds.getDictionary( node.getIdNodeData() );
-				} catch ( NotFoundException nfe ) {
-					try {
-						int quant = ds.updateDictionary( node );
-						if ( quant > 0 ) System.out.println(" > concluido com " + quant + " itens.");
-					} catch ( Exception e ) {
-						System.out.println("Erro ao tentar atualizar o dicion�rio: " + e.getMessage() );
-					}
-				}
-				*/
-				
-			}
+    		if ( config.getConfig().getScanDictAtStartup() ) {
+    			System.out.println("Atualização de dicionario solicitada...");
+    			DictionaryService ds = new DictionaryService();
+    			ds.scanDictionary();
+    			System.out.println("Fim da atualização de dicionario.");
 			
-			if ( Configurator.getInstance().getFeicaoRootNode() == null ) {
-				ns.newTransaction();
-				Configurator.getInstance().setFeicaoRootNode( ns.createCRN() );
-			} 
-			
-			
+    		}
 			
 			// TEMP!
     		/*
@@ -128,9 +103,14 @@ public class Startup implements ServletContextListener {
 	
 	@Override
     public void contextDestroyed(ServletContextEvent event) {
-		loggerDebug("shutdown");
+		
+		System.out.println("Desligando MCLM.");
+		/*
 		try {
 			scheduler.shutdownNow();
-		} catch ( Exception e ) {}
+		} catch ( Exception e ) {
+			
+		}
+		*/
     }
 }

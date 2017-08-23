@@ -258,7 +258,13 @@ public class DataLayerService {
 			layerAlias = layerAlias.replace(" ", "_");
 			//----------------------------------------------------------------
 
-			int feicaoRootNodeId = Configurator.getInstance().getFeicaoRootNode().getIdNodeData();
+			
+			NodeData feicaoNode = Configurator.getInstance().getFeicaoRootNode();
+			if ( feicaoNode == null  ) {
+				throw new Exception("Pasta de armazenamento de Feições não encontrada.");
+			}
+			int feicaoRootNodeId = feicaoNode.getIdNodeData();
+			
 			
 			NodeService ns = new NodeService();
 			NodeData node = new NodeData(feicaoRootNodeId, "", feicaoDescricao, "Feição", layerAlias, feicaoNome, LayerType.FEI);

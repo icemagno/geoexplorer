@@ -17,6 +17,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import br.mil.mar.casnav.mclm.misc.LayerType;
+import br.mil.mar.casnav.mclm.misc.WindowType;
 
 
 @Entity
@@ -42,6 +43,10 @@ public class NodeData {
 	@Enumerated(EnumType.STRING)
 	private LayerType layerType;
 	
+	@Column(length=10)
+	@Enumerated(EnumType.STRING)
+	private WindowType windowType;	
+	
 	@Transient
 	private int children;
 
@@ -53,6 +58,9 @@ public class NodeData {
 
 	@Column(length=250)
 	private String description;
+
+	@Column(length=250)
+	private String cqlFilter;	
 	
 	@Column(length=250)
 	private String institute;
@@ -72,7 +80,12 @@ public class NodeData {
 	@OneToOne()
 	@JoinColumn(name="id_filter_item", foreignKey = @ForeignKey(name = "fk_node_data_filter_item"))
 	private FilterItem filter;	
+
 	
+	@ManyToOne()
+	@JoinColumn(name="id_server", foreignKey = @ForeignKey(name = "fk_datalayer_server"))
+	private Server server;		
+
 	@ManyToOne()
 	@JoinColumn(name="id_data_window", foreignKey = @ForeignKey(name = "fk_datalayer_data_window"))
 	private DataWindow dataWindow;		
@@ -96,6 +109,7 @@ public class NodeData {
 		this.layerType = layerType;
 		this.readOnly = false;
 		this.serialId = "LR" + UUID.randomUUID().toString().replaceAll("-", "").substring(0, 8);
+		this.windowType = WindowType.DEFAULT;
 	}
 	
 	public NodeData(int idNodeParent, String originalServiceUrl, String description, String institute, String layerName, 
@@ -247,9 +261,31 @@ public class NodeData {
 
 	public void setFeicao(Feicao feicao) {
 		this.feicao = feicao;
+	}
+
+	public WindowType getWindowType() {
+		return windowType;
+	}
+
+	public void setWindowType(WindowType windowType) {
+		this.windowType = windowType;
+	}
+
+	public String getCqlFilter() {
+		return cqlFilter;
+	}
+
+	public void setCqlFilter(String cqlFilter) {
+		this.cqlFilter = cqlFilter;
+	}
+
+	public Server getServer() {
+		return server;
+	}
+
+	public void setServer(Server server) {
+		this.server = server;
 	}	
 
-
-	
 	
 }

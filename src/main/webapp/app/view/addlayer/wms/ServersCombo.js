@@ -4,6 +4,11 @@ Ext.define('MCLM.view.addlayer.wms.ServersCombo', {
 	id : 'serversCombo',
 	fieldLabel: 'Fonte Externa',
 	displayField: 'name',
+	
+    allowBlank: false,
+    editable : false,	
+    queryMode : 'local',
+    
 	valueField:'idServer',
 	width:400,
 	emptyText:'Selecione...',

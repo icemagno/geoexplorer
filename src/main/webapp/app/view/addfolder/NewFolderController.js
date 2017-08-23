@@ -49,7 +49,7 @@ Ext.define('MCLM.view.addfolder.NewFolderController', {
                 text		: newFolderNameValue,
                 layerAlias 	: newFolderNameValue,
                 leaf		: false,
-                checked		: false,
+                
                 id 			: y,
                 idNodeParent: selectedTreeNode.get('id'),
                 layerType	: 'FDR'

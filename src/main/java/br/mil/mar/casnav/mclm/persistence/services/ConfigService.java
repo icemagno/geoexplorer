@@ -35,6 +35,8 @@ public class ConfigService {
 				cfg.setRoutingPort(5432);
 				cfg.setMapZoom(5);
 				cfg.setProxyPort(8080);
+				cfg.setMapBackgroudColor("#FFFFFF");
+				cfg.setScanDictAtStartup( false );
 				cfg.setUseProxy(false);
 				cfg.setDistanceFromRoute( 1000 ); // Metros
 				newTransaction();
@@ -42,6 +44,7 @@ public class ConfigService {
 				
 			}
 			cfg.setUser( user );
+			
 			Configurator.getInstance().updateConfiguration( cfg );
 			
 			JSONObject itemObj = new JSONObject( cfg );
@@ -96,6 +99,9 @@ public class ConfigService {
 		
 		oldConfig.setServicosCptecUrl( config.getServicosCptecUrl() );
 		oldConfig.setSymbolServerURL( config.getSymbolServerURL() );
+		
+		oldConfig.setMapBackgroudColor( config.getMapBackgroudColor() );
+		oldConfig.setScanDictAtStartup( config.getScanDictAtStartup() );
 		
 		rep.newTransaction();
 		rep.updateConfig( oldConfig );

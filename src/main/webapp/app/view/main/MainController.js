@@ -20,10 +20,25 @@ Ext.define('MCLM.view.main.MainController', {
     	
     	restToolsWindow = Ext.create('MCLM.view.tools.RestToolsWindow');
     	restToolsWindow.show();    	
-    	restToolsWindow.alignTo(Ext.getBody(), "tr-tr", [-90, 10]);
+    	restToolsWindow.alignTo(Ext.getBody(), "tr-tr", [-90, 70]);
     	
 	},
 	
+	undoZoom : function() {
+		MCLM.Map.undoZoom();
+	},
+	
+    showForecastToolBar : function() {
+    	
+		var restWeatherWindow = Ext.getCmp('restWeatherWindow');
+		if ( !restWeatherWindow ) {
+			restWeatherWindow = Ext.create('MCLM.view.tools.RestWeatherWindow');
+		}
+		restWeatherWindow.show();
+		restWeatherWindow.alignTo(Ext.getBody(), "tr-tr", [-90, 70]);
+    	
+    },
+    	
 	// --------------------------------------------------------------------------------------------
 	manageServers : function( button ) {
     	var serversWindow = Ext.getCmp('serversWindow');

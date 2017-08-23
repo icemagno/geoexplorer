@@ -2,6 +2,8 @@ Ext.define('MCLM.view.trabalho.TrabalhoTreeController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.trabalho',
     
+    addingText : false,
+    
     init : function(app) {
         this.control({
             '#trabalhoTreeView' : {
@@ -57,28 +59,29 @@ Ext.define('MCLM.view.trabalho.TrabalhoTreeController', {
     onLayerTreeItemClick : function( view, record, item, index, e ) {
     	//
     },
-    // Limpa a área de trabalho
+    // Limpa  Cenário
     doClearWorkspace : function() {
     	var me = this;
 		var tree = Ext.getCmp('trabalhoTree');
 		var root = tree.getRootNode();
-		root.set("text","Área de Trabalho");
-		root.set("checked",false);
+		root.set("text","Cenário");
+		//root.set("checked",false);
 		
     	var painelEsquerdo = Ext.getCmp('painelesquerdo');
     	painelEsquerdo.setTitle("");		    		
 		
     	// Limpa a arvore principal
     	var layerTree = Ext.getCmp("layerTree");
+    	
     	layerTree.getRootNode().cascade( function(node) { 
-    		node.set('checked', false );
+    		if (  (node.get('layerType') != '') && (node.get('layerType') != 'CRN') && (node.get('layerType') != 'FDR') ) node.set('checked', false );
 		});   
     	
     	
     	// Apaga do layer stack
     	var trabalhoTree = Ext.getCmp("trabalhoTree");
     	trabalhoTree.getRootNode().cascade( function(node) { 
-    		node.set('checked', false );
+    		if (  (node.get('layerType') != '') && (node.get('layerType') != 'CRN') && (node.get('layerType') != 'FDR') ) node.set('checked', false );
     		me.toggleNode( node );
 		});			    	
     	
@@ -96,10 +99,10 @@ Ext.define('MCLM.view.trabalho.TrabalhoTreeController', {
 		
 		
     },
-    // Pergunta se deseja limpar a área de trabalho
+    // Pergunta se deseja limpar o Cenário
     clearWorkspace : function() {
     	var me = this;
-		Ext.Msg.confirm('Limpar Área de Trabalho', 'Deseja realmente limpar a Área de trabalho? As alterações não gravadas serão perdidas.', function( btn ){
+		Ext.Msg.confirm('Limpar Cenário', 'Deseja realmente limpar o Cenário? As alterações não gravadas serão perdidas.', function( btn ){
 			   if( btn === 'yes' ){
 				   me.doClearWorkspace();
 			   } else {
@@ -134,14 +137,17 @@ Ext.define('MCLM.view.trabalho.TrabalhoTreeController', {
     
     // Recursivamente marca/desmarca pais dos nos até o root
     recursiveCheckParent : function( node, pChildCheckedCount ) {
+    	/*
 	    if( node ) {
 	    	node.set('checked', !!pChildCheckedCount);
 	    	var parent = node.parentNode;
 	    	this.recursiveCheckParent( parent, pChildCheckedCount );
 	    }
+	    */
     },
     
     clearCheckToTheRoot : function ( parentNode ) {
+    	/*
     	var me = this;
 	    
 	    var pChildCheckedCount = 0;
@@ -151,7 +157,8 @@ Ext.define('MCLM.view.trabalho.TrabalhoTreeController', {
 	    });
 	    
 	    parentNode.set('checked', !!pChildCheckedCount);
-	    me.recursiveCheckParent( parentNode, pChildCheckedCount );	    	
+	    me.recursiveCheckParent( parentNode, pChildCheckedCount );
+	    */	    	
     },
     
     // Quando o estado do no muda (selecionado/nao selecionado)
@@ -194,6 +201,14 @@ Ext.define('MCLM.view.trabalho.TrabalhoTreeController', {
 		    });
 			
 			
+		} else if ( data.layerType == 'TXT' ) { 
+		
+		    var menu_grid = new Ext.menu.Menu({ 
+		    	items: [
+		          { iconCls: 'delete-icon', text: 'Remover', handler: function() { me.askDeleteLayer( record ); } },
+		        ]
+		    });
+		
 		} else {    	
     	
 		    var menu_grid = new Ext.menu.Menu({ 
@@ -240,8 +255,12 @@ Ext.define('MCLM.view.trabalho.TrabalhoTreeController', {
     	// Apaga do layer stack
     	var trabalhoTree = Ext.getCmp("trabalhoTree");
     	trabalhoTree.getRootNode().cascade( function(node) { 
-    		node.set('checked', false );
-    		me.toggleNode( node );
+    		
+    		if( (node.get('layerType') != '') && (node.get('layerType') != 'CRN') && (node.get('layerType') != 'FDR') ) {
+    			node.set('checked', false );
+    			me.toggleNode( node );
+    		}
+    		
 		});			    	
 			
 		
@@ -259,7 +278,173 @@ Ext.define('MCLM.view.trabalho.TrabalhoTreeController', {
 		    	}
 		    }
 		});      	
-    },    
+    },  
+
+    
+    onFormClose : function() {
+    	var textBoxWindow = Ext.getCmp('textBoxWindow');
+    	textBoxWindow.close();
+    	this.addingText = false;
+    },
+    
+    onFormSubmit : function() {
+    	var boxDescription = Ext.getCmp('boxDescriptionId');
+    	var boxTitle = Ext.getCmp('boxTitleId');
+    	var textBoxWindow = Ext.getCmp('textBoxWindow');
+    	this.addingText = false;
+    	var center = textBoxWindow.boxCenter;
+    	
+    	textBoxWindow.close();
+    	if( (boxTitle.getValue() != '') && (boxDescription.getValue() != '') ) {
+    		this.createText( center, boxTitle.getValue(), boxDescription.getValue() );   
+    	}
+    	
+    },
+    
+    
+    createText : function( center, titulo, texto ) {
+    	MCLM.Globals.totalTextBoxes++;
+    	var qtd = MCLM.Globals.totalTextBoxes;
+    	
+    	var divId = 'popup'+qtd;
+    	
+    	var div = $('<div id="'+divId+'"></div>').addClass("popupArea");
+    	$(document.body).append( div );
+    	var domDiv = document.getElementById(divId);
+    	
+		var popup = new ol.Overlay({
+			  element: domDiv,
+			  stopEvent: false,
+			  dragging: false,
+			  positioning: 'left-top',
+
+			  autoPan: true,
+			  autoPanAnimation: { duration: 250 },
+			  titulo : '',
+			  texto : '',
+				  			  
+			  
+		});
+		MCLM.Map.map.addOverlay(popup);    	
+		popup.setPosition( center );
+		
+		popup.set('titulo', titulo);
+		popup.set('texto', texto)
+		
+		var boxDiv = '<div class="popupText"><div class="popupTitle">'+titulo+'</div>' + 
+		'<div class="popupContent">'+texto+'</div></div>';
+		
+		domDiv.innerHTML = boxDiv;   	
+    	
+		var dragPan;
+		MCLM.Map.map.getInteractions().forEach(function(interaction){
+			if (interaction instanceof ol.interaction.DragPan) {
+				dragPan = interaction;  
+		  }
+		});
+
+		domDiv.addEventListener('mousedown', function(evt) {
+			dragPan.setActive(false);
+			popup.set('dragging', true);
+			console.info('start dragging ' + popup.get('titulo') );
+			$(this).css('opacity','1');
+		});
+
+		domDiv.addEventListener('mouseup', function(evt) {
+			$(this).css('opacity','0.7');
+		});
+		
+		MCLM.Map.map.on('pointermove', function(evt) {
+			if (popup.get('dragging') === true) {
+				popup.setPosition(evt.coordinate);
+			}
+		});
+
+		MCLM.Map.map.on('pointerup', function(evt) {
+			if (popup.get('dragging') === true) {
+			    dragPan.setActive(true);
+			    popup.set('dragging', false);
+			    console.info('stop dragging ' + popup.get('titulo') );
+			}
+		});		
+		
+		
+
+		// Cria o no no cenario
+		
+		var serialId = "FE" + MCLM.Functions.guid().substring(1, 8);
+		var trabalhoTree = Ext.getCmp('trabalhoTree');
+		var root = trabalhoTree.getRootNode();		
+		
+		var newId = 0;
+		root.cascadeBy( function(n) { 
+			var temp = n.get('id');
+			if ( temp > newId ) newId = temp;
+		});
+		newId++;		
+		
+		var feicao = {};
+		feicao.nome = titulo;
+		feicao.descricao = texto;
+		feicao.geomType = 'POINT';
+		feicao.metadados = center.toString();
+		
+		var newNode =  root.appendChild({
+			   'id' : newId,
+			   'text' : titulo,
+			   'layerAlias' : titulo,
+			   'layerName' : titulo,
+			   'layerType' : 'TXT',
+			   'description' : texto,
+			   'readOnly' : false,
+			   'checked' : true,
+			   'selected' : true,
+			   'institute' : 'Criado pelo Usuário',
+			   'indexOrder' : 0,
+			   'iconCls' : 'text-icon',
+			   'leaf' : true,
+			   'idNodeParent' : 0,
+			   'serialId' : serialId,
+			   'idNodeData' : -1,
+			   'feicao' : feicao
+		});			
+
+    },
+    
+    // Adiciona um texto em uma posição geográfica
+    addTextToScenery : function() {
+    	var me = this;
+
+    	MCLM.Map.unbindMapClick();
+    	if ( me.addingText ) {
+    		$("#painelCentral").css('cursor','default');
+    		me.addingText = false;
+    		return true;
+    	}
+    	
+		$("#painelCentral").css('cursor','copy');
+		
+		me.addingText = true;
+		
+		MCLM.Map.onClickBindKey = MCLM.Map.map.on('click', function(event) {
+			var center = event.coordinate;
+			MCLM.Map.unbindMapClick();	
+			
+			var textBoxWindow = Ext.getCmp('textBoxWindow');
+			if( !textBoxWindow ) {
+				textBoxWindow = Ext.create('MCLM.view.trabalho.TextBoxWindow');
+			}
+			textBoxWindow.show();
+			textBoxWindow.boxCenter = center;
+			Ext.getCmp('boxTitleId').focus(true, 100);
+			
+		});    	
+    	
+    	
+    	
+    },
+    
+    
     // Abre a janela de seleção de cenários para carregar um cenario para a area de trabalho.
     loadScenery : function() {
     	var sceneryStore = Ext.getStore('store.Scenery');
@@ -366,7 +551,8 @@ Ext.define('MCLM.view.trabalho.TrabalhoTreeController', {
 			Ext.getCmp('servidorBaseID').setValue( MCLM.Map.getBaseServerURL() );
 			Ext.getCmp('mapaBaseAtivoID').setValue( MCLM.Map.isBaseMapActive() );
 			Ext.getCmp('gradeAtivaID').setValue( MCLM.Map.isGraticuleActive() );
-			Ext.getCmp('mapBbox').setValue( MCLM.Map.getMapCurrentBbox() );			
+			Ext.getCmp('mapBbox').setValue( MCLM.Map.getMapCurrentBbox() );		
+			Ext.getCmp('mapCenterHDMSId').setValue( MCLM.Map.getCenterHDMS() );
 			
 			Ext.getCmp('nomeCenarioID').focus(true, 100);
 	    	
@@ -404,7 +590,8 @@ Ext.define('MCLM.view.trabalho.TrabalhoTreeController', {
 	// Efetivamente apaga um no da arvore
 	deleteLayer : function ( record ) {
 		var layerName = record.data.layerName;
- 	   	MCLM.Map.removeLayer( layerName );		
+		var serialId = record.data.serialId;
+ 	   	MCLM.Map.removeLayer( serialId );	
 		record.parentNode.removeChild(record);
 	},
 
@@ -433,6 +620,9 @@ Ext.define('MCLM.view.trabalho.TrabalhoTreeController', {
 		var layerName = node.get('layerName');
 		var serialId = node.get('serialId' );
 		var layerType = node.get('layerType' );
+		
+		
+		console.log( node );
 		
 		if ( layerName == "" ) return;
 		

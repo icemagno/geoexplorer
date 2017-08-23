@@ -2,7 +2,8 @@ Ext.define('MCLM.view.paineis.AbaTrabalho', {
 	extend: 'Ext.container.Container',
 	xtype: 'abaTrabalho',
 	id: 'abaTrabalho',
-    title: 'Trabalho',
+	
+    title: 'Cenário',
 
 	requires: [
 	   'MCLM.view.trabalho.TrabalhoTree'

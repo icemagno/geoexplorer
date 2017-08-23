@@ -1,7 +1,5 @@
 var map;
 
-
-
 /* Add map layer */
 var baseLayer = new ol.layer.Tile({
 	source : new ol.source.OSM()

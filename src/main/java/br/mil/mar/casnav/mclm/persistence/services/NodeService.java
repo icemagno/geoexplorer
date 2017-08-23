@@ -47,7 +47,7 @@ public class NodeService {
 	public NodeData addNode( NodeData node ) throws Exception {
         node = rep.insertNode( node );
         DictionaryService ds = new DictionaryService();
-        ds.updateDictionary( node );
+        ds.createDictionary( node );
         return node;
 	}
 	
@@ -103,6 +103,7 @@ public class NodeService {
 	 * Acionado quando o usuario arrasta um nao na arvore de camadas e muda sua posicao
 	 */
 	public String updateNodeIndexes( String data ) throws Exception {
+		
 		JSONArray ja = new JSONArray( data );
 		NodeData oldNode = null;
 		for( int x=0; x < ja.length(); x++ ) {
@@ -110,8 +111,7 @@ public class NodeService {
 				JSONObject jo = ja.getJSONObject( x );
 				// Pega o novo indice do no e seu ID
 				int id = jo.getInt( "id" ) ;
-				int index = jo.getInt( "index" );
-				
+
 				rep.newTransaction();
 				// Pega o n. no BD
 				oldNode = rep.getNode( id );
@@ -124,13 +124,34 @@ public class NodeService {
 					parentId = jo.getInt( "parentId" );
 				} catch ( Exception ignored ) {	}
 				
-				oldNode.setIndexOrder( index );
-				oldNode.setIdNodeParent( parentId );
-			
+				
+				if ( jo.has("index") ) {
+					int index = jo.getInt( "index" );
+					oldNode.setIndexOrder( index );
+					oldNode.setIdNodeParent( parentId );
+				} 
+				
+				if ( jo.has("text") ) {
+					String text = jo.getString("text");
+					oldNode.setLayerAlias( text );
+				}
+				
+				if ( jo.has("cqlFilter") ) {
+					String cqlFilter = jo.getString("cqlFilter");
+					oldNode.setCqlFilter( cqlFilter );
+				}
+				
+				if ( jo.has("description") ) {
+					String description = jo.getString("description");
+					oldNode.setDescription(description);
+				}
+				
+				
 				rep.newTransaction();
 				rep.updateNode( oldNode );
 
 			} catch ( Exception ex ) {
+				ex.printStackTrace();
 				// Os dados da requisiao deste item "x" nao vieram como esperado. Tentar o proximo item...
 			}
 		}
@@ -155,18 +176,24 @@ public class NodeService {
 		
 		DataLayerService dss = new DataLayerService();
 		FilterService fs = new FilterService();
+		ServerService ss = new ServerService();
 		
 		JSONArray arrayObj = new JSONArray();
 		for ( UserTableEntity ute : utes ) {
-			TreeNode tn = new TreeNode( ute, dss, fs );
-			// Nao coloca feicao na arvore do catalogo...
-			//if ( !tn.getLayerType().equals("FEI") ) {
-				JSONObject itemObj = new JSONObject( tn );
-	            arrayObj.put( itemObj );	
-			//}
+			TreeNode tn = new TreeNode( ute, dss, fs, ss );
+			JSONObject itemObj = new JSONObject( tn );
+
+			// Se for pasta ou pasta de feição então nao mostra os checkboxes...
+			if ( tn.getLayerType().equals("FDR") || tn.getLayerType().equals("CRN")  ) {
+				itemObj.remove("checked");
+			}
+            
+			arrayObj.put( itemObj );	
+	            
 		}
 		dss.closeSession();
 		fs.closeSession();
+		ss.closeSession();
 		rep.closeSession();
 		
 		return arrayObj.toString();
@@ -190,6 +217,14 @@ public class NodeService {
 		node.setReadOnly( true );
 		NodeData result = addNode( node );
 		return result;
+	}
+
+	public List<NodeData> getSameOriginNodes(String layerName) throws Exception {
+		return rep.getSameOrignNodes( layerName );
+	}
+
+	public NodeData getFeicaoRootNode() throws Exception {
+		return rep.getFeicaoRootNode();
 	}
 
 

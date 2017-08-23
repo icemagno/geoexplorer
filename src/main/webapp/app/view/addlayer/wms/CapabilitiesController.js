@@ -44,8 +44,17 @@ Ext.define('MCLM.view.addlayer.wms.CapabilitiesController', {
 		
 		var layerNameForm = Ext.getCmp('layerNameID');
 		var layerName = layerNameForm.getValue();
+
+		/*
+		var idServerForm = Ext.getCmp('idServer');
+		idServerForm.setValue( null );		
 		
-		this.addLayerToPreviewPanel( serverUrl + "wms/", layerName  );
+		if ( !layerName && MCLM.Globals.lastServerSelectedID ) {
+			idServerForm.setValue( MCLM.Globals.lastServerSelectedID );
+		}
+		*/
+		
+		this.addLayerToPreviewPanel( serverUrl, layerName  );
     	
     },
     layerNameIDChange : function() {
@@ -54,8 +63,13 @@ Ext.define('MCLM.view.addlayer.wms.CapabilitiesController', {
 		
 		var layerNameForm = Ext.getCmp('layerNameID');
 		var layerName = layerNameForm.getValue();
+
+		/*
+		var idServerForm = Ext.getCmp('idServer');
+		idServerForm.setValue( null );		
+		*/
 		
-		this.addLayerToPreviewPanel( serverUrl + "wms/", layerName  );
+		this.addLayerToPreviewPanel( serverUrl, layerName  );
     },
     
     
@@ -78,36 +92,32 @@ Ext.define('MCLM.view.addlayer.wms.CapabilitiesController', {
 		var layerName = layerNameForm.getValue();
 			
 		
-		//if ( !layerName || !serverUrl || !titulo ) {	
-			
-			var layerTree = Ext.getCmp('layerTree');
-			var selectedTreeNode = layerTree.getSelectionModel().getSelection()[0];
-			var layerFolderID = selectedTreeNode.data.id;
-			
-			var layerParentForm = Ext.getCmp('parentFolderID');
-			layerParentForm.setValue( layerFolderID );
-			
-			var layerDetailForm = Ext.getCmp('layerDetailForm');
-			var form = layerDetailForm.getForm();
-			if ( form.isValid() ) {
-				form.submit({
-					success: function(form, action) {
-				  		var layerTreeStore = Ext.getStore('store.layerTree');
-				  		layerTreeStore.load( { node: selectedTreeNode } );
-				  		me.closeCapabilitiesWindow();
-				  		Ext.Msg.alert('Sucesso', action.result.msg);
-					},
-				  	failure: function(form, action) {
-				  		Ext.Msg.alert('Falha', action.result.msg);
-				    }                		  
-				});
-	        } else { 
-	        	Ext.Msg.alert('Dados inválidos', 'Por favor, corrija os erros assinalados.')
-	        }
-            
-		//} else {     
-		//	Ext.Msg.alert('Nenhuma Camada selecionada', 'Por favor, selecione uma camada e tente novamente.')
-		//}
+		var layerTree = Ext.getCmp('layerTree');
+		var selectedTreeNode = layerTree.getSelectionModel().getSelection()[0];
+		var layerFolderID = selectedTreeNode.data.id;
+		
+		var layerParentForm = Ext.getCmp('parentFolderID');
+		layerParentForm.setValue( layerFolderID );
+		
+		var layerDetailForm = Ext.getCmp('layerDetailForm');
+		var form = layerDetailForm.getForm();
+		
+		if ( form.isValid() ) {
+			form.submit({
+				success: function(form, action) {
+			  		var layerTreeStore = Ext.getStore('store.layerTree');
+			  		layerTreeStore.load( { node: selectedTreeNode } );
+			  		me.closeCapabilitiesWindow();
+			  		Ext.Msg.alert('Sucesso', action.result.msg);
+				},
+			  	failure: function(form, action) {
+			  		Ext.Msg.alert('Falha', action.result.msg);
+			    }                		  
+			});
+        } else { 
+        	Ext.Msg.alert('Dados inválidos', 'Por favor, corrija os erros assinalados.')
+        }
+         
     	
 	},
     // ---------------------------------------------------------------------------------------------------------------
@@ -116,6 +126,16 @@ Ext.define('MCLM.view.addlayer.wms.CapabilitiesController', {
     serversComboSelect: function(combo, record, index) {
 		this.removeLayerFromPreviewPanel();
 		this.requestCapabilities( record.data );
+		
+		MCLM.Globals.lastServerSelected = record.data.name;
+		MCLM.Globals.lastServerSelectedID = record.data.idServer; 
+		
+		var layerDetailForm = Ext.getCmp('layerDetailForm');
+		layerDetailForm.getForm().reset();
+		
+		var idServerForm = Ext.getCmp('idServer');
+		idServerForm.setValue( MCLM.Globals.lastServerSelectedID );	    	
+		
     },  
     // ---------------------------------------------------------------------------------------------------------------
     // Chamado quando o usuario clica em uma camada na lista oferecida apos selecionar uma fonte externa do combo.
@@ -136,13 +156,13 @@ Ext.define('MCLM.view.addlayer.wms.CapabilitiesController', {
 
 		var descriptionForm = Ext.getCmp('descriptionID');
 		descriptionForm.setValue( layerName );
-		
+
 		var combo = Ext.getCmp('serversCombo');
 		var comboValue = combo.getRawValue();
 		var origemForm = Ext.getCmp('instituteID');
 		origemForm.setValue( comboValue ); 				
 		
-    	this.addLayerToPreviewPanel( serverUrl + "wms/", layerName  );  
+    	this.addLayerToPreviewPanel( serverUrl , layerName  );  
     	
     },    
     // Fecha a janela. Interceptado do botao 'fechar' no form 'MCLM.view.addlayer.wms.LayerDetailForm' 
@@ -162,7 +182,9 @@ Ext.define('MCLM.view.addlayer.wms.CapabilitiesController', {
     	
     	
     	var previewView = new ol.View({
-            center: ol.proj.transform([-55.37109375,-17.39257927105777], 'EPSG:4326', 'EPSG:3857'),
+            //center: ol.proj.transform([-55.37109375,-17.39257927105777], 'EPSG:4326', 'EPSG:3857'),
+            center: [-55.37109375,-17.39257927105777],
+            projection: 'EPSG:4326',
             zoom: 3
         })	
     	

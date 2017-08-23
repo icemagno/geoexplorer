@@ -19,5 +19,17 @@ Ext.define('MCLM.view.config.ConfigWindow', {
 	renderTo: Ext.getBody(),
     items : [{
         xtype: 'configForm',
-    }]
+    }],
+    
+    
+    listeners: {
+    	
+    	
+    	close : function() {
+    		//
+    	},
+	    
+
+    }      
+    
 });

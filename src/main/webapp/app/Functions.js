@@ -2,6 +2,125 @@ Ext.define('MCLM.Functions', {
 
 	statics: {
 		countLog : 0,
+		
+		translateAerodromos : function( what ) {
+			var aeroWindow = {};
+			aeroWindow["id"] = "Identificador";
+			aeroWindow["sigla"] = "Sigla";
+			aeroWindow["nome"] = "Nome";
+			aeroWindow["logradouro"] = "Rua";
+			aeroWindow["numeroEnd"] = "Número";
+			aeroWindow["bairro"] = "Bairro";
+			aeroWindow["cep"] = "CEP";
+			aeroWindow["caractNotaveis"] = "Características";
+			aeroWindow["fonte"] = "Fonte";
+			aeroWindow["infoContato"] = "Contato";
+			aeroWindow["sumarioPistas"] = "Sumário";
+			aeroWindow["distancia"] = "Distância";
+			aeroWindow["orgControladora"] = "Controlador";
+			aeroWindow["listCapacidadesLogisticas"] = "Cap. Logísticas";
+			aeroWindow["listTiposCapacidadeLogistica"] = "Tipos Cap. Logística";
+			aeroWindow["anacSlotControlado"] = "anacSlotControlado";
+			aeroWindow["anacSituacaoAerodromo"] = "anacSituacaoAerodromo";
+			aeroWindow["anacLocalidade"] = "anacLocalidade";
+			aeroWindow["tipoNome"] = "Tipo";
+			aeroWindow["paisNome"] = "País";
+			aeroWindow["estadoNome"] = "Estado";
+			aeroWindow["anacAerodromoSituacaoAtualizacaoNome"] = "Sit. Nome";
+			aeroWindow["administracaoNome"] = "Administração";
+			aeroWindow["cidadeNome"] = "Cidade";
+			aeroWindow["anacAerodromoUtilizacaoNome"] = "Utilização";
+			
+			
+			
+			return aeroWindow[what];
+			
+		} ,
+				 
+	
+		syntaxHighlight : function(json) {
+		    if (typeof json != 'string') {
+		         json = JSON.stringify(json, undefined, 2);
+		    }
+		    json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+		    return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+		        var cls = 'number';
+		        if (/^"/.test(match)) {
+		            if (/:$/.test(match)) {
+		                cls = 'key';
+		            } else {
+		                cls = 'string';
+		            }
+		        } else if (/true|false/.test(match)) {
+		            cls = 'boolean';
+		        } else if (/null/.test(match)) {
+		            cls = 'null';
+		        }
+		        return '<span class="' + cls + '">' + match + '</span>';
+		    });
+		},
+		
+		showMetarImage : function( aeroporto ) {
+			var metarImageWindow = Ext.getCmp('metarImageWindow');
+			if ( !metarImageWindow ) {
+				metarImageWindow = Ext.create('MCLM.view.apolo.aerodromo.MetarImageWindow');
+			}
+			
+			var image = "<div style='background-color:#edeff2;border-bottom:1px dotted #cacaca;width:100%;height:45px'><img style='position:absolute;left:5px;top:2px;width: 220px;' src='img/clima/cptec/logocomp.gif'><img style='width: 50px;position:absolute;right:5px;top:2px;' src='img/clima/cptec/logo_cptec.png'></div>" + 
+			    	   "<img style='margin-top:5px;margin-left:10px;width:400px;height:450px' src='http://img0.cptec.inpe.br/~rmetop/meteograma/"+aeroporto+".gif'>";
+			
+			metarImageWindow.update( image );
+			metarImageWindow.setTitle('Dados de METAR - ' + aeroporto);
+			metarImageWindow.show();
+		},
+		
+		getClimaDesc : function( value ) {
+			var climaDesc = [];
+			climaDesc["ec"] = "Encoberto com Chuvas Isoladas";
+				climaDesc["ci"] = "Chuvas Isoladas";
+				climaDesc["c"] = "Chuva";
+				climaDesc["in"] = "Instável";
+				climaDesc["pp"] = "Poss. de Pancadas de Chuva";
+				climaDesc["cm"] = "Chuva pela Manhã";
+				climaDesc["cn"] = "Chuva a Noite";
+				climaDesc["pt"] = "Pancadas de Chuva a Tarde";
+				climaDesc["pm"] = "Pancadas de Chuva pela Manhã";
+				climaDesc["np"] = "Nublado e Pancadas de Chuva";
+				climaDesc["pc"] = "Pancadas de Chuva";
+				climaDesc["pn"] = "Parcialmente Nublado";
+				climaDesc["cv"] = "Chuvisco";
+				climaDesc["ch"] = "Chuvoso";
+				climaDesc["t"] = "Tempestade";
+				climaDesc["ps"] = "Predomínio de Sol";
+				climaDesc["e"] = "Encoberto";
+				climaDesc["n"] = "Nublado";
+				climaDesc["cl"] = "Céu Claro";
+				climaDesc["nv"] = "Nevoeiro";
+				climaDesc["g"] = "Geada";
+				climaDesc["ne"] = "Neve";
+				climaDesc["nd"] = "Não Definido";
+				climaDesc["pnt"] = "Pancadas de Chuva a Noite";
+				climaDesc["psc"] = "Possibilidade de Chuva";
+				climaDesc["pcm"] = "Possibilidade de Chuva pela Manhã";
+				climaDesc["pct"] = "Possibilidade de Chuva a Tarde";
+				climaDesc["pcn"] = "Possibilidade de Chuva a Noite";
+				climaDesc["npt"] = "Nublado com Pancadas a Tarde";
+				climaDesc["npn"] = "Nublado com Pancadas a Noite";
+				climaDesc["ncn"] = "Nublado com Poss. de Chuva a Noite";
+				climaDesc["nct"] = "Nublado com Poss. de Chuva a Tarde";
+				climaDesc["ncm"] = "Nubl. c/ Poss. de Chuva pela Manhã";
+				climaDesc["npm"] = "Nublado com Pancadas pela Manhã";
+				climaDesc["npp"] = "Nublado com Possibilidade de Chuva";
+				climaDesc["vn"] = "Variação de Nebulosidade";
+				climaDesc["ct"] = "Chuva a Tarde";
+				climaDesc["ppn"] = "Poss. de Panc. de Chuva a Noite";
+				climaDesc["ppt"] = "Poss. de Panc. de Chuva a Tarde";
+				climaDesc["ppm"] = "Poss. de Panc. de Chuva pela Manhã";	
+			
+				return climaDesc[ value ];
+			
+			
+		},
 
 		shortGuid : function() {
 			function s4() {
@@ -77,8 +196,196 @@ Ext.define('MCLM.Functions', {
 			return ctx.createPattern(cnv, 'repeat');
 		},	
 
-		openWindowData : function( record ) {
+		createOrgMilWindow : function( respText, record ) {
+			console.log( respText );
+			
+			var orgMilWindow = Ext.getCmp('orgMilWindow');
+			if( !orgMilWindow ) {
+				orgMilWindow = Ext.create('MCLM.view.apolo.orgmil.OrgMilWindow');
+			}
+			orgMilWindow.update( Ext.encode(respText) );
+			orgMilWindow.show();
+		},
 
+		createAerodromoWindow : function( sigla, data, record ) {
+			
+			var aerodromoWindow = Ext.getCmp('aerodromoWindow');
+			if( !aerodromoWindow ) {
+				aerodromoWindow = Ext.create('MCLM.view.apolo.aerodromo.AerodromoWindow');
+			}
+			
+			aerodromoWindow.codAerodromo = sigla;
+			
+			var image = "<div style='position:relative;background-color:#edeff2;border-bottom:1px dotted #cacaca;width:100%;height:45px'><img style='position:absolute;left:5px;top:2px;width: 220px;' src='img/clima/cptec/logocomp.gif'><img style='width: 50px;position:absolute;right:5px;top:2px;' src='img/clima/cptec/logo_cptec.png'></div>";
+			
+			
+			var table = "<table style='width:370px' class='dataWindow'>";
+		    for ( var key in data ) {
+		    	
+		        if ( data.hasOwnProperty( key ) ) {
+		        	var value = data[key];
+		        	if ( !value ) { 
+		        		value = "";
+		        	} 
+		        	var translatedKey = MCLM.Functions.translateAerodromos( key );
+		        	if ( translatedKey ) {
+			        	table = table + "<tr class='dataWindowLine'><td class='dataWindowLeft'>" + translatedKey + 
+							"</td><td class='dataWindowMiddle'>" + value + "</td></tr>";
+		        	}
+		        	
+		        } 
+		    }			
+		    table = table + "</table>";
+			
+		    var frame = "<iframe frameBorder='0' width='100%' height='100%' src='http://www.aisweb.aer.mil.br/_inc/iframe.cfm?pagina=rotaer&codigo=" + sigla + "'>" 
+			 
+			var content =  "<div style='witdt:100%;height:100%'>" + 
+				"<div style='width:380px;float:left;'>" + table + "</div>" +
+				"<div style='border-left:1px dotted #cacaca;width:385px;height:2000px;float:left;'>" +
+					image +
+					"<div id='aeroWeatherContent' style='border:0px;width:384px;height:65px'></div>" +
+					"<div style='border:0px;width:384px;height:2000px'>" + frame + "</div>" +
+				"</div>" + 
+			"</div>";
+
+			Ext.Ajax.request({
+				url: 'getWeatherAerodromo',
+				params: {
+					'codigo': sigla,
+				},       
+				success: function(response, opts) {
+					var respText = Ext.decode( response.responseText );
+					
+					if ( respText.metar ) {
+						var mtr = respText.metar;
+						
+						var att = mtr.atualizacao;
+						var pressao = mtr.pressao;
+						var temp = mtr.temperatura + " ºC";
+						var tempo = '<img style="width:60px;height:50px;" src="img/clima/cptec/'+ mtr.tempo + '.png">';
+						var tempoDesc = mtr.tempo_desc;
+						var umidade = mtr.umidade;
+						var ventoDir = mtr.vento_dir;
+						var ventoInt = mtr.vento_int;
+						var visibilidade = mtr.visibilidade.replace('>','&gt;').replace('<','&lt;');
+						
+						var metar = '<table class="aeroWeather" style="height:60px;width:100%">' +
+								'<tr><td rowspan="4">'+tempo+'</td><td>' + tempoDesc + '</td> <td>' + att +'</td></tr>' + 
+								'<tr><td>Temperatura: '+temp+'</td> <td>Pressão: '+ pressao +'</td></tr>' + 
+								'<tr><td>Umidade: '+umidade+'%</td> <td>Vento: '+ventoDir+'  '+ ventoInt +'</td></tr>' + 
+								'<tr><td colspan="3">Visibilidade: '+visibilidade+' metros</td> </tr>' + 
+								'</table>';
+						
+						$('#aeroWeatherContent').html( metar );
+					}
+					
+				},
+				failure: function(response, opts) {
+					Ext.Msg.alert('Erro','Erro ao receber dados de METAR.' );
+				}
+
+			});			    
+		    
+		    
+		    aerodromoWindow.show();		    
+		    var dataPanel = Ext.getCmp('dataPanel');
+		    dataPanel.update( content );
+		    
+		},
+		
+		
+		showAerodromo : function( record ) {
+
+			var sigla = null;
+			if ( record.hasOwnProperty( 'Sigla' ) ) {
+				sigla = record.Sigla;
+			} else {
+				sigla = record.sigla;				
+			}
+			
+			// TESTE
+			//var respText = {"id":58040160825162140000,"sigla":"SWIQ","nome":"Mina\u00e7u","pais":{"codigoPais":"BRA","nome":"BRASIL","continente":{"idContinente":3,"nome":"Am\u00e9rica do Sul","area":17757691,"linkWeb":"http://en.wikipedia.org/wiki/South_America","mapcolor":"#00FF00","geom":null,"versao":1374175227526,"emptyLinkWeb":false},"tipo":{"codigo":1,"nome":"Pais Soberano","ordem":1,"mapFields":{"mapColor":{"value":"CC9966","unformattedValue":"#CC9966"},"symbology":24,"geometryTypes":["Polygon"]},"handler":{},"newRecord":false,"hibernateLazyInitializer":{}},"regiao":{"idRegiao":18,"nome":"Am\u00e9rica do Sul","area":17757691,"linkWeb":"http://en.wikipedia.org/wiki/South_America","mapcolor":"#CCFFCC","geom":null,"versao":1374175229159,"emptyLinkWeb":false},"nomeLongoPais":"Brazil","nomeFormalPais":"Rep\u00fablica Federativa do Brasil","observacoes":null,"populacaoEstimada":198739269,"anoPopulacao":null,"area":8459420,"ultimoCenso":2010,"isoa2":"BR","isoa3":"BRA","ison3":"076","linkWeb":"http://en.wikipedia.org/wiki/Brazil; www.google.com.br","podeApagar":false,"versao":1435841340935,"linkWebList":["http://en.wikipedia.org/wiki/Brazil","http://www.google.com.br"],"ddi":"55","nomeAlternativo":null,"nomeEntidadeForDialogMessage":"o Pa\u00eds","emptyLinkWeb":false,"newVersion":false,"brasil":true,"fieldForDialogMessage":"BRASIL"},"estado":{"id":2927,"codigo":"BRA-GO","sigla":"GO","nome":"Goi\u00e1s","iso":"BR-GO","area":341247,"popEstimada":6004045,"observacao":null,"linkWeb":"http://pt.wikipedia.org/wiki/Goi%C3%A1s","versao":1374175264666,"linkWebList":["http://pt.wikipedia.org/wiki/Goi%C3%A1s"],"emptyLinkWeb":false},"cidade":{"idCidade":21644,"nome":"MINA\u00c7U","nomeAlternativo":null,"tipo":{"ordem":4,"idTipoCidades":4,"nome":"Cidade","mapFields":{"mapColor":{"value":"FF00FF","unformattedValue":"#FF00FF"},"mapsymbol":704,"symbol":null}},"populacao":31149,"observacao":null,"linkWeb":"http://cidades.ibge.gov.br/xtras/perfil.php?codmun=5213087","ddd":"62","versao":1374175799975,"distancia":0,"linkWebList":["http://cidades.ibge.gov.br/xtras/perfil.php?codmun=5213087"],"codEstado":2927,"codPais":"BRA","handler":{},"emptyLinkWeb":false,"newRecord":false,"hibernateLazyInitializer":{}},"logradouro":null,"numeroEnd":null,"bairro":null,"cep":null,"caractNotaveis":null,"fonte":null,"infoContato":null,"sumarioPistas":null,"linkWeb":null,"dhCriacao":1472142099016,"versao":1472142099030,"tipo":{"codigo":"AER","nome":"Aeroporto","ordem":1,"mapFields":{"mapColor":{"value":"0000FF","unformattedValue":"#0000FF"},"mapsymbol":473,"symbol":null},"label":"Aeroporto","newRecord":false,"id":"AER"},"orgControladora":null,"distancia":0,"linkWebList":[],"mapFields":{"mapColor":{"value":"0000FF","unformattedValue":"#0000FF"},"mapsymbol":473,"symbol":null},"listCapacidadesLogisticas":[],"listTiposCapacidadeLogistica":[],"anacSlotControlado":false,"anacSituacaoAerodromo":"A","anacAerodromoUtilizacao":{"codigo":"R","nome":"Reservado"},"anacLocalidade":"N","anacAerodromoSituacaoAtualizacao":{"codigo":"A","nome":"A - N\u00e3o Informado"},"nomeEntidadeForDialogMessage":"o Aer\u00f3dromo","emptyLinkWeb":true,"fieldForDialogMessage":"Mina\u00e7u","emptyOrgControladora":true,"newRecord":false}
+			//MCLM.Functions.createAerodromoWindow( sigla, respText, record );
+			//return true;
+			// -------------------------
+			
+			Ext.Ajax.request({
+				url: 'apoloGetAerodromo',
+				params: {
+					'codigo': sigla,
+				},       
+				success: function(response, opts) {
+					
+					var respText = Ext.decode( response.responseText );
+
+					if ( respText.error ) {
+						Ext.Msg.alert('Erro', respText.msg );
+					} else {
+						MCLM.Functions.createAerodromoWindow( sigla, respText, record );
+					}
+
+				},
+				failure: function(response, opts) {
+					Ext.Msg.alert('Erro','Erro ao receber dados.' );
+				}
+
+			});				
+			
+		},
+		
+		showOrgMil : function( record ) {
+			
+			Ext.Ajax.request({
+				url: 'apoloGetOM',
+				params: {
+					'orgid': record.id,
+				},       
+				success: function(response, opts) {
+					
+					var respText = Ext.decode( response.responseText );
+
+					if ( respText.error ) {
+						Ext.Msg.alert('Erro', respText.msg );
+					} else {
+						MCLM.Functions.createOrgMilWindow( respText, record );
+					}
+
+				},
+				failure: function(response, opts) {
+					Ext.Msg.alert('Erro','Erro ao receber dados.' );
+				}
+
+			});				
+			
+		},
+		
+		openWindowData : function( layerName, record ) {
+			
+			/*
+				public enum WindowType {
+					ORGMIL, DEFAULT, AERODROMO
+				}			
+			*/
+			
+			if ( record.window_type == 'DEFAULT' ) {
+				MCLM.Functions.createSimpleDataWindow( layerName, record );
+				MCLM.Functions.mainLog("Janela de Features criada.");
+				return true;
+			}
+			
+			
+			// update node_data set windowtype = 'ORGMIL' where layername = 'view_org_mil'
+			if ( record.window_type == 'ORGMIL' ) {
+				MCLM.Functions.showOrgMil( record );
+				return true;
+			}
+
+			if ( record.window_type == 'AERODROMO' ) {
+				MCLM.Functions.showAerodromo( record );
+				return true;
+			}
+			
+			
 			if ( record.data_window == -1 ) {
 				Ext.Msg.alert('Janela de Dados não encontrada','Não há janela de dados cadastrada para esta camada.' );
 				return true;
@@ -110,9 +417,127 @@ Ext.define('MCLM.Functions', {
 				}
 
 			});			
+			
+			
+		},	
+		
+		showImages : function( imageList ) {
+			var imgArr = imageList.split(";");
+			
+			var table = "<table style='margin:0px;padding:0px;width:100%'>";
+			for ( img in imgArr ) {
+				var imgLink = "<img style='width:200px;height:200px' src='" + imgArr[img] + "'>";
+				table = table + "<tr><td>" + imgLink + "</td></tr>";
+				
+				console.log( imgLink );
+			}
+			table = table + "</table>";
+			
+			
+			var	showImagesWindow = Ext.getCmp('showImagesWindow');
+			if ( !showImagesWindow ) {
+				showImagesWindow = Ext.create('MCLM.view.datawindow.ShowImagesWindow');
+			}
+			showImagesWindow.update( table );
+			showImagesWindow.show();
+			
+		},
+		
+		showSymbol : function( url ) {
+			var attrValue = '<object id="iconPreview" style="width:100%;height:100%" type="image/svg+xml" data="'+url+'"></object>';
+			var	showSymbolWindow = Ext.getCmp('showSymbolWindow');
+			if ( !showSymbolWindow ) {
+				showSymbolWindow = Ext.create('MCLM.view.datawindow.ShowSymbolWindow');
+			}
+			showSymbolWindow.update( attrValue );
+			showSymbolWindow.show();
+		},
 
-		},		
+		// Cria uma janela de dados simples usando somente os dados vindos da camada WMS (publicado no Geoserver)
+		createSimpleDataWindow( layerName, record ) {
+			var	dataWindow = Ext.getCmp('dataWindow');
+			
+			if ( dataWindow ) {
+				MCLM.Functions.removeDataWindowTooltip();
+				dataWindow.destroy();
+			} 	
+			
+			dataWindow = Ext.create('Ext.Window', {
+				id: 'dataWindow',    	
+				xtype: 'dataWindow',
+				title : layerName + ' (' + record.layer_source + ')',
+				width : 555,
+				height: 500,
+				bodyStyle:{"background-color":"white"},
+				autoScroll: true,
+				constrain: true,
+				renderTo: Ext.getBody(),
+				listeners : {
+					close : function() {
+						MCLM.Functions.removeDataWindowTooltip();
+					},
+				},
+				resizable: false,
+			});	
 
+			var metaData = record.mclm_metadata_property;
+			
+			var content = "<table class='dataWindow'>";
+		    for ( var key in record ) {
+		    	
+		        if ( record.hasOwnProperty( key ) ) {
+		        	if ( key != 'id' && key != 'mclm_metadata_property' && key != 'mclm_pk_gid' && key != 'window_type' && key != 'layer_description'
+		        			&& key != 'data_window' && key != 'layer_source' && key != 'node_data') {
+			        	var value = record[key];
+						content = content + "<tr class='dataWindowLine'><td class='dataWindowLeft'>" + key + 
+						"</td><td class='dataWindowMiddle'>" + value + "</td></tr>";
+		        	}
+		        } 
+		    }			
+			content = content + "</table>";
+			
+			var dataTabPanel = Ext.create('Ext.Panel', {
+				//layout: 'fit',
+				width : 525,
+				border: false,
+				bodyPadding: 2,
+				html : content,
+				autoHeight: true
+			});			
+
+			var windowData = {};
+			windowData.windowName = layerName;
+			
+			dataWindow.add( dataTabPanel );
+			
+			dataWindow.addDocked({
+				xtype: 'toolbar',
+				dock: 'top',
+				items: [{
+					iconCls: 'scenery-icon',
+					id: 'cloneToSceneryBtn',
+					handler: function(event, toolEl, panel){
+						MCLM.Functions.cloneToScenery( windowData,record );
+					}	                
+				}, {
+					iconCls: 'clima-icon',
+					id: 'showWeatherBtn',
+					handler: function(event, toolEl, panel){
+						MCLM.Functions.exibeClima( windowData, record );
+					}	                
+				}]
+			});			
+
+			dataWindow.show();	
+			
+			dataWindow.updateLayout();	
+			dataTabPanel.updateLayout(); 
+		    MCLM.Functions.bindDataWindowTooltips();
+		    
+			
+		},
+		
+		// Cria uma janela de dados complexa, indo ao Banco para requisitar os dados da camada.
 		createDataWindow( windowData, record ) {
 			var symbolServerUrl = MCLM.Globals.config.symbolServerURL;
 			var windowName = windowData.windowName;
@@ -156,7 +581,7 @@ Ext.define('MCLM.Functions', {
 					var fieldValue = fields[x].fieldValue;
 					var fieldType = fields[x].fieldType;
 					if( fieldType == 'COLOR' ) {
-						theColor = fieldValue.replace('#','');;
+						theColor = fieldValue.replace('#','');
 					}
 				}
 
@@ -234,14 +659,30 @@ Ext.define('MCLM.Functions', {
 			cloneToCenarioWindow.feicao = feicao;
 		},
 
-		exibeClima : function( data ) {
-			console.log( data );
+		exibeClima : function( data, record ) {
+			var objRecord = Ext.decode( record.mclm_metadata_property );
+			var features = new ol.format.GeoJSON().readFeatures( objRecord , {
+				//featureProjection: 'EPSG:3857'
+			});			
+			
+			var theFeature = features[0];
+		    var aa = theFeature.getGeometry().getExtent();
+		    var center = ol.extent.getCenter(aa);			
+			
+	    	var center2 = center;//ol.proj.transform( center , 'EPSG:3857', 'EPSG:4326');
+	    	lon = center2[0];
+	    	lat = center2[1];
+	    	
+	    	//console.log( lon + " " + lat);
+	    	
+	    	MCLM.Map.getWeatherFromLocation( lat, lon );
 		},
 
 		removeDataWindowTooltip : function() {
 			Ext.tip.QuickTipManager.unregister('cloneToSceneryBtn');
 			Ext.tip.QuickTipManager.unregister('showWeatherBtn');
 		},
+		
 		bindDataWindowTooltips : function() {
 			Ext.tip.QuickTipManager.register({
 				target: 'cloneToSceneryBtn',
@@ -274,7 +715,6 @@ Ext.define('MCLM.Functions', {
 			Ext.tip.QuickTipManager.init();
 
 			Ext.tip.QuickTipManager.register(
-
 					{
 						target: 'id011',
 						title: 'Expandir Tudo',
@@ -282,6 +722,14 @@ Ext.define('MCLM.Functions', {
 						width: 150,
 						dismissDelay: 5000 
 
+					},     	
+					{
+						target: 'topMainToolBarHomeIcon',
+						title: 'Sair',
+						text: 'Sair do sistema.',
+						width: 150,
+						dismissDelay: 5000 
+						
 					},     	
 					{
 						target: 'id012',
@@ -352,8 +800,8 @@ Ext.define('MCLM.Functions', {
 						dismissDelay: 5000 
 					}, {
 						target: 'reloadTreeBtn',
-						title: 'Atualizar a Árvore',
-						text: 'Atualiza toda a árvore carregando os dados do servidor novamente.',
+						title: 'Limpar Catálogo',
+						text: 'Limpa as camadas selecionadas do Catálogo e o Mapa.',
 						width: 150,
 						dismissDelay: 5000 
 					}, {
@@ -374,7 +822,19 @@ Ext.define('MCLM.Functions', {
 						text: 'Retorna para o zoom inicial da configuração.',
 						width: 150,
 						dismissDelay: 5000 
-					}); 	
+					},{
+		    	        target: 'showForecastToolBarID',
+		    	        title: 'Serviços Meteorológicos',
+		    	        text: 'Ferramentas de Serviços Meteorológicos.',
+		    	        width: 180,
+		    	        dismissDelay: 5000 
+		    	    },{
+		    	        target: 'zoomUndo',
+		    	        title: 'Voltar Zoom Anterior',
+		    	        text: 'Retorna a posição e zoom anterior do mapa.',
+		    	        width: 180,
+		    	        dismissDelay: 5000 
+		    	    }); 	
 		},
 
 		latLonToUTM : function(lon, lat) {

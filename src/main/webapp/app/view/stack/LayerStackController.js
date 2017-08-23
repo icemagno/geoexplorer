@@ -40,17 +40,17 @@ Ext.define('MCLM.view.stack.LayerStackController', {
     	var totalLayerCount = layerStackStore.getCount();
     	var indx = totalLayerCount;
     	layerStackStore.each( function( rec ){
-    		var layerName = rec.get('layerName');
+    		var serialId = rec.get('serialId');
     		var newIndex = ( totalLayerCount - indx ) + 1;
-    	    MCLM.Map.setNewIndex( layerName , newIndex );
+    	    MCLM.Map.setNewIndex( serialId , newIndex );
     	    indx--;
     	});            	
     	this.mountImagePreview();
     },    
     
     gridRowClick: function(grid, record, tr, rowIndex, e, eOpts) {
-    	var layerName = record.get('layerName');
-    	MCLM.Map.selectLayer( layerName );
+    	var serialId = record.get('serialId');
+    	MCLM.Map.selectLayer( serialId );
 		var opacity = MCLM.Map.getSelectedLayerOpacity();
 		var newOpacity = opacity * 10;
 		var stackSlider = Ext.getCmp('stackSlider');

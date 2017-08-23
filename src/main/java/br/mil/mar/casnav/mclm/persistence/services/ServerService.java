@@ -2,6 +2,7 @@ package br.mil.mar.casnav.mclm.persistence.services;
 
 import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.google.gson.Gson;
@@ -40,6 +41,10 @@ public class ServerService {
 		rep.updateServer(oldServer);
 
 	}	
+	
+	public void closeSession() {
+		rep.closeSession();
+	}
 
 	public void newTransaction() {
 		if ( !rep.isOpen() ) {
@@ -47,8 +52,16 @@ public class ServerService {
 		}
 	}
 	
+	public Server getServerWMS( int serverId ) throws Exception {
+		return rep.getServerWMS(serverId);
+	}
+	
 	public Postgres getServerPGR( int IdServer ) throws Exception {
 		return rep.getServerPGR( IdServer );
+	}
+	
+	public int insertServerWMS( Server server ) throws Exception {
+		return rep.insertServerWMS( server ).getIdServer();
 	}
 	
 	public String insertServerWMS( String name, String url, String version ) throws InsertException {
@@ -93,9 +106,8 @@ public class ServerService {
 			}
 			
 			if ( type.equals("PGR") ) {
-				Postgres server = rep.getServerPGR( idServer );
 				rep.newTransaction();
-				rep.deleteServerPGR(server);
+				rep.deteleTablePGRDepends( idServer );
 			}
 			
 		} catch ( Exception ex ) {
@@ -162,6 +174,91 @@ public class ServerService {
 		JSONObject itemObj = new JSONObject( esc );
 		rep.closeSession();
 		return itemObj.toString();		
+	}
+
+	public String saveServer(String server) throws Exception {
+		// [{"name":"ANA - Cheiasgfdgfgfdgf","version":"1.1.1","url":"http://www.snirh.gov.br/arcgis/services/SNIRH2016/Cheias/MapServer/WMSServer/","idServer":33,"id":"extModel25-3"}]
+		JSONArray arr = new JSONArray( server );
+		
+		for( int x=0; x < arr.length(); x++ ){
+			
+			try {
+				JSONObject srvObj = arr.getJSONObject( x );
+				int idServer = srvObj.getInt("idServer");
+				
+				rep.newTransaction();
+				Server oldServ = rep.getServerWMS( idServer );
+				oldServ.setName( srvObj.getString("name") );
+				oldServ.setVersion( srvObj.getString("version") );
+				oldServ.setUrl( srvObj.getString("url") );
+				
+				rep.newTransaction();
+				rep.updateServer(oldServ);
+				
+			} catch ( Exception e ) {
+				e.printStackTrace();
+			}
+			
+		}
+		
+		rep.closeSession();
+		return "";
+	}
+
+	public String savePGRServer(String server) throws Exception  {
+		// [{"idServer":5,"tables":[{"idTable":7,"name":"public.planet_osm_polygon","geometryColumnName":"way","idColumnName":"osm_id","id":"extModel32-1"},{"idTable":6,"name":"public.planet_osm_line","geometryColumnName":"way","idColumnName":"osm_id","id":"extModel32-2"},{"idTable":5,"name":"public.planet_osm_point","geometryColumnName":"way","idColumnName":"osm_id","id":"extModel32-3"},{"idTable":9,"name":"public.pointscanner(8)","geometryColumnName":"way","idColumnName":"osm_id","id":"extModel32-4"}],"serverAddress":"10.5.115.122","name":"OSM Defesagfhghgfhf","type":"WMS","serverUser":"postgres","serverDatabase":"osm","serverPassword":"admin","serverPort":5432,"id":"extModel26-2"}]
+		
+		JSONArray arr = new JSONArray( server );
+		for( int x=0; x < arr.length(); x++ ){
+			try {
+				JSONObject srvObj = arr.getJSONObject( x );
+				int idServer = srvObj.getInt("idServer");
+				
+				rep.newTransaction();
+				Postgres oldSrv = rep.getServerPGR( idServer );
+				// "serverAddress":"10.5.115.122","name":"OSM Defesagfhghgfhf","type":"WMS","serverUser":"postgres","serverDatabase":"osm","serverPassword":"admin","serverPort":5432,"id":"extModel26-2"}]
+				String serverAddress = srvObj.getString("serverAddress");
+				String name = srvObj.getString("name");
+				String type =srvObj.getString("type");
+				String serverUser = srvObj.getString("serverUser");
+				String serverDatabase = srvObj.getString("serverDatabase");
+				String serverPassword = srvObj.getString("serverPassword");
+				int serverPort = srvObj.getInt("serverPort");
+				
+				oldSrv.setName(name);
+				oldSrv.setServerAddress(serverAddress);
+				oldSrv.setServerDatabase(serverDatabase);
+				oldSrv.setServerPassword(serverPassword);
+				oldSrv.setServerPort(serverPort);
+				oldSrv.setServerUser(serverUser);
+				oldSrv.setType(type);
+				
+				
+				rep.newTransaction();
+				rep.updatePGRServer( oldSrv );				
+				
+			} catch ( Exception e ) {
+				e.printStackTrace();
+			}
+		}		
+		
+		rep.closeSession();
+		return "";
+		
+	}
+
+	public String deletePgTable(int idTable) {
+		String result = "{ \"success\": true, \"msg\": \"Tabela removida.\" }";
+		try {
+			rep.deletePgTable( idTable );
+		} catch ( Exception e ) {
+			result = "{ \"error\": true, \"msg\": \""+e.getMessage()+".\" }";
+		}
+		return result;
 	}	
+	
+	
+	
+	
 	
 }

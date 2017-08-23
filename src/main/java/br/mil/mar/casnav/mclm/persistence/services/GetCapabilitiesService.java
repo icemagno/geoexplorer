@@ -18,7 +18,7 @@ public class GetCapabilitiesService {
 	
 	
 	public List<GeoServerCapability> getCapabilities( String url, String version ) throws Exception {
-		String cgUrl = "wms?request=GetCapabilities&version=" + version;
+		String cgUrl = "?request=GetCapabilities&version=" + version;
 		
 		List<GeoServerCapability> capabilities = new ArrayList<GeoServerCapability>();
 		String fullTarget = URLDecoder.decode( url, "UTF-8" ) + cgUrl;

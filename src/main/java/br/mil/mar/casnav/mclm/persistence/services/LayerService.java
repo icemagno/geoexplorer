@@ -1,9 +1,19 @@
 package br.mil.mar.casnav.mclm.persistence.services;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
+import java.util.UUID;
+
+import javax.imageio.ImageIO;
 
 import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
@@ -19,10 +29,79 @@ import br.mil.mar.casnav.mclm.persistence.entity.DataLayer;
 import br.mil.mar.casnav.mclm.persistence.entity.DictionaryItem;
 import br.mil.mar.casnav.mclm.persistence.entity.NodeData;
 import br.mil.mar.casnav.mclm.persistence.entity.SceneryNode;
+import br.mil.mar.casnav.mclm.persistence.entity.Server;
 import br.mil.mar.casnav.mclm.persistence.exceptions.NotFoundException;
 
 public class LayerService {
 
+	
+	private BufferedImage convertToImage( String base64Image ) throws Exception {
+		byte[] decoded = Base64.getDecoder().decode( base64Image.replace("data:image/png;base64,", "").getBytes(StandardCharsets.UTF_8) );
+		BufferedImage image = new BufferedImage( 1000, 600, BufferedImage.TYPE_INT_RGB);
+		ByteArrayInputStream bis = new ByteArrayInputStream( decoded );
+		image = ImageIO.read(bis);
+		bis.close();		
+		return image;
+	}
+	
+	
+	public String getLayersAsImage( String urlList, String feiEncodedCanvas )  {
+		
+		String resposta = "{\"result\":\"error\"}";
+		try {
+			BufferedImage convertedImage = null;
+			if ( ( feiEncodedCanvas != null) && !feiEncodedCanvas.equals("") ) {
+				convertedImage = convertToImage( feiEncodedCanvas );
+			} 
+			
+			WebClient wc = new WebClient();
+			
+			String uuid = UUID.randomUUID().toString().replace("-", "");
+			String path = PathFinder.getInstance().getPath() + "/tempmaps/" + uuid;
+			
+			File temp = new File( path );
+			List<File> images = new ArrayList<File>();
+			
+			temp.mkdirs();
+			JSONArray arr = new JSONArray( urlList );
+			for ( int x = 0; x < arr.length(); x++  ) {
+				JSONObject jo = arr.getJSONObject(x);
+				String url = jo.getString("url");
+				String serial = jo.getString("id");
+				
+				String targetFile = path + "/" + serial + ".png";
+				wc.saveImage(url, targetFile);
+				images.add( new File(targetFile) );
+			}
+			
+		    BufferedImage result = new BufferedImage( 1000, 600, BufferedImage.TYPE_INT_RGB);
+		    Graphics2D g = (Graphics2D)result.getGraphics();
+		    
+		    g.setPaint ( new Color ( 255, 255, 255 ) );
+		    g.fillRect ( 0, 0, result.getWidth(), result.getHeight() );	    
+			
+		    for( File image : images ) {
+		        BufferedImage bi = ImageIO.read( image );
+		        g.drawImage(bi, 0, 0, null);
+		    }	
+		    
+		    if ( convertedImage != null ) {
+		    	g.drawImage(convertedImage, 0, 0, null);
+		    	ImageIO.write( convertedImage,"png", new File(path + "/feicoes.png") );	
+		    }
+		    
+		    ImageIO.write( result,"png", new File( path + "/result.png" ) );		    
+		    String urlPath = "tempmaps/" + uuid + "/result.png";
+		    
+		    resposta = "{\"result\":\"success\",\"imagePath\":\""+urlPath+"\",\"uuid\":\""+uuid+"\"}";
+
+		} catch ( Exception e ) {
+			e.printStackTrace();
+		}
+		    
+	    return resposta;
+	}
+	
 	/*
 	public String getLayerAsFeatures( String requestUrl ) {
 		String result = "";
@@ -148,53 +227,84 @@ public class LayerService {
 		
 		try {
 			DictionaryService ds = new DictionaryService();
+			NodeService ns = new NodeService();
+			NodeData node = ns.getNode(idNodeData);
+			
 			List<DictionaryItem> dictItems = ds.getDictionary( idNodeData );
-			for ( DictionaryItem item : dictItems ) {
-				String originalName = item.getOriginalName();
-				String translatedName = item.getTranslatedName();		
-		
-				for ( int x=0; x < jsonFeatures.length(); x++ ) {
-					JSONObject properties = jsonFeatures.getJSONObject(x).getJSONObject("properties");
-					properties.put("data_window", idDataWindow);
-					properties.put("node_data", idNodeData);
+			
+			for ( int x=0; x < jsonFeatures.length(); x++ ) {
+				JSONObject feature = jsonFeatures.getJSONObject(x);
+				JSONObject properties = feature.getJSONObject("properties");			
+
+				properties.put("data_window", idDataWindow);
+				properties.put("node_data", idNodeData);
+				properties.put("window_type", node.getWindowType().toString() );
+				properties.put("layer_description", node.getDescription() );
+				properties.put("layer_source", node.getInstitute() );					
+				
+				JSONArray attributes = new JSONArray();				
+				
+				for ( DictionaryItem item : dictItems ) {
+					String originalName = item.getOriginalName();
+					String translatedName = item.getTranslatedName();	
+					int indexOrder = item.getIndexOrder();
+
+					if ( item.isVisible() ) {
+						JSONObject attribute = new JSONObject();
+						attribute.put("indexOrder", indexOrder);
+						attribute.put("originalName", originalName);
+						attribute.put("translatedName", translatedName);
+						attribute.put("dataType", item.getDataType().toString() );
+						attribute.put("description", item.getDescription() );
+						
+						Object value = "";
+						try {
+							value = properties.get( originalName );
+							if ( value.equals("null") ) value = "";
+						} catch ( Exception e ) {
+							//e.printStackTrace();
+						}
 					
-					if ( !item.isVisible() ) {
-						properties.remove( originalName );
-					} else {					
-					
-						// Adiciona as chaves primarias com o nome do campo sem traducao.
+
 						if ( item.isPrimaryKey() ) {
-							
 							if( !properties.has( originalName ) ) {
 								// Lanca erro caso a coluna PK escolhida pelo usuario nao exista no resultset
 								// vindo do banco. Nesse caso o usuario devera adicionar a PK como coluna de retorno
 								// na consulta SQL acima para que ela venha no resultado.
-								throw new Exception("A coluna definida como chave primária (" + originalName + ") não foi encontrada entre as colunas resultantes da consulta efetuada. Adicione esta coluna na camada '" + layerName + "'" );
+								throw new Exception("A coluna definida como chave primária (" + originalName + ") não foi encontrada entre as colunas resultantes da consulta efetuada. Adicione esta coluna na camada '" + layerName + "' em " + node.getServer().getName() );
 							}
-							
-							Object value = properties.get( originalName );
 							String primaryColumnName = "mclm_pk_" + originalName;
-							properties.put(primaryColumnName, value);
+							attribute.put(primaryColumnName, value);
 						}
 						
-						// Troca o nome original pelo traduzido no dicionario
-						if ( translatedName != null && !translatedName.equals("") && properties.has( originalName ) ) {
-							Object value = properties.get( originalName );
-							properties.remove( originalName );
-							properties.put( translatedName, value );
-						}					
+						attribute.put("value", value);
+						attributes.put( attribute );
 						
-					}
+						
+					} 
 
+
+					try {
+						properties.remove( originalName );	
+					} catch (Exception e) {
+						System.out.println("Cannot remove " + originalName);
+					}
+					
+					
 				}
+				
+				//System.out.println( attributes.toString() );
+
+				properties.put("attributes", attributes);
 			}	
 				
+			result = queryResult.toString();
 			
 		} catch ( Exception e ) {
-			result = e.getMessage().replace("\"", "'");
+			result = "{ \"error\": true, \"msg\": \"" + e.getMessage().replace("\"", "'") + ".\" }";
 		}
 		
-		result = queryResult.toString();
+		
 		
 		return result;
 	}
@@ -248,14 +358,14 @@ public class LayerService {
 			DictionaryService ds = new DictionaryService();
 			ds.deleteDictionary( idNode );
 			
+			/*
 			if ( node.getLayerType() == LayerType.FEI ) {
 				Integer idNodeData = node.getIdNodeData();
-
 				try {
 					SceneryNodeService sns = new SceneryNodeService(); 
 					SceneryNode sn = sns.getSceneryNodeByNodeData( idNodeData );
 					// Se achou eh pq pertence a um cenario
-					throw new Exception("Esta Feição pertence à um Cenário.");
+					throw new Exception("Esta Feição pertence ao Cenário '" + sn.getScenery().getSceneryName() + "'.");
 					
 				} catch ( NotFoundException nfe ) {
 					// Nao achou ... apaga!
@@ -263,9 +373,8 @@ public class LayerService {
 					ns.deleteNode(node);
 					return result;
 				}
-				
-				
-			}			
+			}
+			*/			
 			
 			if ( node.getLayerType() == LayerType.FDR ) {
 				// É uma pasta. Apaga somente o nó SE ESTIVER VAZIO.
@@ -278,6 +387,23 @@ public class LayerService {
 				return result;
 			}
 			
+			Integer idNodeData = node.getIdNodeData();
+			try {
+				SceneryNodeService sns = new SceneryNodeService(); 
+				SceneryNode sn = sns.getSceneryNodeByNodeData( idNodeData );
+				// Se achou eh pq pertence a um cenario
+				throw new Exception("Esta Camada pertence ao Cenário '" + sn.getScenery().getSceneryName() + "'.");
+				
+			} catch ( NotFoundException nfe ) {
+				// Nao achou ... apaga!
+				ns.newTransaction();
+				ns.deleteNode(node);
+			}
+			
+			if ( node.getLayerType() == LayerType.FEI ) {
+				// Se for feição, ja apagou no codigo acima. So sair...
+				return result;
+			}
 			
 			String layerName = node.getLayerName();
 			String workspaceName = "";
@@ -309,16 +435,6 @@ public class LayerService {
 				// Uma feature.... 
 			}
 
-			/*
-			 * isso eh muito perigoso!
-			if ( node.getLayerType() == LayerType.WMS ) { 
-				// http://localhost:8080/geoserver/rest/layers/<layer>
-				serverRESTAPI = geoserverURL + "rest/layers/" + layerName;
-				serverRESTAPILayerGroup = geoserverURL + "rest/layergroups/" + layerName;
-			}
-			*/
-
-			
 			if ( node.getLayerType() == LayerType.SHP ) {
 				if ( !splited ){
 					throw new Exception("Nome da camada malformado. Deve ser no padrão 'workspace:layer' e está '" + layerName + "'");
@@ -335,8 +451,17 @@ public class LayerService {
 			}
 			
 		
-			ns.newTransaction();
-			ns.deleteNode(node);
+			//ns.newTransaction();
+			//ns.deleteNode(node);
+			
+			/*
+			 * isso eh muito perigoso!
+			if ( node.getLayerType() == LayerType.WMS ) { 
+				// http://localhost:8080/geoserver/rest/layers/<layer>
+				serverRESTAPI = geoserverURL + "rest/layers/" + layerName;
+				serverRESTAPILayerGroup = geoserverURL + "rest/layergroups/" + layerName;
+			}
+			*/			
 			
 			if ( !serverRESTAPI.equals("") ) {
 				System.out.println("DELETE " + serverRESTAPI );
@@ -346,7 +471,7 @@ public class LayerService {
 				if ( !serverRESTAPILayerGroup.equals("") ) {
 					res = wc.doRESTRequest( "DELETE", serverRESTAPI, "", geoUser, geoPassword );
 				} else {
-					// Ã‰ um grupo de camadas...
+					// é um grupo de camadas...
 					res = wc.doRESTRequest( "DELETE", serverRESTAPILayerGroup, "", geoUser, geoPassword );
 				}
 
@@ -359,6 +484,7 @@ public class LayerService {
 			}
 
 		} catch (Exception e) {
+			e.printStackTrace();
 			result = "{ \"error\": true, \"msg\": \"" + e.getMessage()+ ".\" }";
 		}
 		
@@ -494,7 +620,7 @@ public class LayerService {
 	
     // Cria uma camada WMS
 	public String createWMSLayer(int layerFolderID, String serverUrl, String description, String institute,
-			String layerName, String layerAlias) {
+			String layerName, String layerAlias, String cqlFilter, int idServer) {
 
 		if ( !serverUrl.endsWith("/") ) serverUrl = serverUrl + "/";
 		if ( !serverUrl.contains("/wms") ) serverUrl = serverUrl + "wms/";
@@ -503,6 +629,12 @@ public class LayerService {
 		try {
 			NodeService ns = new NodeService();
 			NodeData node = new NodeData(layerFolderID, serverUrl, description, institute, layerName, layerAlias, LayerType.WMS);
+			
+			ServerService ss = new ServerService();
+			Server server = ss.getServerWMS( idServer );
+			
+			node.setCqlFilter(cqlFilter);
+			node.setServer( server );
 			
 	        Configurator cfg = Configurator.getInstance();
 	        String originalServer = node.getOriginalServiceUrl(); 
@@ -521,6 +653,7 @@ public class LayerService {
 			
 			ns.addNode( node );	
 		} catch ( Exception ex ) {
+			ex.printStackTrace();
 			result = "{ \"error\": true, \"msg\": \""+ex.getMessage()+".\" }";	
 		}
 		return result;

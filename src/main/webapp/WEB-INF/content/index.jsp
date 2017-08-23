@@ -5,8 +5,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=10, user-scalable=yes">
+	<link href="img/favicon.png" type="image/png" rel="shortcut icon" />
 
-    <title>MCLM</title>
+    <title>Módulo de Cenários Logísticos e de Mobilização - MCLM</title>
 
 	<script type="text/javascript" src="extjs/ext-all.js"></script>
 	

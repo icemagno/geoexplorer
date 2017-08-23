@@ -66,7 +66,7 @@ public class SceneryNodeRepository extends BasicRepository {
 					// Nao achou esta camada do cenario. Criar nova.
 					Scenery scenery = sfDao.getDO( newSceneryNode.getScenery().getIdScenery() );
 					
-					if ( newSceneryNode.getLayerType() != LayerType.FDR ) {
+					if ( (newSceneryNode.getLayerType() != LayerType.FDR) && (newSceneryNode.getLayerType() != LayerType.TXT) ) {
 						NodeData layer = ndDao.getDO( newSceneryNode.getLayer().getIdNodeData() );
 						newSceneryNode.setLayer( layer );
 					} else {

@@ -14,7 +14,7 @@
   </session-config>
   <filter>
     <filter-name>mclm</filter-name>
-    <filter-class>
+    	<filter-class>
 			org.apache.struts2.dispatcher.ng.filter.StrutsPrepareAndExecuteFilter
 		</filter-class>
   </filter>

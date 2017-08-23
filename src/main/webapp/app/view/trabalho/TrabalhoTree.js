@@ -33,6 +33,12 @@ Ext.define('MCLM.view.trabalho.TrabalhoTree', {
     dockedItems: [{
         xtype: 'toolbar',
         items: [{
+        	iconCls: 'export-icon',
+        	id: 'exportMapBtn',
+            handler : function() {
+            	MCLM.Map.exportMap();
+            }
+        },{
         	iconCls: 'reload-icon',
         	id: 'clrWsBtn',
             handler : 'clearWorkspace'
@@ -53,7 +59,13 @@ Ext.define('MCLM.view.trabalho.TrabalhoTree', {
         	iconCls: 'scenery-icon',
         	id: 'mngCenaryBtn',
             handler : 'loadScenery'
-        }]
+        },{
+        	xtype: 'tbseparator'
+        }/*,{
+        	iconCls: 'text-icon',
+        	id: 'adTextBtn',
+            handler : 'addTextToScenery'
+        }*/]
     }],
         
     
@@ -66,9 +78,16 @@ Ext.define('MCLM.view.trabalho.TrabalhoTree', {
 		afterrender:function(){
 			
 		    Ext.tip.QuickTipManager.register({
+				target: 'exportMapBtn',
+				title: 'Exportar',
+				text: 'Exportar Cenário / Mapa atual.',
+				width: 150,
+				dismissDelay: 5000 
+				
+			}, {
 		        target: 'svWsBtn',
 		        title: 'Salvar',
-		        text: 'Salva o conteúdo da área de trabalho / Cenário.',
+		        text: 'Salva o Cenário.',
 		        width: 150,
 		        dismissDelay: 5000 
 		    }, {
@@ -79,14 +98,20 @@ Ext.define('MCLM.view.trabalho.TrabalhoTree', {
 		        dismissDelay: 5000 
 		    }, {
 		        target: 'clrWsBtn',
-		        title: 'Limpar Área de trabalho',
-		        text: 'Limpa a Área de Trabalho. As modificações não gravadas no cenário atual serão perdidas.',
+		        title: 'Limpar Cenário',
+		        text: 'Limpa o Cenário. As modificações não gravadas no cenário atual serão perdidas.',
 		        width: 150,
 		        dismissDelay: 5000 
 		    }, {
 		        target: 'svCenaryAsBtn',
 		        title: 'Salvar Cenário como...',
 		        text: 'Salva uma cópia do Cenário atual.',
+		        width: 150,
+		        dismissDelay: 5000 
+		    }, {
+		        target: 'adTextBtn',
+		        title: 'Adicionar caixa de texto',
+		        text: 'Adiciona uma caixa de texto ao cenário.',
 		        width: 150,
 		        dismissDelay: 5000 
 		    });			

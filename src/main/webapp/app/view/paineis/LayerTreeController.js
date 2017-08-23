@@ -24,7 +24,7 @@ Ext.define('MCLM.view.paineis.LayerTreeController', {
     	var me = this;
     	var layerTree = Ext.getCmp("layerTree");
     	layerTree.getRootNode().cascade( function(node) { 
-    		node.set('checked', false );
+    		if( (node.get('layerType') != '') && (node.get('layerType') != 'CRN') && (node.get('layerType') != 'FDR') ) node.set('checked', false );
     		me.toggleNode( node );
 		});    	
     },
@@ -34,7 +34,7 @@ Ext.define('MCLM.view.paineis.LayerTreeController', {
     	var layerTree = Ext.getCmp("layerTree");
     	var node = layerTree.getRootNode().findChild('serialId',serialId,true);
     	if ( node ) {
-	    	node.set('checked', status );
+    		if( (node.get('layerType') != '') && (node.get('layerType') != 'CRN') && (node.get('layerType') != 'FDR') ) node.set('checked', status );
 	    	this.clearCheckToTheRoot ( node.parentNode );
     	}
     	return true;
@@ -47,6 +47,9 @@ Ext.define('MCLM.view.paineis.LayerTreeController', {
     },
 
     onReloadTree : function( button ) {
+    	
+    	this.clearMainTree();
+    	
     	var layerTree = Ext.getCmp('layerTree');
 		var rootMaintree = layerTree.getRootNode();
 		
@@ -57,25 +60,21 @@ Ext.define('MCLM.view.paineis.LayerTreeController', {
     
     // Responde ao clique em um no. Mostra os detalhes do no painel abaixo da arvore
     onLayerTreeItemClick : function( view, record, item, index, e ) {
-		var tempData = [];
-		tempData.push( record.data );
-		var layerDetailStore = Ext.data.StoreManager.lookup('store.LayerDetail');
-		layerDetailStore.loadData( tempData );
-    	
-		if( record.data.readOnly ) {
-			$("#id_lock_icon").css("display","block");
-		}
-		
+    	// Nada a fazer....
     },
+    
     // Recursivamente marca/desmarca pais dos nos até o root
     recursiveCheckParent : function( node, pChildCheckedCount ) {
+    	/*
 	    if( node ) {
 	    	node.set('checked', !!pChildCheckedCount);
 	    	var parent = node.parentNode;
 	    	this.recursiveCheckParent( parent, pChildCheckedCount );
 	    }
+	    */
     },
     clearCheckToTheRoot : function ( parentNode ) {
+    	/*
     	var me = this;
 	    var pChildCheckedCount = 0;
 	    parentNode.suspendEvents();
@@ -83,16 +82,19 @@ Ext.define('MCLM.view.paineis.LayerTreeController', {
 	        if (c.get('checked')) pChildCheckedCount++; 
 
 	    });
-       	me.recursiveCheckParent( parentNode, pChildCheckedCount );	    	
+       	me.recursiveCheckParent( parentNode, pChildCheckedCount );
+       	*/	    	
     },
     // Quando o estado do no muda (selecionado/nao selecionado)
     // Adiciona ou remove uma camada na lista de camadas e no mapa
     onLayerTreeCheckChange : function( node, checked, eOpts ) {
+    	/*
     	if ( !node.isLeaf() ) {
 			Ext.Msg.alert('Operação Inválida', ' Não é permitido marcar um grupo de camadas. Você deve marcar as camadas individualmente.' );
 			node.set('checked',false);
 			return;
     	}
+    	*/
     	var me = this;
 	    var serialId = node.get('serialId');
 	    this.fireEvent( "syncLayerNodeInTrabalhoTree", serialId, checked );	    
@@ -122,23 +124,12 @@ Ext.define('MCLM.view.paineis.LayerTreeController', {
 		    });
 		} else {
 			var data = record.data;
-			/*
-			if ( data.layerType == 'WMS' ) {
-			    var menu_grid = new Ext.menu.Menu({ 
-			    	items: [
-					  { iconCls: 'add-scenery-icon', text: 'Copiar para Área de Trabalho', handler: function() { me.addToScenery(record); } },
-					  { iconCls: 'dictionary-icon', text: 'Configurar Dicionário', handler: function() { me.configDictionary(record); } },
-					  { iconCls: 'datawindow-icon', text: 'Criar Janela de Dados', handler: function() { me.configDataWindow(record); } },
-					  { xtype: 'menuseparator' },
-			          { iconCls: 'delete-icon', text: 'Apagar', handler: function() { me.askDeleteLayer( record ); } }
-			        ]
-			    });
-			} else
-			*/
 			if ( data.layerType == 'FEI' ) {
 			    var menu_grid = new Ext.menu.Menu({ 
 			    	items: [
 			    	  { iconCls: 'goto-icon', text: 'Ir para...', handler: function() { me.goToFeicao( record ); } },
+					  { xtype: 'menuseparator' },
+			          { iconCls: 'properties-icon', text: 'Propriedades...', handler: function() { me.showLayerProperties( record ); } },
 					  { xtype: 'menuseparator' },
 			          { iconCls: 'delete-icon', text: 'Apagar', handler: function() { me.askDeleteLayer( record ); } }
 			        ]
@@ -147,9 +138,12 @@ Ext.define('MCLM.view.paineis.LayerTreeController', {
 			
 			    var menu_grid = new Ext.menu.Menu({ 
 			    	items: [
-					  { iconCls: 'add-scenery-icon', text: 'Copiar para Área de Trabalho', handler: function() { me.addToScenery(record); } },
+					  { iconCls: 'add-scenery-icon', text: 'Copiar para Cenário', handler: function() { me.addToScenery(record); } },
 					  { iconCls: 'dictionary-icon', text: 'Configurar Dicionário', handler: function() { me.configDictionary(record); } },
+					  { iconCls: 'copy-dictionary-icon', text: 'Copiar Dicionário para Camadas de Mesma Origem', handler: function() { me.copyDictionary(record); } },
 					  { iconCls: 'datawindow-icon', text: 'Criar Janela de Dados', handler: function() { me.configDataWindow(record); } },
+					  { xtype: 'menuseparator' },
+			          { iconCls: 'properties-icon', text: 'Propriedades...', handler: function() { me.showLayerProperties( record ); } },
 					  { xtype: 'menuseparator' },
 			          { iconCls: 'delete-icon', text: 'Apagar', handler: function() { me.askDeleteLayer( record ); } }
 			        ]
@@ -161,6 +155,79 @@ Ext.define('MCLM.view.paineis.LayerTreeController', {
 		e.stopEvent();    	
     },
     
+    // Mostra os detalhes de uma camada
+    showLayerProperties : function( node ) {
+    	var layerDetailWindow = Ext.getCmp('layerDetailWindow');
+    	if( !layerDetailWindow ) {
+    		layerDetailWindow = Ext.create('MCLM.view.paineis.LayerDetailWindow');
+    	}
+    	
+    	var data = node.data;
+    	var layerAlias = data.layerAlias;
+    	var dataLayer = data.dataLayer;
+    	var feicao = data.feicao;
+    	var wmsServer = data.server; 
+    	
+    	layerDetailWindow.setTitle( layerAlias );
+    	
+    	var table = "";
+    	
+    	if ( data.readOnly == true ) {
+    		table = table + "<div style='width:30px;height:30px;position:absolute;top:5px;right:10px;'><img src='img/lock.svg' style='width:30px;height:30px;'></div>";
+    	}
+    	    	
+    	table = table + "<table id='tableLayerDetails' >";
+    	
+    	table = table + "<tr> <td class='leftColumn'>Nome</td> <td class='rightColumn'>"+ layerAlias + "</td> </tr>";
+    	table = table + "<tr> <td class='leftColumn'>Descrição</td> <td class='rightColumn'>"+ data.description + "</td> </tr>";
+    	table = table + "<tr> <td class='leftColumn'>Origem</td> <td class='rightColumn'>"+ data.institute + "</td> </tr>";
+    	table = table + "<tr> <td class='leftColumn'>Camada</td> <td class='rightColumn'>"+ data.layerName + "</td> </tr>";
+    	/*
+    	table = table + "<tr> <td class='leftColumn'>Fonte Original</td> <td class='rightColumn'>"+ data.originalServiceUrl + "</td> </tr>";
+    	table = table + "<tr> <td class='leftColumn'>Fonte Atual</td> <td class='rightColumn'>"+ data.serviceUrl + "</td> </tr>";
+    	*/
+    	table = table + "<tr> <td class='leftColumn'>Filtro Fixo</td> <td class='rightColumn'>"+ data.cqlFilter + "</td> </tr>";
+
+    	if ( wmsServer ) {
+    		table = table + "<tr> <td colspan='2' style='padding-top:5px;' class='leftColumn'>Fonte WMS:</td></tr>";
+    		table = table + "<tr> <td class='leftColumn'>Nome</td> <td class='rightColumn'>"+ wmsServer.name + "</td> </tr>";
+    		table = table + "<tr> <td class='leftColumn'>Origem</td> <td class='rightColumn'>"+ wmsServer.url + "</td> </tr>";
+    		table = table + "<tr> <td class='leftColumn'>Versão WMS</td> <td class='rightColumn'>"+ wmsServer.version + "</td> </tr>";
+    	}
+    	
+    	if ( feicao ) {
+    		
+    		var prettyJson = MCLM.Functions.syntaxHighlight(feicao.metadados);
+    		
+    		table = table + "<tr> <td colspan='2' style='padding-top:5px;' class='leftColumn'>Feição:</td></tr>";
+ 		
+    		table = table + "<tr> <td class='leftColumn'>Tipo</td> <td class='rightColumn'>"+ feicao.geomType + "</td> </tr>";  
+    		table = table + "<tr> <td class='leftColumn'>Estilo</td> <td class='rightColumn'>"+ feicao.style.featureStyleName + "</td> </tr>";    		
+    		table = table + "<tr> <td class='leftColumn'>Metadados</td> <td class='rightColumn'><pre>"+ prettyJson + "</pre></td> </tr>";    		
+    	}
+    	
+    	if ( dataLayer ) {
+    		table = table + "<tr> <td colspan='2' style='padding-top:5px;' class='leftColumn'>Camada de Dados:</td></tr>";
+    		if ( dataLayer.style ) {
+    			table = table + "<tr> <td class='leftColumn'>Estilo</td> <td class='rightColumn'>"+ dataLayer.style.featureStyleName + "</td> </tr>";
+    		}
+        	table = table + "<tr> <td class='leftColumn'>Tabela</td> <td class='rightColumn'>"+ dataLayer.table.name + "</td> </tr>";
+        	table = table + "<tr> <td class='leftColumn'>Etiqueta</td> <td class='rightColumn'>"+ dataLayer.labelColumn + "</td> </tr>";
+        	table = table + "<tr> <td class='leftColumn'>Atributos</td> <td class='rightColumn'>"+ dataLayer.propertiesColumns + "</td> </tr>";
+        	table = table + "<tr> <td class='leftColumn'>Seletor</td> <td class='rightColumn'>"+ dataLayer.whereClause + "</td> </tr>";
+        	table = table + "<tr> <td class='leftColumn'>Nome Servidor</td> <td class='rightColumn'>"+ dataLayer.table.server.name + "</td> </tr>";
+        	table = table + "<tr> <td class='leftColumn'>End. Servidor</td> <td class='rightColumn'>"+ dataLayer.table.server.serverAddress + "</td> </tr>";
+        	table = table + "<tr> <td class='leftColumn'>Banco de Dados</td> <td class='rightColumn'>"+ dataLayer.table.server.serverDatabase + "</td> </tr>";
+
+    	}
+    	
+    	table = table + "</table>";
+    	
+    	layerDetailWindow.update( table );
+    	layerDetailWindow.show();
+    	
+    },
+    
     // Configura / Cria Janela de Dados
     configDataWindow : function(record) {
 		var configDataWindow = Ext.create('MCLM.view.datawindow.ConfigDataWindow');
@@ -168,10 +235,53 @@ Ext.define('MCLM.view.paineis.LayerTreeController', {
 		configDataWindow.show();	
     },
     
+    // Copia o dicionario da camada WMS selecionada para todas as que possuem mesma origem de dados (mesma camada de origem)
+    doCopyDictionary : function( record ) {
+    	var data = record.data;
+    	var idNodeData = data.idNodeData;
+
+    	MCLM.Functions.mainLog('Copiando dicionário. Aguarde...');
+    	
+		Ext.Ajax.request({
+		       url: 'copyDictionary',
+		       params: {
+		           'sourceNode': idNodeData 
+		       },       
+		       success: function(response, opts) {
+		    	   var result = JSON.parse( response.responseText );
+		    	   if ( result.success ) {
+			    	   Ext.Msg.alert('Sucesso', result.msg );
+			    	   MCLM.Functions.mainLog('Dicionário copiado.');
+		    	   } else {
+			    	   Ext.Msg.alert('Falha', result.msg );
+			    	   MCLM.Functions.mainLog('Falha copiando dicionário.');
+		    	   }
+		       },
+		       failure: function(response, opts) {
+		    	   var result = JSON.parse( response.responseText );
+		    	   Ext.Msg.alert('Falha', result.msg );
+		    	   MCLM.Functions.mainLog('Falha copiando dicionário.');
+		       }
+		});
+    	
+    },
+    copyDictionary : function( record ) {
+
+    	var me = this;
+		Ext.Msg.confirm('Copiar Dicionário', 'Esta operação irá sobrescrever o dicionário de todas as camadas que possuem a mesma origem que esta. Tem certeza?', function( btn ){
+			   if( btn === 'yes' ){
+				   me.doCopyDictionary( record );
+			   } else {
+			       return;
+			   }
+		 });
+    	
+    	
+    },
+    
     // Edita o dicionario de dados para uma camada
     configDictionary : function(record) {
     	var data = record.data;
-    	
     	var layerName = data.layerName;
     	var layerType = data.layerType;
     	var serviceUrl = data.serviceUrl;
@@ -222,7 +332,6 @@ Ext.define('MCLM.view.paineis.LayerTreeController', {
     	// se o novo no estava marcado na arvore principal, marca ele e o pai no cenario
     	if ( copy.get( 'checked' ) ) {
     		copy.set( 'selected', true );
-    		root.set( 'checked', true );
     	}
 
    	
@@ -233,6 +342,12 @@ Ext.define('MCLM.view.paineis.LayerTreeController', {
     addNewFolder : function( record ) {
 		var data = record.data;
 		record.expand();
+		
+		if ( record.data.layerType == 'CRN' ) {
+			Ext.Msg.alert('Permissão Negada','Você não pode criar pastas dentro desta pasta de sistema.' );
+			return true;	
+		}
+		
 		
     	var newFolderWindow = Ext.getCmp('newFolderWindow');
     	if ( newFolderWindow ) return;
@@ -278,7 +393,15 @@ Ext.define('MCLM.view.paineis.LayerTreeController', {
 		var data = record.data;
 		var name = data.layerAlias;
 		var me = this;
-
+		
+		
+		/*
+		MCLM.Map.map.getLayers().forEach( function ( layer ) {
+			console.log( layer.get("serialId") + " -- " + data.serialId );
+		});
+		*/
+				
+		
 		if ( record.data.readOnly ) {
 			Ext.MessageBox.show({
 				title: 'Camada Bloqueada',
@@ -293,7 +416,7 @@ Ext.define('MCLM.view.paineis.LayerTreeController', {
 		Ext.Msg.confirm('Apagar Camada', 'Deseja realmente apagar a Camada "' + name + '" ?', function( btn ){
 			   if( btn === 'yes' ){
 				   record.set("checked",false);
-				   me.clearCheckToTheRoot( record );
+				   //me.clearCheckToTheRoot( record );
 				   me.deleteLayer( parentNode, data );
 			   } else {
 			       return;
@@ -308,8 +431,9 @@ Ext.define('MCLM.view.paineis.LayerTreeController', {
 		var data = record.data;
 		var name = data.layerAlias;
 		var me = this;
+		var type = data.layerType;  
 		
-		if ( record.data.readOnly ) {
+		if ( data.readOnly ) {
 			
 			Ext.MessageBox.show({
 				title: 'Pasta Bloqueada',
@@ -317,14 +441,19 @@ Ext.define('MCLM.view.paineis.LayerTreeController', {
 				buttons: Ext.MessageBox.OK,
 				icon: 'lock-icon'
 			});			
-			
 			return true;
 		}
 		
-		if ( record.data.childrenCount > 0 ) {
+		if ( record.childNodes.length > 0 ) {
 			Ext.Msg.alert('Apagar Pasta', 'Não é possível apagar pastas com camadas ou outras pastas. Remova todas as camadas e pastas desta pasta antes.');
 			return true;
 		}
+		
+		if ( type == "CRN" ) {
+			Ext.Msg.alert('Apagar Pasta', 'Esta é uma pasta do sistema e não pode ser apagada.');
+			return true;
+		}
+		
 		
 		Ext.Msg.confirm('Apagar Pasta', 'Deseja realmente apagar a pasta "' + name + '" ?', function( btn ){
 			   if( btn === 'yes' ){
@@ -333,7 +462,8 @@ Ext.define('MCLM.view.paineis.LayerTreeController', {
 			   } else {
 			       return;
 			   }
-		});	
+		});
+			
 		
 	},
 
@@ -341,6 +471,7 @@ Ext.define('MCLM.view.paineis.LayerTreeController', {
 	deleteLayer : function ( parentNode, data ) {
 		var nodeId = data.id;
 		var layerName = data.layerName;
+		var serialId = data.serialId;
 		var me = this;
 		
 		Ext.Ajax.request({
@@ -353,7 +484,7 @@ Ext.define('MCLM.view.paineis.LayerTreeController', {
 		    	   
 		    	   var layerTreeStore = Ext.getStore('store.layerTree');
 		    	   layerTreeStore.load({ node: parentNode });
-		    	   MCLM.Map.removeLayer( layerName );
+		    	   MCLM.Map.removeLayer( serialId );
 		    	   
 		    	   Ext.Msg.alert('Sucesso', result.msg );
 
@@ -379,7 +510,19 @@ Ext.define('MCLM.view.paineis.LayerTreeController', {
     	
     	capabilitiesWindow = Ext.create('MCLM.view.addlayer.wms.CapabilitiesWindow');
     	capabilitiesWindow.setTitle( title );
-    	capabilitiesWindow.show();		
+    	capabilitiesWindow.show();	
+    	
+    	var serversStore = Ext.getStore('store.externalsource');
+    	serversStore.load();    	
+    	
+    	if ( MCLM.Globals.lastServerSelected  ) {
+    		var comboBox = Ext.getCmp('serversCombo');
+    		comboBox.setValue( MCLM.Globals.lastServerSelected );
+    		
+    		var idServerForm = Ext.getCmp('idServer');
+    		idServerForm.setValue( MCLM.Globals.lastServerSelectedID );	      		
+    		
+    	}
     	
     	// Interceptado pelo controller 'MCLM.view.addlayer.wms.CapabilitiesController'
     	this.fireEvent('createMapPreview', record);
@@ -485,6 +628,8 @@ Ext.define('MCLM.view.paineis.LayerTreeController', {
 		var layerName = node.get('layerName');
 		var serialId = node.get('serialId');
 		var layerType = node.get('layerType' );
+		
+		var cqlFilter = node.get('cqlFilter');
 		
 		if ( layerName == "" ) return;
 		

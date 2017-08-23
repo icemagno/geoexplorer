@@ -12,9 +12,12 @@ Ext.define('MCLM.view.servers.PostgreGrid', {
     
     autoScroll: true,
     columns:[
-	     {text:'Nome', dataIndex:'name', width:200},
-	     {text:'Endereço', dataIndex:'serverAddress', width:200},
-	     {text:'Banco', dataIndex:'serverDatabase', width:100},
+	     {text:'Nome', dataIndex:'name', width:200,editor: 'textfield'},
+	     {text:'Endereço', dataIndex:'serverAddress', width:200,editor: 'textfield'},
+	     {text:'Banco', dataIndex:'serverDatabase', width:100,editor: 'textfield'},
+	     {text:'Porta', dataIndex:'serverPort', width:70,editor: 'textfield'},
+	     {text:'Usuário', dataIndex:'serverUser', width:100,editor: 'textfield'},
+	     {text:'Senha', dataIndex:'serverPassword', width:100,editor: { xtype: 'passwordfield', allowBlank: false },renderer: function(value) { return '***'} },
     ],
     
     dockedItems: [{
@@ -30,7 +33,24 @@ Ext.define('MCLM.view.servers.PostgreGrid', {
         }]
     }],	
     
+    selType: 'cellmodel',
+    plugins: {
+        ptype: 'cellediting',
+        clicksToEdit: 2
+    },    
+    
 	listeners:{
+		
+		edit : function( a, b) {
+			
+	    	var layerTree = Ext.getCmp('layerTree');
+			var rootMaintree = layerTree.getRootNode();
+			
+	  		var layerTreeStore = Ext.getStore('store.layerTree');
+	  		layerTreeStore.load( { node: rootMaintree } );	
+	  		
+		},
+	
 		
 		itemclick: function( view, rec, node, index, e, options ) {
 			var postgreTable = Ext.data.StoreManager.lookup('store.postgreTable');

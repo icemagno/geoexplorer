@@ -31,6 +31,7 @@ public class UpdateCenarioTreeNodeAction extends BasicActionClass {
 				SceneryNodeService sns = new SceneryNodeService();
 				resp = sns.updateOrCreateNodes(data, cenario);
 			} catch ( Exception e ) {
+				e.printStackTrace();
 				resp = "{ \"error\": true, \"msg\": \"" + e.getMessage() + "\" }";
 			}
 			

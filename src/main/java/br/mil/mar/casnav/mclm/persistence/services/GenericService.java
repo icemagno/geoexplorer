@@ -22,6 +22,25 @@ public class GenericService {
 	public void closeSession() {
 		rep.closeSession();		
 	}
+	
+	public String getActiveDatabaseTasks() throws Exception {
+		String resTasks = "";
+		
+		/*
+		String sql = "select array_to_json( array_agg( f ) )::json As tasks from (" +
+				"select application_name, query_start, state_change, query, datname, state FROM pg_stat_activity order by query_start" + 
+		") as f ";
+		List<UserTableEntity> result = genericFetchList( sql );
+		
+		String resTasks = "";
+		if ( result.size() > 0 ) {
+			UserTableEntity ute = result.get(0);
+			resTasks = ute.getData("tasks");
+		}	
+		*/
+		
+		return resTasks;
+	}
 
 	@SuppressWarnings("rawtypes")
 	public List<UserTableEntity> genericFetchList(String query) throws Exception {

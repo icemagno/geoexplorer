@@ -3,8 +3,10 @@ package br.mil.mar.casnav.mclm.misc;
 import br.mil.mar.casnav.mclm.persistence.entity.DataLayer;
 import br.mil.mar.casnav.mclm.persistence.entity.Feicao;
 import br.mil.mar.casnav.mclm.persistence.entity.FilterItem;
+import br.mil.mar.casnav.mclm.persistence.entity.Server;
 import br.mil.mar.casnav.mclm.persistence.services.DataLayerService;
 import br.mil.mar.casnav.mclm.persistence.services.FilterService;
+import br.mil.mar.casnav.mclm.persistence.services.ServerService;
 
 /*
  * Se mexer nesta estrutura, altere tambï¿½m 
@@ -22,6 +24,7 @@ public class TreeNode {
 	// -----------------------
 	
 	private String serviceUrl;
+	private String cqlFilter;
 	private String originalServiceUrl;
 	private String layerName;
 	private String description;
@@ -38,19 +41,24 @@ public class TreeNode {
 	private FilterItem filter;
 	private int idDataWindow;
 	private Feicao feicao;
+	private Server server;
 	
-	public TreeNode( UserTableEntity ute, DataLayerService dss, FilterService fs ) {
+	public TreeNode( UserTableEntity ute, DataLayerService dss, FilterService fs, ServerService ss ) {
 		this.childrenCount = Integer.valueOf( ute.getData("children") );
 
 		this.idNodeParent = Integer.valueOf( ute.getData("id_node_parent") );
 		this.index = Integer.valueOf( ute.getData("index_order") );
 		this.layerName = ute.getData("layername");
 		this.originalServiceUrl = ute.getData("originalserviceurl");
-		this.serviceUrl = ute.getData("serviceurl");		
+		
+		//this.serviceUrl = ute.getData("serviceurl"); 		
+		
 		this.description = ute.getData("description");		
 		this.institute = ute.getData("institute");		
 		this.layerAlias = ute.getData("layeralias");
 		this.layerType = ute.getData("layertype");
+		this.cqlFilter = ute.getData("cqlfilter");
+		
 		this.readOnly = Boolean.valueOf( ute.getData("read_only") );
 		this.iconCls = "";
 		this.idNodeData = Integer.valueOf( ute.getData("id_node_data") );
@@ -74,7 +82,23 @@ public class TreeNode {
 			if ( this.layerType.equals("WMS") ) {
 				this.iconCls = "wms-icon";
 				String filterId = ute.getData("id_filter_item");
-			
+
+				try {
+					int idServer = Integer.valueOf( ute.getData("id_server") );
+					this.server = ss.getServerWMS( idServer );
+					ss.newTransaction();
+					
+					String serverUrl = this.server.getUrl();
+					if ( !serverUrl.endsWith("/") ) serverUrl = serverUrl + "/";
+					if ( !serverUrl.contains("/wms") ) serverUrl = serverUrl + "wms/";
+					
+					this.serviceUrl = serverUrl;
+					this.institute = this.server.getName();
+						
+				} catch ( Exception e ) {
+					//e.printStackTrace();
+				}
+				
 				if( filterId != null && !filterId.equals("") ) {
 					try {
 						int idFilterItem = Integer.valueOf( ute.getData("id_filter_item") );
@@ -295,6 +319,26 @@ public class TreeNode {
 	
 	public Feicao getFeicao() {
 		return feicao;
+	}
+
+	public String getCqlFilter() {
+		return cqlFilter;
+	}
+
+	public void setCqlFilter(String cqlFilter) {
+		this.cqlFilter = cqlFilter;
+	}
+
+	public Server getServer() {
+		return server;
+	}
+
+	public void setServer(Server server) {
+		this.server = server;
 	}	
+	
+	
+	
+	
 	
 }

@@ -3,7 +3,6 @@ Ext.define('MCLM.view.paineis.AbaCatalogo', {
 	xtype: 'abaCatalogo',
 	
 	requires: [
-        'MCLM.view.paineis.LayerDetail',
         'MCLM.view.paineis.LayerTree'
 	],
 	
@@ -21,8 +20,5 @@ Ext.define('MCLM.view.paineis.AbaCatalogo', {
 	items: [{
 		flex:5,
 		xtype: 'view.layerTree'
-	},{
-		flex:1,
-		xtype: 'view.layerDetail'
 	}]
 });

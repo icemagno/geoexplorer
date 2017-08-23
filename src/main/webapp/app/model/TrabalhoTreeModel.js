@@ -17,7 +17,7 @@ Ext.define('MCLM.model.TrabalhoTreeModel', {
         { name: 'readOnly', type: 'boolean' },
         { name: 'transparency', type: 'int' },
         { name: 'layerStackIndex', type: 'int' },
-        { name: 'checked', type: 'boolean' },
+        /*{ name: 'checked', type: 'boolean' },*/
         { name: 'selected', type: 'boolean' }
 	],
 

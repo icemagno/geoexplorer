@@ -12,7 +12,7 @@ Ext.define('MCLM.view.dicionario.DictWindow', {
 	id:'dictWindow',    	
 	xtype: 'dictWindow',
 	title : "Dicionário de Dados",
-	width : 950,
+	width : 980,
 	height: 550,
 	
 	layout : 'fit',

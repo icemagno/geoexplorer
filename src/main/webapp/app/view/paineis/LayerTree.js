@@ -14,7 +14,24 @@ Ext.define('MCLM.view.paineis.LayerTree', {
         }
     },    
     
-    plugins: [{  ptype: 'treefilter', allowParentFolders: true }],
+    plugins: [{
+        ptype: 'cellediting',
+        clicksToEdit: 2,
+        listeners: {
+            beforeedit: function( e, editor, options ){
+
+            },
+            afteredit: function( e, editor, options ){
+            	
+            	var layerTreeStore = Ext.getStore('store.layerTree');
+            	layerTreeStore.sync();
+            	
+            	
+            }
+        }        
+    }, {  ptype: 'treefilter', allowParentFolders: true } ],    
+    
+    
     
     store: 'store.layerTree',
    
@@ -24,19 +41,34 @@ Ext.define('MCLM.view.paineis.LayerTree', {
         text: 'Nome',
         dataIndex: 'text',
         width : 260,
-        sortable: true
+        sortable: true,
+        editor: {
+            xtype: 'textfield'
+        }           
     },{
         text: 'Origem',
         dataIndex: 'institute',
-        width : 170,
+        width : 130,
         sortable: true,
         align: 'left'
     },{
-        text: 'Tipo',
-        dataIndex: 'layerType',
+        text: 'Filtro',
+        dataIndex: 'cqlFilter',
         sortable: true,
-        width : 50,
-        align: 'left'
+        width : 250,
+        align: 'left',
+        editor: {
+            xtype: 'textfield'
+        }          
+    },{
+        text: 'Descrição',
+        dataIndex: 'description',
+        sortable: true,
+        width : 300,
+        align: 'left',
+        editor: {
+            xtype: 'textfield'
+        }          
     },{
         text: 'Camada',
         dataIndex: 'layerName',

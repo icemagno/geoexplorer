@@ -101,9 +101,9 @@ Ext.define('MCLM.view.cenarios.CenarioController', {
 
     	var sceneryName = row.get("sceneryName");
     	var idScenery = row.get("idScenery");
-    	var idUser = row.get("idUser");
+    	var cpfUser = row.get("cpfUser");
 
-    	if ( idUser != MCLM.Globals.config.user.idUser ) {
+    	if ( cpfUser != MCLM.Globals.config.user.cpfUser ) {
     		Ext.Msg.alert('Operação não permitida', 'É permitido tornar privado somente Cenários criados por você.' );
     		return true;
     	}
@@ -142,9 +142,9 @@ Ext.define('MCLM.view.cenarios.CenarioController', {
     	
     	var sceneryName = row.get("sceneryName");
     	var idScenery = row.get("idScenery");
-    	var idUser = row.get("idUser");
+    	var cpfUser = row.get("cpfUser");
 
-    	if ( idUser != MCLM.Globals.config.user.idUser ) {
+    	if ( cpfUser != MCLM.Globals.config.user.cpfUser ) {
     		Ext.Msg.alert('Operação não permitida', 'É permitido tornar público somente Cenários criados por você.' );
     		return true;
     	}
@@ -185,9 +185,9 @@ Ext.define('MCLM.view.cenarios.CenarioController', {
     	
     	var sceneryName = row.get("sceneryName");
     	var idScenery = row.get("idScenery");
-    	var idUser = row.get("idUser");
+    	var cpfUser = row.get("cpfUser");
 
-    	if ( idUser != MCLM.Globals.config.user.idUser ) {
+    	if ( cpfUser != MCLM.Globals.config.user.cpfUser ) {
     		Ext.Msg.alert('Operação não permitida', 'É permitido apagar somente Cenários criados por você.' );
     		return true;
     	}

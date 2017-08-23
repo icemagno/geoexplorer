@@ -102,7 +102,7 @@ Ext.define('MCLM.view.rotas.RotaWindow', {
 		    Ext.tip.QuickTipManager.register({
 		        target: 'idAddRoute',
 		        title: 'Adicionar Rota ao Cenário',
-		        text: 'Adiciona a rota atual ao Cenário na Área de Trabalho.',
+		        text: 'Adiciona a rota atual ao Cenário.',
 		        width: 190,
 		        dismissDelay: 5000 
 		    },{

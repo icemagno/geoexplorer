@@ -36,7 +36,6 @@ public class UpdateCenarioDataAction extends BasicActionClass {
 			SceneryService sns = new SceneryService();
 			resp = sns.updateScenery( idScenery, mapCenter, mapZoom, mapaBase, servidorBase, mapBbox, mapaBaseAtivo, gradeAtiva );
 				
-			
 			HttpServletResponse response = (HttpServletResponse)ActionContext.getContext().get(StrutsStatics.HTTP_RESPONSE);
 			response.setCharacterEncoding("UTF-8"); 
 			response.setContentType("application/json");

@@ -42,8 +42,14 @@ public class Scenery {
 	@Column(name="map_center", length=100)
 	private String mapCenter = "-48.12,-15.8";
 	
+	@Column(name="map_center_hdms", length=100)
+	private String mapCenterHDMS;
+	
 	@Column(name="map_bbox", length=200)
 	private String mapBbox;	
+	
+	@Column(name="user_name", length=200)
+	private String userName;	
 
 	@Column(name="base_map", length=100)
 	private String baseMap;	
@@ -60,8 +66,8 @@ public class Scenery {
     @Column(name="is_public")
 	private Boolean isPublic;	    
     
-	@Column(name="id_user")
-	private Integer idUser;	
+	@Column(name="cpf_user", length=11)
+	private String cpfUser;		
 	
     @OneToMany(orphanRemoval=true,  mappedBy="scenery", fetch = FetchType.EAGER)
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
@@ -195,14 +201,6 @@ public class Scenery {
 		this.isPublic = isPublic;
 	}
 
-	public void setIdUser(Integer idUser) {
-		this.idUser = idUser;
-	}
-	
-	public Integer getIdUser() {
-		return idUser;
-	}
-
 	public String getDescription() {
 		return description;
 	}
@@ -218,5 +216,32 @@ public class Scenery {
 	public void setMapBbox(String mapBbox) {
 		this.mapBbox = mapBbox;
 	}
+
+	public String getCpfUser() {
+		return cpfUser;
+	}
+
+	public void setCpfUser(String cpfUser) {
+		this.cpfUser = cpfUser;
+	}
+
+	public String getUserName() {
+		return this.userName;
+	}
 	
+	public void setUserName(String name) {
+		this.userName = name;
+		
+	}
+
+	public String getMapCenterHDMS() {
+		return mapCenterHDMS;
+	}
+
+	public void setMapCenterHDMS(String mapCenterHDMS) {
+		this.mapCenterHDMS = mapCenterHDMS;
+	}
+	
+	
+
 }

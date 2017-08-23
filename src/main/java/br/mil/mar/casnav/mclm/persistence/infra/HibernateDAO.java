@@ -91,6 +91,16 @@ public class HibernateDAO<T> implements IDao<T>  {
 		
 	}
 	
+	public void deleteList( List<T> list ) throws DeleteException {
+		try {
+			Query q = session.createQuery("DELETE FROM YourEntityName ye WHERE ye.id IN (:list)");
+			q.setParameterList("list", list);
+			q.executeUpdate();
+		} catch (HibernateException e) {
+			throw new DeleteException( e.getMessage() );
+		} 				
+		estimatedTime = System.nanoTime() - startTime;		
+	}
 	
 	public void deleteDO(T objeto) throws DeleteException {
 		try {

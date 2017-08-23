@@ -26,6 +26,7 @@ Ext.define('MCLM.view.cenarios.SaveCenarioController', {
 		Ext.getCmp('mapaBaseAtivoID').setValue( MCLM.Map.isBaseMapActive() );
 		Ext.getCmp('gradeAtivaID').setValue( MCLM.Map.isGraticuleActive() );
 		Ext.getCmp('mapBbox').setValue( MCLM.Map.getMapCurrentBbox() );
+		Ext.getCmp('mapCenterHDMSId').setValue( MCLM.Map.getCenterHDMS() );
 		
         if ( form.isValid() ) {
       	  form.submit({

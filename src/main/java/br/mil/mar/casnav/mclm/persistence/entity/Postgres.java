@@ -127,5 +127,15 @@ public class Postgres {
 	public void setTables(List<PostgresTable> tables) {
 		this.tables = tables;
 	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+	
+	
 	
 }

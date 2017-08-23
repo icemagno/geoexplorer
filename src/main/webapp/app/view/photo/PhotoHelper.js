@@ -34,6 +34,7 @@ Ext.define('MCLM.view.photo.PhotoHelper', {
 			this.photoLayer.set('name', 'photoLayer');
 			this.photoLayer.set('alias', 'photoLayer');
 			this.photoLayer.set('serialId', 'photoLayer');
+			this.photoLayer.set('layerType', 'FEI');
 			this.photoLayer.set('baseLayer', false);
 			this.photoLayer.set('ready', true);
 			
@@ -61,7 +62,8 @@ Ext.define('MCLM.view.photo.PhotoHelper', {
 	    },
 
 		getPhotosCloseTo : function( coordinate ) {
-			coordinate = ol.proj.transform(coordinate, 'EPSG:3857', 'EPSG:4326')
+			//coordinate = ol.proj.transform(coordinate, 'EPSG:3857', 'EPSG:4326')
+			coordinate = coordinate;
 			
 			var me = this;
 			var lon = coordinate[0];
@@ -91,8 +93,10 @@ Ext.define('MCLM.view.photo.PhotoHelper', {
 	            			var lat = respObj[x].lat;
 	            			var key = respObj[x].key;
 	            			
-			    			var point = new ol.geom.Point( ol.proj.transform([lon, lat], 'EPSG:4326', 'EPSG:3857') );
-	 		    			var feature = new ol.Feature({
+	            			var point = new ol.geom.Point( [lon, lat] );
+			    			//var point = new ol.geom.Point( ol.proj.transform([lon, lat], 'EPSG:4326', 'EPSG:3857') );
+	 		    			
+			    			var feature = new ol.Feature({
 	 		    				geometry: point,
 	 		    			});	            		
 

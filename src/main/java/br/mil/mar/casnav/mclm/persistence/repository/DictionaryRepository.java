@@ -10,7 +10,6 @@ import br.mil.mar.casnav.mclm.persistence.exceptions.InsertException;
 import br.mil.mar.casnav.mclm.persistence.exceptions.UpdateException;
 import br.mil.mar.casnav.mclm.persistence.infra.DaoFactory;
 import br.mil.mar.casnav.mclm.persistence.infra.IDao;
-import br.mil.mar.casnav.mclm.persistence.services.GenericService;
 
 
 
@@ -38,7 +37,7 @@ public class DictionaryRepository extends BasicRepository {
 		DaoFactory<DictionaryItem> df = new DaoFactory<DictionaryItem>();
 		IDao<DictionaryItem> fm = df.getDao(this.session, DictionaryItem.class);
 		
-		item.setVisible( true );
+		
 		if ( item.getNode() != null ) {
 			// Coloca o Node no contexto de persistencia
 			DaoFactory<NodeData> dfnd = new DaoFactory<NodeData>();
@@ -76,6 +75,12 @@ public class DictionaryRepository extends BasicRepository {
 		return node;
 	}
 	
+	public void deleteList( List<DictionaryItem> list ) throws Exception {
+		DaoFactory<DictionaryItem> df = new DaoFactory<DictionaryItem>();
+		IDao<DictionaryItem> fm = df.getDao(this.session, DictionaryItem.class);
+		fm.deleteList(list);
+	}
+	
 	public List<DictionaryItem> getList( int idNodeData ) throws Exception {
 		DaoFactory<DictionaryItem> df = new DaoFactory<DictionaryItem>();
 		IDao<DictionaryItem> fm = df.getDao(this.session, DictionaryItem.class);
@@ -91,7 +96,7 @@ public class DictionaryRepository extends BasicRepository {
 	}
 
 	
-	public List<DictionaryItem> getListByLayer( String layerName ) throws Exception {
+	public List<DictionaryItem> getDictionaryByLayer( String layerName ) throws Exception {
 		DaoFactory<DictionaryItem> df = new DaoFactory<DictionaryItem>();
 		IDao<DictionaryItem> fm = df.getDao(this.session, DictionaryItem.class);
 		List<DictionaryItem> users = null;
@@ -119,11 +124,18 @@ public class DictionaryRepository extends BasicRepository {
 		return users;
 	}
 
-	public void deleteDictionary(int idNodeData ) throws Exception {
+	
+	public void executeQuery(String sql, boolean withCommit ) throws Exception {
+		DaoFactory<DictionaryItem> df = new DaoFactory<DictionaryItem>();
+		IDao<DictionaryItem> fm = df.getDao(this.session, DictionaryItem.class);
+		fm.executeQuery( sql , withCommit);
+	}
+	
+	public void deleteDictionary(int idNodeData, boolean withCommit ) throws Exception {
 		String sql = "delete from dictionary where id_node_data = " + idNodeData ;
 		DaoFactory<DictionaryItem> df = new DaoFactory<DictionaryItem>();
 		IDao<DictionaryItem> fm = df.getDao(this.session, DictionaryItem.class);
-		fm.executeQuery( sql , true);
+		fm.executeQuery( sql , withCommit);
 	}
 	
 }

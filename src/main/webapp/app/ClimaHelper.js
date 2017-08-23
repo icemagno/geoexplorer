@@ -19,6 +19,7 @@ Ext.define('MCLM.ClimaHelper', {
 			me.climaLayer.set('name', 'climaLayer');
 			me.climaLayer.set('alias', 'climaLayer');
 			me.climaLayer.set('serialId', 'climaLayer');
+			me.climaLayer.set('layerType', 'FEI');
 			me.climaLayer.set('baseLayer', false);
 			me.climaLayer.set('ready', true);		
 			
@@ -324,7 +325,9 @@ Ext.define('MCLM.ClimaHelper', {
 			
 			if ( feature.get('isCity') ) return true; 
 			
-				var coordinateNew = ol.proj.transform(coordinate, 'EPSG:3857', 'EPSG:4326');
+			//var coordinateNew = ol.proj.transform(coordinate, 'EPSG:3857', 'EPSG:4326');
+			var coordinateNew = coordinate;
+			
 			MCLM.ClimaHelper.getCityLevels( coordinateNew[1], coordinateNew[0]);
 			
             var title = feature.get('title');

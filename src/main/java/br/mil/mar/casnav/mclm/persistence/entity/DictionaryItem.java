@@ -35,6 +35,9 @@ public class DictionaryItem {
 	@Column(length=250)
 	private String description = "";	
 	
+	@Column(name="index_order")
+	private Integer indexOrder;		
+	
 	@Column(length=80)
 	private String dataType;	
 
@@ -53,7 +56,9 @@ public class DictionaryItem {
 	}
 	
 	public DictionaryItem( ) {
-		// 
+		this.visible = true;
+		this.primaryKey = false;
+		this.indexOrder = 99;
 	}
 
 	public DictionaryItem(String columnName, String dataType, NodeData node) {
@@ -62,6 +67,7 @@ public class DictionaryItem {
 		this.dataType = dataType;
 		this.visible = true;
 		this.primaryKey = false;
+		this.indexOrder = 99;
 	}
 
 	public int getIdDictionaryItem() {
@@ -136,6 +142,17 @@ public class DictionaryItem {
 	@Transient
 	public Boolean isPrimaryKey() {
 		return primaryKey;
+	}
+
+	public Integer getIndexOrder() {
+		if ( indexOrder == null ) indexOrder = 0;  
+		return indexOrder;
+	}
+
+	public void setIndexOrder(Integer indexOrder) {
+		this.indexOrder = indexOrder;
 	}	
+	
+	
 	
 }

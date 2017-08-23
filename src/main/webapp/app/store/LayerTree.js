@@ -39,6 +39,7 @@ Ext.define('MCLM.store.LayerTree', {
     
 	listeners: {
         load: function(store, records){
+        	
         	// Ao recarregar os filhos de um no, verificar se algum deles ja
         	// estava selecionado (a camada ja exixtia no mapa)
         	// pois ao recarregar eles vem desmarcados.

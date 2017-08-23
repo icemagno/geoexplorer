@@ -4,15 +4,32 @@ Ext.define('MCLM.store.PostgreSource', {
     alias: 'store.postgresource',
     storeId:'store.postgresource',
     
+    autoSync: true,
+    
 	proxy: {
         type: 'ajax',
-        url: 'getPostgreSources',
         reader: {
             type: 'json',
             rootProperty:'servers',
             totalProperty: 'totalCount'
-        }        
-	},
+        },
+        api: {
+            read: 'getPostgreSources',
+            create: 'setPostgreSources',
+            update: 'setPostgreSources',
+            destroy: 'delPostgreSources'
+        },         
+        writer: {
+            type:'json',
+            allowSingle:false,
+            writeAllFields : true,
+            encode:true,
+            rootProperty:'server'
+        }          
+	},    
+		
+	
+	
     fields: [
          {name:'idServer', type:'int'},    
          {name:'name', type:'string'},

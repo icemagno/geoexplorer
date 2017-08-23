@@ -25,6 +25,7 @@ public class SceneryNodeService {
 
 	
 	public String updateOrCreateNodes(String data, Integer idScenery) {
+		
 		String result = "{ \"success\": true, \"msg\": \"Cenário atualizado com sucesso.\" }";
 
 		try {
@@ -38,9 +39,12 @@ public class SceneryNodeService {
 			JSONArray array = new JSONArray( data );
 			List<SceneryNode> nodes = new ArrayList<SceneryNode>();
 			
-			
-			for ( Object obj : array ) {
-				JSONObject jsonobj = (JSONObject)obj;
+			for ( int xx = 0; xx < array.length(); xx++  ) {
+				JSONObject jsonobj = array.getJSONObject( xx );
+			//}
+			//for ( Object obj : array ) {
+				//JSONObject jsonobj = (JSONObject)obj;
+				
 				NodeData layer = gson.fromJson( jsonobj.toString(), NodeData.class);
 
 				int id = jsonobj.getInt( "id" );
@@ -76,6 +80,7 @@ public class SceneryNodeService {
 		} catch ( Exception e ) {
 			e.printStackTrace();
 			result = "{ \"error\": true, \"msg\": \"" + e.getMessage() + ".\" }";
+			System.out.println("The data was: " + data );
 		}
 		return result;
 	}	
@@ -96,14 +101,41 @@ public class SceneryNodeService {
 		return expRet ;
 	}	
 
-	public void deleteSceneryNode( int idSceneryNode ) throws DeleteException {
+	
+	private void deleteScenery( JSONObject sceneryNode ) throws Exception {
+		int idSceneryNode =  sceneryNode.getInt( "idSceneryNode" );
+		rep.newTransaction();
+		SceneryNode SceneryNode = rep.getSceneryNode( idSceneryNode );
+		rep.newTransaction();
+		rep.deleteSceneryNode(SceneryNode);
+		
+	}
+	
+	public String deleteSceneryNode( String data ) throws DeleteException {
+		String result = "{ \"success\": true, \"msg\": \"Cenário atualizado com sucesso.\" }";
 		try {
-			SceneryNode SceneryNode = rep.getSceneryNode(idSceneryNode);
-			rep.newTransaction();
-			rep.deleteSceneryNode(SceneryNode);
+			
+			try {
+				JSONObject sceneryNode = new JSONObject( data );
+				deleteScenery( sceneryNode );
+			} catch ( org.json.JSONException jj ) {
+				
+				JSONArray arr = new JSONArray( data );
+				for ( int x=0; x < arr.length(); x++ ) {
+					JSONObject sceneryNode = arr.getJSONObject(x);
+					deleteScenery( sceneryNode );
+				}
+				
+			}
+					 			
+			
 		} catch (Exception e) {
-			throw new DeleteException( e.getMessage() );
+			result = "{ \"error\": true, \"msg\": \"" + e.getMessage() + ".\" }";
+			e.printStackTrace();
+			System.out.println("The data was: " + data );
 		}
+		
+		return result;
 	}
 
 	/*

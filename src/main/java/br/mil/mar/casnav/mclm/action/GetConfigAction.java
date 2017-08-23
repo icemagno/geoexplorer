@@ -35,6 +35,6 @@ public class GetConfigAction extends BasicActionClass {
 		}
 		return "ok";
 	}
-
+	
 	
 }

@@ -13,13 +13,37 @@ Ext.define('MCLM.Map', {
 		aeroTrafficEnabled: false,
 		shipTrafficEnabled: false,
 		streetPhotoEnabled : false,
+		queryLocationEnabled : false,
+		
+	    topoEnabled : false,
+	    oceanEnabled : false,
+	    hillshadeEnabled : false,
+	    imageryEnabled : false,		
+	    seaMapEnabled : false,	
+	    osmEnabled : false,
+		
+		currentMapPosition : 0,
+		currentMap : [],
+		maxStoreSize : 15,
+		doNotStorePosition : false,
+		
+		precipitacaoLayer : null,
+		windLayer : null,
+		tempLayer : null,
+		pressureLayer : null,
+		worldTopoMap : null,
+		oceanBaseMap : null,
+		hillshadeMap : null,
+		openSeaMapLayer: null,
+		osmLayer : null,
+		
 		arrayMapCenter: null,
 		mapZoom: 5,
 		mapCenterLat: 0,
 		mapCenterLong: 0,	
 		baseLayer: null,
 		baseLayerName: null,
-		openSeaMapLayer: null,
+		
 		queryFactorRadius: 4,
 		graticule: null,
 		geoserverUrl: '',
@@ -29,6 +53,355 @@ Ext.define('MCLM.Map', {
 		shipsHelper : null,
 		canPhoto : true,
 		statusBar : null,
+		
+		
+		toggleOsm : function() {
+	    	if( MCLM.Map.osmEnabled ) {
+	    		MCLM.Map.osmEnabled = false;
+	    		MCLM.Map.removeLayer( 'mclm_openstreetmap' );
+	    		MCLM.Map.removeFromLayerStack( 'mclm_openstreetmap' );
+	    		$("#toggleOsmID").css("border","1px solid #cacaca");	    		
+	    	} else {
+	    		MCLM.Map.map.addLayer( MCLM.Map.osmLayer );
+	    		MCLM.Map.osmEnabled = true;
+	    		
+	    		var data = {};
+	    		data.description = 'Mapa OpenStreetMap Externo';
+	    		data.institute = 'www.openstreetmap.org';
+	    		data.layerName = 'OpenStreetMap';
+	    		data.layerAlias = 'OpenStreetMap';
+	    		data.serialId = 'mclm_openstreetmap';
+	    		data.layerType = 'Externo';
+	    		MCLM.Map.addToLayerStack( data );
+	    		$("#toggleOsmID").css("border","2px solid #ff5d00");
+	    		
+	    	}
+	    },		
+		
+		toggleImagery : function() {
+	    	if( MCLM.Map.imageryEnabled ) {
+	    		MCLM.Map.imageryEnabled = false;
+	    		MCLM.Map.removeLayer( 'mclm_ago_imageryMap' );
+	    		MCLM.Map.removeFromLayerStack( 'mclm_ago_imageryMap' );
+	    		$("#toggleImageryID").css("border","1px solid #cacaca");	    		
+	    	} else {
+	    		MCLM.Map.map.addLayer( MCLM.Map.imageryMap );
+	    		MCLM.Map.imageryEnabled = true;
+	    		
+	    		var data = {};
+	    		data.description = 'Imagens de satélite do ArcGIS';
+	    		data.institute = 'www.arcgis.com';
+	    		data.layerName = 'Imagens de Satélite';
+	    		data.layerAlias = 'Imagens de Satélite';
+	    		data.serialId = 'mclm_ago_imageryMap';
+	    		data.layerType = 'Externo';
+	    		MCLM.Map.addToLayerStack( data );
+	    		$("#toggleImageryID").css("border","2px solid #ff5d00");
+	    		
+	    	}
+	    },
+		
+	    
+	    toggleHillshade : function() {
+	    	
+	    	if( MCLM.Map.hillshadeEnabled ) {
+	    		MCLM.Map.hillshadeEnabled = false;
+	    		MCLM.Map.removeLayer( 'mclm_ago_hillshadeMap' );
+	    		MCLM.Map.removeFromLayerStack( 'mclm_ago_hillshadeMap' );
+	    		$("#toggleHillshadeID").css("border","1px solid #cacaca");
+	    	} else {
+	    		MCLM.Map.map.addLayer( MCLM.Map.hillshadeMap );
+	    		MCLM.Map.hillshadeEnabled = true;
+	    		
+	    		var data = {};
+	    		data.description = 'Camada de Relevo do ArcGIS';
+	    		data.institute = 'www.arcgis.com';
+	    		data.layerName = 'Relevo';
+	    		data.layerAlias = 'Relevo';
+	    		data.serialId = 'mclm_ago_hillshadeMap';
+	    		data.layerType = 'Externo';
+	    		MCLM.Map.addToLayerStack( data );   
+	    		$("#toggleHillshadeID").css("border","2px solid #ff5d00");
+	    	}
+	    	
+	    },   	    
+
+	    
+	    toggleSeaMapLayer : function() {
+	    	
+	    	if( MCLM.Map.seaMapEnabled ) {
+	    		MCLM.Map.seaMapEnabled = false;
+	    		MCLM.Map.removeLayer( 'mclm_openseamap_cmoa' );
+	    		MCLM.Map.removeFromLayerStack( 'mclm_openseamap_cmoa' );
+	    		$("#seaMapID").css("border","1px solid #cacaca");
+	    	} else {
+	    		MCLM.Map.map.addLayer( MCLM.Map.openSeaMapLayer );
+	    		MCLM.Map.seaMapEnabled = true;
+	    		
+	    		var data = {};
+	    		data.description = 'Elementos Náuticos do OpenSeaMap';
+	    		data.institute = 'OpenSeaMap';
+	    		data.layerName = 'Elementos Náuticos';
+	    		data.layerAlias = 'Elementos Náuticos';
+	    		data.serialId = 'mclm_openseamap_cmoa';
+	    		data.layerType = 'Externo';
+	    		MCLM.Map.addToLayerStack( data );   
+	    		$("#seaMapID").css("border","2px solid #ff5d00");
+	    	}
+	    	
+	    },  	    
+	    
+	    
+	    toggleTopo : function() {
+	    	
+	    	if( MCLM.Map.topoEnabled ) {
+	    		MCLM.Map.topoEnabled = false;
+	    		MCLM.Map.removeLayer( 'mclm_ago_worldTopoMap' );
+	    		MCLM.Map.removeFromLayerStack( 'mclm_ago_worldTopoMap' );
+	    		$("#toggleTopoID").css("border","1px solid #cacaca");
+	    	} else {
+	    		MCLM.Map.map.addLayer( MCLM.Map.worldTopoMap );
+	    		MCLM.Map.topoEnabled = true;
+	    		
+	    		var data = {};
+	    		data.description = 'Camada de Topografia do ArcGIS';
+	    		data.institute = 'www.arcgis.com';
+	    		data.layerName = 'Topografia';
+	    		data.layerAlias = 'Topografia';
+	    		data.serialId = 'mclm_ago_worldTopoMap';
+	    		data.layerType = 'Externo';
+	    		MCLM.Map.addToLayerStack( data );   
+	    		$("#toggleTopoID").css("border","2px solid #ff5d00");
+	    	}
+	    	
+	    },    
+
+	    toggleOcean : function() {
+	    	
+	    	if( MCLM.Map.oceanEnabled ) {
+	    		MCLM.Map.oceanEnabled = false;
+	    		MCLM.Map.removeLayer( 'mclm_ago_oceanBaseMap' );
+	    		MCLM.Map.removeFromLayerStack( 'mclm_ago_oceanBaseMap' );
+	    		$("#toggleOceanID").css("border","1px solid #cacaca");
+	    	} else {
+	    		MCLM.Map.map.addLayer( MCLM.Map.oceanBaseMap );
+	    		MCLM.Map.oceanEnabled = true;
+	    		
+	    		var data = {};
+	    		data.description = 'Camada de Relevo do Leito Marinho do ArcGIS';
+	    		data.institute = 'www.arcgis.com';
+	    		data.layerName = 'Leito Marinho';
+	    		data.layerAlias = 'Leito Marinho';
+	    		data.serialId = 'mclm_ago_oceanBaseMap';
+	    		data.layerType = 'Externo';
+	    		MCLM.Map.addToLayerStack( data );    
+	    		$("#toggleOceanID").css("border","2px solid #ff5d00");
+	    	}
+	    	
+	    },  	    
+	    
+		exportMap : function() {
+
+			var layers = MCLM.Map.map.getLayers();
+			var length = layers.getLength();
+			var thumImg = "";
+			var idCenario = MCLM.Globals.currentScenery;
+			
+			var images = [];
+			
+			var mapImageWindow = Ext.getCmp('mapImageWindow');
+			if ( !mapImageWindow ) {
+				mapImageWindow = Ext.create('MCLM.view.paineis.MapImageWindow');
+			}
+			mapImageWindow.update('<div style="width:1000px;height:600px" id="mapImageMap"></div>');
+			
+			var feiMap = new ol.Map({
+				layers: [],
+				target: 'mapImageMap',
+				renderer: 'canvas',
+				view : MCLM.Map.theView
+			});
+			
+			var feiMapCanvas = null;
+			
+			feiMap.once('postcompose', function(event) {
+				feiMapCanvas = event.context.canvas;	
+			});
+			
+			
+			var foundFei = false;
+			for (var i = 0; i < length; i++) {
+				var layerName = layers.item(i).get('layerName');
+				var serviceUrl = layers.item(i).get('serviceUrl');
+				var alias = layers.item(i).get('alias');
+				var serverUrl = layers.item(i).get('serverUrl');
+				var serialId = layers.item(i).get('serialId');
+				var layerType = layers.item(i).get('layerType');				
+				var cqlFilter = layers.item(i).get('cqlFilter');				
+				var visible =  layers.item(i).getVisible(); 				
+
+				if ( visible ) {
+					
+					if ( layerType == 'FEI' ) {
+						var source = layers.item(i).getSource();
+						var features = source.getFeatures();
+						if ( features.length > 0 ) {
+							//alert("found FEI");
+							foundFei = true;
+							feiMap.addLayer( layers.item(i) );
+						}
+					}
+					
+					if ( layerType == 'BAS' ) {
+						thumImg = MCLM.Map.getLayerImagePreview( MCLM.Globals.config.baseLayer, MCLM.Globals.config.geoserverUrl, 1000, 600 );
+						//thumImg = MCLM.Map.getLayerImagePreview( MCLM.Globals.config.baseLayer, MCLM.Globals.config.geoserverUrl, 1920, 1080 );
+						var lrObj = {};
+						lrObj["url"] = thumImg;
+						lrObj["id"] = serialId;
+						lrObj["cqlFilter"] = "";
+						images.push(lrObj);
+					}
+	
+					if ( layerType == 'WMS' ) {
+						thumImg = MCLM.Map.getLayerImagePreview ( layerName, serviceUrl, 1000, 600, cqlFilter );
+						//thumImg = MCLM.Map.getLayerImagePreview ( layerName, serviceUrl, 1920, 1080, cqlFilter ); 
+						var lrObj = {};
+						lrObj["url"] = thumImg;
+						lrObj["id"] = serialId;
+						lrObj["cqlFilter"] = cqlFilter;
+						images.push(lrObj);
+					}
+					
+				}	
+				
+			}
+
+			var feiEncodedCanvas = '';
+			if ( foundFei == true ) {
+				feiMap.renderSync();
+				feiEncodedCanvas = feiMapCanvas.toDataURL('image/png');
+			}
+			
+			if ( images.length > 0 || foundFei ) {
+				
+				Ext.Ajax.request({
+				       url: 'getMapImage',
+				       params: {
+				           'urlList': Ext.encode( images ),
+				           'feiEncodedCanvas' : feiEncodedCanvas,
+				       },       
+				       success: function(response, opts) {
+				    	   var respText = Ext.decode(response.responseText);
+				    	   
+				    	   if( respText.result != 'error ') {
+				    		   var uuid = respText.uuid;
+				    		   window.open('getMapAsPDF?uuid='+uuid+'&idCenario='+idCenario,'_blank');
+				    		   
+				    		   mapImageWindow.update('<img style="width:500px;height:300px" src="'+respText.imagePath+'">');
+				    		   mapImageWindow.show();
+				    	   } else {
+				    		   Ext.alert('Erro', 'Erro ao gerar a imagem');
+				    	   }
+				    	   
+				       }
+				});
+				
+			} 
+			
+			
+		},
+		
+		showWindyWindow : function() {
+    	   var weatherWindity = Ext.getCmp('weatherWindity');
+    	   if ( !weatherWindity ) {
+    		   weatherWindity = Ext.create('MCLM.view.clima.WeatherWindity');
+    	   }
+    	   
+    	   var center = MCLM.Map.map.getView().getCenter();
+    	   //var center2 = ol.proj.transform([center[0], center[1]], 'EPSG:3857', 'EPSG:4326');
+    	   var center2 = center;
+    	   
+    	   lon = center2[0];
+    	   lat = center2[1];
+    	   zoom = MCLM.Map.map.getView().getZoom();			
+    	   
+    	   var url = "<iframe width='100%' height='100%' src='https://embed.windy.com/embed2.html?lat="+lat+"&lon="+lon+"&zoom="+zoom+"&level=surface&overlay=wind&menu=&message=&marker=&forecast=24&calendar=now&location=coordinates&type=map&actualGrid=&metricWind=km%2Fh&metricTemp=%C2%B0C' frameborder='0'></iframe> ";
+    	   weatherWindity.update( url );
+    	   weatherWindity.show();				
+			
+		},
+		
+		enableQueryLocation : function() {
+			MCLM.Map.unbindMapClick();
+			MCLM.Map.queryLocationEnabled = true;
+			$("#painelCentral").css('cursor','help');
+			
+			MCLM.Map.onClickBindKey = MCLM.Map.map.on('click', function(event) {
+				//var center = ol.proj.transform(event.coordinate, 'EPSG:3857', 'EPSG:4326');
+				var center = event.coordinate;
+				var lat = center[1];
+				var lon = center[0];
+				MCLM.Map.getWeatherFromLocation( lat, lon );
+			});
+			
+		},
+		
+		getWeatherFromLocation : function( lat, lon ) {
+			Ext.Ajax.request({
+			       url: 'getWeatherLocation',
+			       params: {
+			           'lat': lat,
+			           'lon': lon
+			       },       
+			       success: function(response, opts) {
+			    	   var respText = Ext.decode(response.responseText);
+			    	   
+			    	   var weatherCoordinateWindow = Ext.getCmp('weatherCoordinateWindow');
+			    	   if ( !weatherCoordinateWindow ) {
+			    		   weatherCoordinateWindow = Ext.create('MCLM.view.clima.WeatherCoordinateWindow');
+			    	   }
+			    	   weatherCoordinateWindow.setTitle("Previsão para município em coordenadas");
+			    	   weatherCoordinateWindow.show();				    	   
+			    	   
+			    	   var previsoes = respText.cidade.previsao;
+			    	   var table = "<table style='width:100%'>";
+			    	   for(var x=0; x<previsoes.length;x++  ) {
+			    		   var previsao = previsoes[x];
+			    		   var diaSpt = previsao.dia.split("-");
+			    		   var preDta = diaSpt[2] + "/" + diaSpt[1] + "/" + diaSpt[0]; 
+			    			   
+			    		   var icone = "img/clima/cptec/" + previsao.tempo + ".png";
+			    		   
+			    		   var tdIcone = "<img style='width:70px' src='"+icone+"'>";
+			    		   var mxIcone = "<img src='img/clima/cptec/ic_temp_max.png'>";
+			    		   var mnIcone = "<img src='img/clima/cptec/ic_temp_min.png'>";
+			    		   
+			    		   var climaDesc = MCLM.Functions.getClimaDesc( previsao.tempo );
+			    		   
+			    		   table = table + "<tr><td colspan='3' style='background-color:#efefef;border:1px dotted #cacaca'>Previsão para "+preDta+"</td></tr>";
+			    		   table = table + "<tr><td style='font-size:9px;'>"+climaDesc+"</td><td>Máxima</td><td>Mínima</td></tr>";
+			    		   table = table + "<tr><td>"+tdIcone+"</td><td style='color: #ef9d44;font-size: 18px;font-weight: 600;'>" + mxIcone + "&nbsp;&nbsp;" + previsao.maxima+"ºC</td>" + 
+			    		   	"<td style='color: #4174e8;font-size: 18px;font-weight: 600;'>"+ mnIcone + "&nbsp;&nbsp;" + previsao.minima+"ºC</td></tr>";
+			    		   
+			    		   
+			    		   
+			    	   }
+			    	   table = table + "<tr><td colspan='3' style='background-color:#efefef;border:1px dotted #cacaca'>Origem: Windy</td></tr>";
+			    	   table = table + "</table>";
+			    	   
+			    	   var windity = "<iframe width='410' height='220' src='https://embed.windy.com/embed2.html?lat="+lat+"&lon="+lon+"&type=forecast&metricWind=km%2Fh&metricTemp=%C2%B0C' frameborder='0'></iframe>";
+			    	   
+			    	   var divMain = "<div style='background-color:#edeff2;border-bottom:1px dotted #cacaca;width:100%;height:45px'><img style='position:absolute;left:5px;top:2px;width: 220px;' src='img/clima/cptec/logocomp.gif'><img style='width: 50px;position:absolute;right:5px;top:2px;' src='img/clima/cptec/logo_cptec.png'></div>" + 
+			    	   "<div style='padding-top:5px;font-size:11px;font-weight:bold;text-align:center;border-bottom:1px dotted #cacaca;width:100%;height:23px'>"+respText.cidade.nome+"</div>" + table + windity;
+			    	   
+			    	   
+			    	   weatherCoordinateWindow.update( divMain );
+			    	   
+			    	   
+			       }
+			});
+			
+		},
 		
 		getBaseMapName : function() {
 			return MCLM.Map.baseLayerName;
@@ -58,11 +431,18 @@ Ext.define('MCLM.Map', {
 			var map = MCLM.Map.map;
 			MCLM.Map.map.getView().fit([-16716960.433033716, -7413397.061675084, 23358056.252544772, 10745594.873977667]);	
 		},
+		getCenterHDMS : function() {
+			var center = MCLM.Map.map.getView().getCenter();
+			var coord = ol.coordinate.toStringHDMS( center );
+			return coord;
+		},
 		// --------------------------------------------------------------------------------------------
 		// Cria o Mapa Principal e Camadas auxiliares
 		loadMap : function( container ) {
 			me = MCLM.Map;
 			MCLM.Map.init();
+			MCLM.Map.initExternalLayers();
+			// ===================================================
 			
 			MCLM.Map.map = new ol.Map({
 				layers: [ MCLM.Map.baseLayer ],
@@ -71,9 +451,10 @@ Ext.define('MCLM.Map', {
 			    loadTilesWhileAnimating: true,
 			    loadTilesWhileInteracting: true,	
 				controls: ol.control.defaults().extend([
-				   new ol.control.ScaleLine(),
-				   new ol.control.ZoomSlider(),
-		           new ol.control.MousePosition({
+                   new ol.control.FullScreen(),  
+                   new ol.control.ScaleLine(),
+                   new ol.control.ZoomSlider(),
+ 		           new ol.control.MousePosition({
 		               undefinedHTML: '',
 		               projection: 'EPSG:4326',
 		               coordinateFormat: function(coordinate) {
@@ -86,15 +467,34 @@ Ext.define('MCLM.Map', {
 			    		   var lon = coordinate[1];		            	   
 		            	   var utmCoord = MCLM.Functions.latLonToUTM( lon, lat );
 		            	   
+		            	   MCLM.Map.centerHDMS = coord;
+		            	   
 		            	   $("#coord_map").html( mapCoord );
 		            	   $("#coord_hdms").html( coord );
 		            	   $("#coord_utm").html( utmCoord );
 		            	   
 		            	   return "";
 		               }
-		           })
-		        
+		           }),
+                   new ol.control.OverviewMap({className: 'ol-overviewmap ol-custom-overviewmap'}),
+	               new ol.control.Rotate({
+					   autoHide: false
+				   }),	                    
 				]),
+				
+		        interactions: ol.interaction.defaults({
+		        	  shiftDragZoom: false
+		        }).extend([
+		            new ol.interaction.DragRotateAndZoom(),
+		            new ol.interaction.DragZoom({
+		            	duration: 200,
+		            	condition: function(mapBrowserEvent) {
+		            		var originalEvent = mapBrowserEvent.originalEvent;
+		            		return ( originalEvent.ctrlKey && !(originalEvent.metaKey || originalEvent.altKey) && !originalEvent.shiftKey);
+		            	}
+		            })
+	            ]),				
+				
 				view: MCLM.Map.theView
 			});	
 			
@@ -109,6 +509,8 @@ Ext.define('MCLM.Map', {
 						break;  
 				}
 			});	
+			
+			MCLM.Map.map.on('moveend', MCLM.Map.storeMapPosition );
 			
 			MCLM.Map.map.on('pointermove', function(evt) {
 				if (evt.dragging) {
@@ -130,6 +532,198 @@ Ext.define('MCLM.Map', {
 			MCLM.Map.shipsHelper.init();
 			setInterval( MCLM.Map.updateMaritmTraffic , 300000); // 5 minutos			
 			
+			
+			MCLM.Map.createSceneryInfoLayer();
+		},
+		
+		initExternalLayers : function() {
+
+			//MCLM.Functions.showMetarImage('SBRJ');
+			
+			// Mais Mapas
+			
+			// Estilo Atlas:
+			// http://services.arcgisonline.com/arcgis/rest/services/NatGeo_World_Map/MapServer
+			
+			// Cartas aéreas
+			// http://services.arcgisonline.com/arcgis/rest/services/Specialty/World_Navigation_Charts/MapServer
+			
+			// Mais relevo
+			// http://services.arcgisonline.com/arcgis/rest/services/World_Shaded_Relief/MapServer
+			
+			// Street Map
+			// http://services.arcgisonline.com/arcgis/rest/services/World_Street_Map/MapServer
+
+			
+			MCLM.Map.imageryMap = new ol.layer.Tile({
+				source: new ol.source.XYZ({
+					attributions: ["ArcGisOnline"],
+					url: 'https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+				})
+			});
+
+			
+			MCLM.Map.osmLayer = new ol.layer.Tile({
+				source: new ol.source.OSM()
+			});
+
+			
+			
+			MCLM.Map.oceanBaseMap = new ol.layer.Tile({
+				source: new ol.source.XYZ({
+					attributions: ["ArcGisOnline"],
+					url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}'
+				})
+			});
+								
+
+			MCLM.Map.hillshadeMap = new ol.layer.Tile({
+				source: new ol.source.XYZ({
+					attributions: ["ArcGisOnline"],
+					url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}'
+				})
+			});				
+			
+			
+			MCLM.Map.worldTopoMap = new ol.layer.Tile({
+				source: new ol.source.XYZ({
+					attributions: ["ArcGisOnline"],
+					url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}'
+				})
+			});
+							
+			
+			
+			// https://openweathermap.org/api/weathermaps#examples
+			MCLM.Map.pressureLayer = new ol.layer.Tile({
+				source: new ol.source.XYZ({
+					attributions: ["OpenWeatherMap"],
+					url: 'http://tile.openweathermap.org/map/pressure_new/{z}/{x}/{y}.png?appid=810c5cf214be9635b7c73268bd0b516d'
+				})
+			});
+			
+			MCLM.Map.tempLayer = new ol.layer.Tile({
+				source: new ol.source.XYZ({
+					attributions: ["OpenWeatherMap"],
+					url: 'http://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=810c5cf214be9635b7c73268bd0b516d'
+				})
+			});	
+
+				
+			MCLM.Map.windLayer = new ol.layer.Tile({
+				source: new ol.source.XYZ({
+					attributions: ["OpenWeatherMap"],
+					url: 'http://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=810c5cf214be9635b7c73268bd0b516d'
+				})
+			});	
+				
+			MCLM.Map.precipitacaoLayer = new ol.layer.Tile({
+				source: new ol.source.XYZ({
+					attributions: ["OpenWeatherMap"],
+					url: 'http://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=810c5cf214be9635b7c73268bd0b516d'
+				})
+			});
+			
+			MCLM.Map.openSeaMapLayer = new ol.layer.Tile({
+				  source: new ol.source.OSM({
+				    crossOrigin: null,
+				    attributions: ["OpenSeaMap"],
+				    url: 'http://t1.openseamap.org/seamark/{z}/{x}/{y}.png'
+				})
+			});
+			
+			
+			MCLM.Map.osmLayer.set('name', 'OpenStreetMap');
+			MCLM.Map.osmLayer.set('alias', 'OpenStreetMap');
+			MCLM.Map.osmLayer.set('serverUrl', '' );
+			MCLM.Map.osmLayer.set('serialId', 'mclm_openstreetmap');
+			MCLM.Map.osmLayer.set('ready', true);
+			MCLM.Map.osmLayer.set('baseLayer', false);			
+			
+			MCLM.Map.bindTileEvent( MCLM.Map.osmLayer );			
+			
+			MCLM.Map.openSeaMapLayer.set('name', 'OpenSeaMap');
+			MCLM.Map.openSeaMapLayer.set('alias', 'OpenSeaMap');
+			MCLM.Map.openSeaMapLayer.set('serverUrl', '' );
+			MCLM.Map.openSeaMapLayer.set('serialId', 'mclm_openseamap_cmoa');
+			MCLM.Map.openSeaMapLayer.set('ready', true);
+			MCLM.Map.openSeaMapLayer.set('baseLayer', false);			
+			
+			MCLM.Map.bindTileEvent( MCLM.Map.openSeaMapLayer );
+
+			MCLM.Map.imageryMap.set('name', 'AGOimageryMap');
+			MCLM.Map.imageryMap.set('alias', 'AGOimageryMap');
+			MCLM.Map.imageryMap.set('serverUrl', '' );
+			MCLM.Map.imageryMap.set('serialId', 'mclm_ago_imageryMap');
+			MCLM.Map.imageryMap.set('ready', true);
+			MCLM.Map.imageryMap.set('baseLayer', false);
+			
+			MCLM.Map.bindTileEvent( MCLM.Map.imageryMap );
+			
+			MCLM.Map.hillshadeMap.set('name', 'AGOhillshadeMap');
+			MCLM.Map.hillshadeMap.set('alias', 'AGOhillshadeMap');
+			MCLM.Map.hillshadeMap.set('serverUrl', '' );
+			MCLM.Map.hillshadeMap.set('serialId', 'mclm_ago_hillshadeMap');
+			MCLM.Map.hillshadeMap.set('ready', true);
+			MCLM.Map.hillshadeMap.set('baseLayer', false);
+			
+			MCLM.Map.bindTileEvent( MCLM.Map.hillshadeMap );
+			
+			
+			MCLM.Map.worldTopoMap.set('name', 'AGOworldTopoMap');
+			MCLM.Map.worldTopoMap.set('alias', 'AGOworldTopoMap');
+			MCLM.Map.worldTopoMap.set('serverUrl', '' );
+			MCLM.Map.worldTopoMap.set('serialId', 'mclm_ago_worldTopoMap');
+			MCLM.Map.worldTopoMap.set('ready', true);
+			MCLM.Map.worldTopoMap.set('baseLayer', false);
+			
+			MCLM.Map.bindTileEvent( MCLM.Map.worldTopoMap );
+			
+			MCLM.Map.oceanBaseMap.set('name', 'AGOoceanBaseMap');
+			MCLM.Map.oceanBaseMap.set('alias', 'AGOoceanBaseMap');
+			MCLM.Map.oceanBaseMap.set('serverUrl', '' );
+			MCLM.Map.oceanBaseMap.set('serialId', 'mclm_ago_oceanBaseMap');
+			MCLM.Map.oceanBaseMap.set('ready', true);
+			MCLM.Map.oceanBaseMap.set('baseLayer', false);	
+			
+			MCLM.Map.bindTileEvent( MCLM.Map.oceanBaseMap );
+			
+			
+			MCLM.Map.pressureLayer.set('name', 'OWMPressure');
+			MCLM.Map.pressureLayer.set('alias', 'OWMPressure');
+			MCLM.Map.pressureLayer.set('serverUrl', '' );
+			MCLM.Map.pressureLayer.set('serialId', 'mclm_owm_pressure');
+			MCLM.Map.pressureLayer.set('ready', true);
+			MCLM.Map.pressureLayer.set('baseLayer', false);	
+			
+			MCLM.Map.bindTileEvent( MCLM.Map.pressureLayer );
+			
+			MCLM.Map.tempLayer.set('name', 'OWMTemperature');
+			MCLM.Map.tempLayer.set('alias', 'OWMTemperature');
+			MCLM.Map.tempLayer.set('serverUrl', '' );
+			MCLM.Map.tempLayer.set('serialId', 'mclm_owm_temperature');
+			MCLM.Map.tempLayer.set('ready', true);
+			MCLM.Map.tempLayer.set('baseLayer', false);	
+			
+			MCLM.Map.bindTileEvent( MCLM.Map.tempLayer );
+
+			MCLM.Map.windLayer.set('name', 'OWMWind');
+			MCLM.Map.windLayer.set('alias', 'OWMWind');
+			MCLM.Map.windLayer.set('serverUrl', '' );
+			MCLM.Map.windLayer.set('serialId', 'mclm_owm_wind');
+			MCLM.Map.windLayer.set('ready', true);
+			MCLM.Map.windLayer.set('baseLayer', false);	
+			
+			MCLM.Map.bindTileEvent( MCLM.Map.windLayer );
+			
+			MCLM.Map.precipitacaoLayer.set('name', 'OWMPrecip');
+			MCLM.Map.precipitacaoLayer.set('alias', 'OWMPrecip');
+			MCLM.Map.precipitacaoLayer.set('serverUrl', '' );
+			MCLM.Map.precipitacaoLayer.set('serialId', 'mclm_owm_precip');
+			MCLM.Map.precipitacaoLayer.set('ready', true);
+			MCLM.Map.precipitacaoLayer.set('baseLayer', false);					
+			
+			MCLM.Map.bindTileEvent( MCLM.Map.precipitacaoLayer );
 		},
 		
 		// --------------------------------------------------------------------------------------------
@@ -153,8 +747,12 @@ Ext.define('MCLM.Map', {
 			MCLM.Map.arrayMapCenter = JSON.parse("[" + MCLM.Map.mapCenter + "]");
 
 			MCLM.Map.theView = new ol.View({
-				center: ol.proj.transform( MCLM.Map.arrayMapCenter, 'EPSG:4326', 'EPSG:3857'),
-				zoom: MCLM.Map.mapZoom
+				//center: ol.proj.transform( MCLM.Map.arrayMapCenter, 'EPSG:4326', 'EPSG:3857'),
+				center: MCLM.Map.arrayMapCenter,
+				zoom: MCLM.Map.mapZoom,
+			    minZoom: 2,
+			    maxZoom: 19,
+			    projection: 'EPSG:4326',
 			});	
 			
 			
@@ -162,13 +760,29 @@ Ext.define('MCLM.Map', {
 				MCLM.Map.updateScale();
 			});			
 			
-			MCLM.Map.openSeaMapLayer = MCLM.Map.createOpenSeaMapLayer();
+			
 			MCLM.Map.baseLayer = MCLM.Map.createBaseLayer();
 			
 			$("#serverHostName").html( config.serverHostName );
+			$("#sysVer").html( config.version );
 			MCLM.Map.updateScale();
 			
+			
+			MCLM.Map.checkInternetAccess();
+			
 		},
+		
+		checkInternetAccess : function() {
+			var image = new Image();
+			image.src = 'https://www.google.com.br/images/branding/googlelogo/2x/googlelogo_color_120x44dp.png';
+			image.onload = function() {
+				MCLM.Functions.mainLog("Seu browser acessa a internet normalmente. Clique aqui para fechar esta mensagem.");
+			};
+			image.onerror = function() {
+				Ext.Msg.alert('Alerta!','Não foi possível acessar a internet a partir de seu navegador. Alguns serviços podem não estar disponíveis. Clique aqui para fechar esta mensagem.' );		  
+			};
+		},
+		
 		updateScale : function() {
 			var resolution = MCLM.Map.theView.getResolution()
 			var units = MCLM.Map.theView.getProjection().getUnits();
@@ -186,47 +800,43 @@ Ext.define('MCLM.Map', {
 			$("#mapScale").html("1 : " + scale);
 		},
 		// --------------------------------------------------------------------------------------------
-		// Gera a Camada do OpenSeaMap
-		createOpenSeaMapLayer : function() {
-			
-			var openSeaMapLayer = new ol.layer.Tile({
-				  source: new ol.source.OSM({
-				    crossOrigin: null,
-				    url: 'http://t1.openseamap.org/seamark/{z}/{x}/{y}.png'
-				})
-			});
-			openSeaMapLayer.set('name', 'OpenSeaMap');
-			openSeaMapLayer.set('alias', 'OpenSeaMap');
-			openSeaMapLayer.set('serverUrl', '' );
-			openSeaMapLayer.set('serialId', 'mclm_openseamap_cmoa');
-			openSeaMapLayer.set('ready', true);
-			openSeaMapLayer.set('baseLayer', false);
-			
-			return openSeaMapLayer;
-		},
-		// --------------------------------------------------------------------------------------------
 		// Gera a camada-base
 		createBaseLayer : function() {
+			var landLayer = null;
 			
-			var landLayer = new ol.layer.Tile({
-			    source: new ol.source.TileWMS({
-			        url: MCLM.Map.geoserverUrl,
-			        isBaseLayer : true,
-			        projection: ol.proj.get('EPSG:4326'),
-			        params: {
-			            'LAYERS': MCLM.Map.baseLayerName, 
-			            'FORMAT': 'image/png8',
-	    	            'tiled': true,
-	    	            'antialias' : 'full',
-	    	            'VERSION': '1.3.0', 
-			            	
-			        }
-			    })
-			});	
+			// Se a URL do mapa base for nula, usa o OSM original como base.
+			if( ( !MCLM.Map.geoserverUrl ) || ( MCLM.Map.geoserverUrl == '' ) ) {
+				
+				landLayer = new ol.layer.Tile({
+					source: new ol.source.OSM()
+				});				
+				
+			} else {
+			
+				landLayer = new ol.layer.Tile({
+				    source: new ol.source.TileWMS({
+				        url: MCLM.Map.geoserverUrl,
+				        isBaseLayer : true,
+				        projection: ol.proj.get('EPSG:4326'),
+				        params: {
+				            'LAYERS': MCLM.Map.baseLayerName, 
+				            'FORMAT': 'image/png8',
+		    	            'tiled': true,
+		    	            'antialias' : 'full',
+		    	            'VERSION': '1.3.0', 
+				            	
+				        }
+				    })
+				});
+				
+			}
+			
 			landLayer.set('name', MCLM.Map.baseLayerName );
 			landLayer.set('alias', 'Camada Base' );
 			landLayer.set('serverUrl', MCLM.Map.geoserverUrl );
 			landLayer.set('serialId', 'mclm_landlayer_cmoa');
+			landLayer.set('layerType', 'BAS');
+			
 			landLayer.set('ready', false);
 			landLayer.set('baseLayer', true);
 			MCLM.Map.bindTileEvent( landLayer );	
@@ -238,6 +848,7 @@ Ext.define('MCLM.Map', {
 		// Trocar o jQuery por ExtJS ... 
 		bindTileEvent : function( layer ) {
 			var serialId =  layer.get('serialId');
+			
 			if ( serialId ) {
 				
 				layer.getSource().on('tileloadstart', function(event) {
@@ -246,15 +857,24 @@ Ext.define('MCLM.Map', {
 					$("#error_" + serialId).css("display","none");
 					layer.set('ready', false);
 					
+					MCLM.Functions.showMainLoadingIcon('Carregando camada "' + layer.get('alias') + '"');
+					
 				});
 			
 				// Tile Carregado. Temos ao menos alguma coisa da camada.
 				// Oculta os icones de alerta e loading. 
 				layer.getSource().on('tileloadend', function(event) {
+					
+					//console.log( serialId + " ----- : " + event.tile.getTileCoord() );
+					//console.log( event.tile.getImage() );
+					//MCLM.Functions.mainLog(   );
+					
 					//console.log("tile '"+serialId+"' load end");
 					$("#alert_" + serialId).css("display","none");
 					$("#error_" + serialId).css("display","none");
 					layer.set('ready', true);
+					
+					MCLM.Functions.hideMainLoadingIcon();
 					
 				});
 				
@@ -264,15 +884,64 @@ Ext.define('MCLM.Map', {
 					$("#error_" + serialId).css("display","block");
 					layer.set('ready', false);
 					
+					MCLM.Functions.hideMainLoadingIcon();
 				});
 			}
 			
 		},
+		
+		undoZoom : function() {
+			
+			var currentMapPosition = MCLM.Map.currentMapPosition;
+			currentMapPosition--;
+			if ( currentMapPosition < 1 ) currentMapPosition = MCLM.Map.currentMap.length;
+			var position = MCLM.Map.currentMap[ currentMapPosition-1 ];
+			
+			if ( position ) {
+				MCLM.Map.theView.setCenter( position.center );
+				MCLM.Map.theView.setZoom( position.zoom );
+				MCLM.Map.currentMapPosition = currentMapPosition;
+				MCLM.Map.doNotStorePosition = true;
+			}
+			
+		},
+		
+		storeMapPosition : function( center, zoom ) {
+			if ( MCLM.Map.doNotStorePosition ) {
+				MCLM.Map.doNotStorePosition = false;
+				return true;
+			}
+			
+			var maxStoreSize = MCLM.Map.maxStoreSize;
+			var center = MCLM.Map.map.getView().getCenter();
+			var mapZoom = MCLM.Map.map.getView().getZoom();
+			
+			$("#zoomLevel").html( mapZoom );			
+			
+			var position = {};
+			position.center = center;
+			position.zoom = mapZoom;
+			
+			if ( MCLM.Map.currentMap.length < maxStoreSize ) {
+				MCLM.Map.currentMap.push( position );
+			} else {
+				if ( MCLM.Map.currentMapPosition == maxStoreSize ) {
+					MCLM.Map.currentMapPosition = 0;
+				}
+				MCLM.Map.currentMap[ MCLM.Map.currentMapPosition ] = position;
+			}
+			
+			MCLM.Map.currentMapPosition++;
+		},
+		
 		// --------------------------------------------------------------------------------------------
 		// Atualiza algumas coisas quando o mapa eh arrastado ou o zoom muda
 		updateMapCenter : function() {
 			var center = MCLM.Map.map.getView().getCenter();
-			var center2 = ol.proj.transform([center[0], center[1]], 'EPSG:3857', 'EPSG:4326');
+			
+			//var center2 = ol.proj.transform([center[0], center[1]], 'EPSG:3857', 'EPSG:4326');
+			var center2 = center;
+			
 			mapCenterLong = center2[0];
 			mapCenterLat = center2[1];
 			mapZoom = MCLM.Map.map.getView().getZoom();
@@ -289,7 +958,10 @@ Ext.define('MCLM.Map', {
 		// Retorna o centro do mapa
 		getMapCenter : function() {
 			var center = MCLM.Map.map.getView().getCenter();
-			var center2 = ol.proj.transform([center[0], center[1]], 'EPSG:3857', 'EPSG:4326');
+			//var center2 = ol.proj.transform([center[0], center[1]], 'EPSG:3857', 'EPSG:4326');
+			var center2 = center;
+			
+			
 			mapCenterLong = center2[0];
 			mapCenterLat = center2[1];
 			return mapCenterLong + "," + mapCenterLat;
@@ -306,21 +978,28 @@ Ext.define('MCLM.Map', {
 			
 			var idDataWindow = node.get('idDataWindow');
 			var idNodeData = node.get('idNodeData');
-			
+			var cqlFilter = node.get('cqlFilter');
 			var serverUrl = node.get('serviceUrl');
 			var layerName = node.get('layerName');
-			
 			var layerAlias = node.get('layerAlias');
 			var data = node.data;
 			var serialId = node.get('serialId');
 			var version = node.get('version');
 			var layerType = node.get('layerType');
 			
-			var filter = node.get("filter");
-			var cql = null;
-			if( filter ) {
-				cql = filter.filter;
+			if ( MCLM.Map.layerExistInMap( serialId )  ){
+				//console.log( " Tentativa de adicionar duas veses a camada " + layerName + " (" + serialId + ")" );
+				return true;
 			}
+			
+			console.log("ATENÇÃO : Falta implementar filtro adicional. Map.js : addLayer() ");
+			/*
+			var filter = node.get("filter");
+			var aditionalFilter = null;
+			if( filter ) {
+				aditionalFilter = filter.filter;
+			}
+			*/
 			
             var transparency = node.get('transparency') / 10;
             var layerStackIndex = node.get('layerStackIndex');			
@@ -350,11 +1029,14 @@ Ext.define('MCLM.Map', {
 	    	            'VERSION': '1.1.1', 
 	    	            'FORMAT': 'image/png8'
 	    	    }
-				if ( cql ) {
+				if ( cqlFilter ) {
+					
+					//console.log("Aplicando filtro " + cqlFilter );
+					
 					paramsRel = {
 		    	        	tiled: true,
 		    	            'layers': layerName,
-		    	            'cql_filter': cql,
+		    	            'cql_filter': cqlFilter,
 		    	            'VERSION': '1.1.1', 
 		    	            'FORMAT': 'image/png8'
 		    	    }					
@@ -370,27 +1052,51 @@ Ext.define('MCLM.Map', {
 		    	    })
 		    	});	
 				
-		    	
-		    	//console.log( "URL Camada " + layerName + " " + serverUrl );
-		    	
 			}
+
+			//console.log( "URL Camada " + layerName + " " + serverUrl );
 			
 			if ( transparency == 0 ) transparency = 1;
 			newLayer.setOpacity( transparency );
+			newLayer.set('layerName', layerName);
 			newLayer.set('name', layerName);
 			newLayer.set('alias', layerAlias);
 			newLayer.set('idNodeData', idNodeData);
 			newLayer.set('serverUrl', serverUrl);
+			newLayer.set('serviceUrl', serverUrl);
 			newLayer.set('serialId', serialId);
 			newLayer.set('layerType', layerType);
 			newLayer.set('idDataWindow', idDataWindow);
 			newLayer.set('ready', false);
 			newLayer.set('baseLayer', false);
+			newLayer.set('cqlFilter', cqlFilter);
 			
 			MCLM.Map.bindTileEvent( newLayer );
 			MCLM.Map.map.addLayer( newLayer );
 
-			if ( layerStackIndex > 0 ) me.setNewIndex( layerName, layerStackIndex );
+			if ( layerStackIndex > 0 ) me.setNewIndex( serialId, layerStackIndex );
+
+			MCLM.Map.addToLayerStack( data );
+			
+			return newLayer;			
+		},
+		
+		removeFromLayerStack : function( serialId ) {
+			// Remove da lista de camadas do gerenciador de camadas
+	    	var layerStackStore = Ext.getStore('store.layerStack');
+	    	var stackGridPanel = Ext.getCmp('stackGridPanel');
+	    	layerStackStore.each( function(rec) {
+	    	    if (rec.data.serialId == serialId) {
+	    	    	layerStackStore.remove(rec);
+	    	        return false;
+	    	    }
+	    	});    	
+	    	if ( stackGridPanel ) {
+	    		stackGridPanel.getView().refresh();
+	    	}   			
+		},
+		
+		addToLayerStack : function( data ) {
 			
 			// Adiciona na lista do gerenciador de camadas.
 	    	var layerStackStore = Ext.getStore('store.layerStack');
@@ -402,8 +1108,8 @@ Ext.define('MCLM.Map', {
 	    		stackGridPanel.getView().refresh();
 	    	}			
 			// ----------------------------------------------
-			return newLayer;			
 		},
+		
 		// --------------------------------------------------------------------------------------------
 		// Checa se uma camada estah sendo exibida no mapa ou nao
 		isLayerEnabled : function( layerName ) {
@@ -450,7 +1156,22 @@ Ext.define('MCLM.Map', {
 			MCLM.Map.aeroTrafficEnabled = !MCLM.Map.aeroTrafficEnabled ;
 			if ( !MCLM.Map.aeroTrafficEnabled ) {
 				MCLM.Map.aircraftHelper.deleteAircrafts();
+				MCLM.Map.removeLayer('aircraftLayer');
+				MCLM.Map.removeFromLayerStack( 'aircraftLayer' );
+				$("#toggleAirTrafficID").css("border","1px solid #cacaca");
 			} else {
+				MCLM.Map.map.addLayer( MCLM.Map.aircraftHelper.activeAircraftLayer );
+				$("#toggleAirTrafficID").css("border","2px solid #ff5d00");
+	    		var data = {};
+	    		data.description = 'Monitoramento de Tráfego Aéreo';
+	    		data.institute = 'Serviço Externo';
+	    		data.layerName = 'Tráfego Aéreo';
+	    		data.layerAlias = 'Tráfego Aéreo';
+	    		data.serialId = 'aircraftLayer';
+	    		data.layerType = 'Externo';
+				
+				MCLM.Map.addToLayerStack( data );
+				
 				MCLM.Map.aircraftHelper.getAircraftsBbox();
 			}
 		},		
@@ -488,18 +1209,23 @@ Ext.define('MCLM.Map', {
 		// Converte uma String GeoJSON para uma camada Vector
 		createVectorLayerFromGeoJSON : function( geojsonStr, node ) {
         	var dataLayer = node.get("dataLayer");
-        	var tableName = dataLayer.tableName;
-        	var database = dataLayer.database;
 			var serialId = node.get('serialId' );			
 			var layerName = node.get( 'layerName' );			
-			var layerAlias = node.get( 'layerAlias' );	
+			var layerAlias = node.get( 'layerAlias' );
+			var layerType = 'FEI';
+			var idNodeData = node.get('idNodeData');
+			
+			
+        	var tableName = dataLayer.tableName;
+        	var database = dataLayer.database;
+			
 			var layerStyle = geojsonStr.featureStyle;
 			var clustered = false;
 		
 			
 			// Carregas as features
 	    	var features = new ol.format.GeoJSON().readFeatures( geojsonStr.data, {
-	    	    featureProjection: 'EPSG:3857'
+	    	    //featureProjection: 'EPSG:3857'
 	    	});		   	
 		   	
 	    	// Cria um source para as features
@@ -736,6 +1462,8 @@ Ext.define('MCLM.Map', {
 			vectorLayer.set('serialId', serialId );
 			vectorLayer.set('ready', true);
 			vectorLayer.set('baseLayer', false);	        
+			vectorLayer.set('idNodeData', idNodeData);
+			vectorLayer.set('layerType', layerType);
 			
 			MCLM.Map.removeLayer( serialId );
 			MCLM.Map.map.addLayer( vectorLayer );
@@ -755,6 +1483,8 @@ Ext.define('MCLM.Map', {
 				}
 			});
 		},
+		
+		
 		removeLayer : function ( serialId ) {
 			var me = MCLM.Map;
 			MCLM.Map.map.getLayers().forEach( function ( layer ) {
@@ -762,34 +1492,16 @@ Ext.define('MCLM.Map', {
 					me.map.removeLayer( layer );	
 					return;
 				}
+				
 			});
 			
-			// Remove da lista de camadas do gerenciador de camadas
-	    	var layerStackStore = Ext.getStore('store.layerStack');
-	    	var stackGridPanel = Ext.getCmp('stackGridPanel');
-	    	layerStackStore.each( function(rec) {
-	    	    if (rec.data.serialId == serialId) {
-	    	    	layerStackStore.remove(rec);
-	    	        return false;
-	    	    }
-	    	});    	
-	    	if ( stackGridPanel ) {
-	    		stackGridPanel.getView().refresh();
-	    	}   			
+			MCLM.Map.removeFromLayerStack( serialId );
 			
 			
 		},
+	
 		// --------------------------------------------------------------------------------------------
-		// Liga/ Desliga o mapa do OpenSeaMap
-		toggleSeaMapLayer : function() {
-			if ( MCLM.Map.isLayerEnabled('OpenSeaMap') ) {
-				MCLM.Map.removeLayer( 'mclm_openseamap_cmoa' );
-			} else {
-				MCLM.Map.map.addLayer( MCLM.Map.openSeaMapLayer );	
-			}
-		},		
-		// --------------------------------------------------------------------------------------------
-		// Liga/ Desliga o mapa do OpenSeaMap
+		// Liga/ Desliga o mapa de base
 		toggleBaseLayer : function() {
 			if ( MCLM.Map.baseLayer.getVisible() ) {
 				MCLM.Map.baseLayer.setVisible(false);
@@ -822,6 +1534,22 @@ Ext.define('MCLM.Map', {
 			}
 			return null;
 		},
+
+		// --------------------------------------------------------------------------------------------
+		// Retorna se uma camada já está carregada no mapa pelo ID
+		layerExistInMap : function ( serial ) {
+			var layers = MCLM.Map.map.getLayers();
+			var length = layers.getLength();
+			for (var i = 0; i < length; i++) {
+				var serialId = layers.item(i).get('serialId');
+				if (serialId === serial) {
+					return true;
+				}
+			}
+			return false;
+		},
+		
+		
 		// --------------------------------------------------------------------------------------------
 		// Retorna uma camada do mapa dado o seu serialId
 		findBySerialID : function ( serial ) {
@@ -837,8 +1565,8 @@ Ext.define('MCLM.Map', {
 		},
 		// --------------------------------------------------------------------------------------------
 		// Marca uma camada como selecionada.
-		selectLayer : function ( layerName ) {
-			MCLM.Map.selectedLayer = MCLM.Map.findByName( layerName );
+		selectLayer : function ( serialId ) {
+			MCLM.Map.selectedLayer = MCLM.Map.findBySerialID( serialId );
 		},
 		// --------------------------------------------------------------------------------------------
 		// Pega a opacidade da camada selecionada
@@ -867,8 +1595,8 @@ Ext.define('MCLM.Map', {
 		},
 		// --------------------------------------------------------------------------------------------
 		// Modifica o indice de uma camada no mapa (nivel)
-		setNewIndex : function ( layerName , newIndex ) {
-			var layer = MCLM.Map.findByName( layerName );
+		setNewIndex : function ( serialId , newIndex ) {
+			var layer = MCLM.Map.findBySerialID( serialId );
 			var layers = MCLM.Map.map.getLayers();
 			if ( layer ) {
 				var length = layers.getLength();
@@ -881,16 +1609,29 @@ Ext.define('MCLM.Map', {
 		// Retorna o bounding box atual do mapa
 		getMapCurrentBbox : function () {
 			var extent = MCLM.Map.map.getView().calculateExtent( MCLM.Map.map.getSize() );
-		    var bottomLeft = ol.proj.transform( ol.extent.getBottomLeft( extent ), 'EPSG:3857', 'EPSG:4326' );
-		    var topRight = ol.proj.transform( ol.extent.getTopRight( extent ), 'EPSG:3857', 'EPSG:4326' );
-			return bottomLeft + "," + topRight;
+
+			//var bottomLeft = ol.proj.transform( ol.extent.getBottomLeft( extent ), 'EPSG:3857', 'EPSG:4326' );
+		    //var topRight = ol.proj.transform( ol.extent.getTopRight( extent ), 'EPSG:3857', 'EPSG:4326' );
+
+		    var bottomLeft = ol.extent.getBottomLeft( extent );
+		    var topRight = ol.extent.getTopRight( extent );
+		    
+		    
+		    return bottomLeft + "," + topRight;
 		},
 		// --------------------------------------------------------------------------------------------
 		// Retorna a URL para pegar a imagem PNG de uma camada 'layerName' do servidor 'serviceUrl'
 		// Usa o BBOX atual da viewport do mapa
-		getLayerImagePreview : function ( layerName, serviceUrl) {
+		getLayerImagePreview : function ( layerName, serviceUrl, width, height, cqlFilter ) {
+			if ( !width ) width = 238;
+			if ( !height ) height = 150;
+			var cql = "";
+			if ( cqlFilter ) cql = "&cql_filter=" + cqlFilter.replace(" ", "");
 			var	bbox = MCLM.Map.getMapCurrentBbox();
-			var thumImg = serviceUrl + "/?service=WMS&srs=EPSG:4326&width=238&height=150&version=1.3&transparent=true&request=GetMap&layers="+layerName+"&format=image/png8&bbox="+bbox;
+			var thumImg = serviceUrl + encodeURI("/?service=WMS&srs=EPSG:4326"+cql+"&width="+width+"&height="+height+"&version=1.3&transparent=true&request=GetMap&layers="+layerName+"&format=image/png&mode=8bit&bbox="+bbox);
+			
+			console.log( "GetMap: " + thumImg );
+			
 			return thumImg;
 		},		
 		// --------------------------------------------------------------------------------------------
@@ -920,7 +1661,8 @@ Ext.define('MCLM.Map', {
 		// --------------------------------------------------------------------------------------------
 		// Interroga o servidor de rotas para saber quais ruas estão mais perto do ponto clicado pelo usuário
 		getNearestRoads : function( center, type ) {
-			var coordinate = ol.proj.transform( center , 'EPSG:3857', 'EPSG:4326');			
+			//var coordinate = ol.proj.transform( center , 'EPSG:3857', 'EPSG:4326');			
+			var coordinate = center;			
 			
 			Ext.Ajax.request({
 		       url: 'getNearestRoads',
@@ -1012,6 +1754,22 @@ Ext.define('MCLM.Map', {
 			});
 		},
 		
+		createSceneryInfoLayer : function() {
+
+			/*
+			// Camada para os detalhes do cenario - texto / imagem
+			MCLM.Map.vectorSourceSceneryDetails = new ol.source.Vector();
+			MCLM.Map.vectorLayerSceneryDetails = new ol.layer.Vector({
+	            source : MCLM.Map.vectorSourceSceneryDetails
+	        });
+			MCLM.Map.vectorLayerSceneryDetails.set('name', 'sceneryDetails' );
+			MCLM.Map.vectorLayerSceneryDetails.set('alias', 'sceneryDetails' );
+			MCLM.Map.vectorLayerSceneryDetails.set('serialId', 'sceneryDetails' );
+			MCLM.Map.vectorLayerSceneryDetails.set('baseLayer', false );
+			MCLM.Map.vectorLayerSceneryDetails.set('ready', true );
+			MCLM.Map.map.addLayer( MCLM.Map.vectorLayerMarker );
+			*/
+		},
 		
 		// --------------------------------------------------------------------------------------------
 		// Liga o click do mouse no mapa com o metodo de consulta de camada
@@ -1024,16 +1782,15 @@ Ext.define('MCLM.Map', {
 			me.onClickBindKey = me.map.on('click', function(event) {
 
 				me.queryMap( event.coordinate );
-				var featureHit = false;
 				var externalLayerName = "";
 				me.map.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
 					var columnRefs = {};
 					var layerName = layer.get("alias");
 					var att = feature.getProperties();
+					var layerType = layer.get("layerType");
 					
-					if ( (layerName == 'aircraftLayer') && aeroTrafficEnabled ) {
+					if ( (layerName == 'aircraftLayer') && MCLM.Map.aeroTrafficEnabled ) {
 						me.aircraftHelper.showAircraftDetails( att );
-						featureHit = true;
 						return true;
 					}
 					
@@ -1044,16 +1801,23 @@ Ext.define('MCLM.Map', {
 					
 					if ( layerName == 'poiLayer' ) {
 						MCLM.RouteHelper.inspectFeature( event.pixel );
-						featureHit = true;
 						return true;
 					}
 
+					
+					// Tete de interrogar FEI --------
+					if ( layerType == 'FEI' ) {
+						var features = [ feature ];
+						att.features = features;
+					}
+					// -------------------------------
+					//console.log( layerType );
+					//console.log( att );					
+					
 					if ( !att.features ) {
 						MCLM.Functions.mainLog("Não existem dados na camada " + layerName );
 					} else {
 					
-						featureHit = true;
-						
 						externalLayerName = layerName;
 						var data = [];
 				        att.features.forEach( function( feature ) {
@@ -1114,6 +1878,10 @@ Ext.define('MCLM.Map', {
 				
 				var idNodeData = layer.get("idNodeData");
 				var idDataWindow = layer.get("idDataWindow");
+				
+				//console.log( layer );
+				//console.log( idNodeData );
+				
 				var found = false;
 				
 				if ( layerName && ( !baseLayer ) ) {
@@ -1139,6 +1907,7 @@ Ext.define('MCLM.Map', {
 		queryLayer : function( layerName, urlFeatureInfo, layerAlias, idNodeData, idDataWindow ) {
 			
 			MCLM.Functions.mainLog("Interrogando " + layerAlias + "...");
+			
 			var encodedUrl = encodeURIComponent( urlFeatureInfo );
 			var me = MCLM.Map;
 			Ext.Ajax.request({
@@ -1150,28 +1919,89 @@ Ext.define('MCLM.Map', {
 		           'idDataWindow' : idDataWindow
 		       },       
 		       success: function(response, opts) {
-		    	  MCLM.Functions.mainLog("[OK] " + layerAlias);
-		    	  
 		    	  var jsonObj = JSON.parse(response.responseText);
-		    	   
-		    	  var rawData = [];
-		    	  for ( x=0; x<jsonObj.features.length;x++ ) {
-		    		  var tempObj = jsonObj.features[x].properties;
-		    		 
-		    		  var feicaoMeta = {};
-		    		  var feicaoMetaFeatures = [];
-		    		  feicaoMetaFeatures.push( jsonObj.features[x] );
-		    		  feicaoMeta["features"] = feicaoMetaFeatures;
-		    		  feicaoMeta["type"] = "FeatureCollection";
+		    	 
+		    	  if ( jsonObj.error == true ) {
+		    		  MCLM.Functions.mainLog("[ERRO] " + layerAlias);
+		    		  Ext.Msg.alert('Erro', jsonObj.msg );
+		    	  } else {
+		    		  MCLM.Functions.mainLog("[OK] " + layerAlias);
+		    		  var symbolServerUrl = MCLM.Globals.config.symbolServerURL;
 		    		  
-		    		  tempObj["mclm_metadata_property"] = Ext.encode( feicaoMeta );
-		    		  rawData.push( tempObj );
-		    	  }
-		    	   
-		    	  if ( rawData.length > 0 ) {
-		    		 me.addGrid( layerAlias, rawData );
-		    	  }
+			    	  var rawData = [];
+			    	  for ( x=0; x<jsonObj.features.length;x++ ) {
+			    		  var feature = jsonObj.features[x];
+			    		  var properties = feature.properties;
+			    		  var attributes = properties.attributes;
+			    		  
+			    		  attributes.sort( function(a, b) {
+			    			  return a.indexOrder - b.indexOrder;
+			  			  });
+			    		  
+			    		  var newProperties = {};
+			    		  newProperties["data_window"] = properties.data_window;
+			    		  newProperties["node_data"] = properties.node_data;
+						  newProperties["window_type"] = properties.window_type;
+						  newProperties["layer_description"] = properties.layer_description;
+						  newProperties["layer_source"] = properties.layer_source;				    		  
+			    		  
+			    		  var theColor = "000000";
+			    		  for ( y=0; y<attributes.length;y++ ) {
+			    			  var attribute = attributes[y];
+			    			  var translatedName = attribute.translatedName; 
+			    			  var description = attribute.description; 
+			    			  var originalName = attribute.originalName; 
+			    			  var attrValue = attribute.value; 
+			    			  var indexOrder = attribute.indexOrder;
+			    			  var dataType = attribute.dataType;
+			    			  var attrName = originalName;
+			    			  
+			    			  if( translatedName ) {
+			    				  attrName = translatedName;
+			    			  }
+			    			  
+			    			  if ( dataType == 'URL' ) attrValue = "<a target='_BLANK' href='" + attrValue + "'>Link Externo</a>";
+			    			  
+			    			  if ( dataType == 'COLOR' ) {
+			    				  theColor = attrValue.replace('#','');
+			    				  attrValue = "<div style='width:30px;height:12px;background-color:"+attrValue+";border:1px solid black'></div>";
+			    			  }
+			    			  
+			    			  if( dataType == 'IMAGE' ) {
+			    				  attrValue = "<a target='_BLANK' href='" + attrValue + "'>Ver imagem...</a>";
+			    			  }
+			    			  
+			    			  
+			    			  if( dataType == 'SYMBOL' ) {
+			    				  var imageLink = symbolServerUrl + "?symbol=" + attrValue + "&color=_" + theColor;
+			    				  attrValue = "<a onclick='MCLM.Functions.showSymbol(\"" + imageLink + "\")' href='#'>Ver símbolo...</a>";
+			    			  }	
+			    			  
+			    			  if( dataType == 'IMAGELIST' ) {
+			    				  attrValue = "<a onclick='MCLM.Functions.showImages(\"" + attrValue + "\")' href='#'>Ver imagens...</a>";
+			    			  }
+			    			  
+			    			  if ( (!attrValue) || String(attrValue).toUpperCase() == 'NULL' ) attrValue = "";
+			  
+			    			  newProperties[attrName] = attrValue;
 
+			    		  }
+			    		  
+			    		  var feicaoMeta = {};
+			    		  var feicaoMetaFeatures = [];
+			    		  feicaoMetaFeatures.push( feature );
+			    		  feicaoMeta["features"] = feicaoMetaFeatures;
+			    		  feicaoMeta["type"] = "FeatureCollection";
+			    		  newProperties["mclm_metadata_property"] = Ext.encode( feicaoMeta );
+			    		  rawData.push( newProperties ); 
+			    	  }
+			    	   
+			    	  if ( rawData.length > 0 ) {
+			    		 me.addGrid( layerAlias, rawData );
+			    	  }
+
+		    	  }
+			    	  
 		       },
 		       failure: function(response, opts) {
 		    	   MCLM.Functions.mainLog("[ERRO] " + layerAlias);
@@ -1198,7 +2028,11 @@ Ext.define('MCLM.Map', {
 		        	if ( key == 'mclm_label_column' ) { keys.push({text: key, width:0, dataIndex: key, hidden : true}) } else
 	        		if ( key == 'mclm_metadata_property' ) { keys.push({text: key, width:0, dataIndex: key, hidden : true}) } else
 		        	if ( key == 'node_data' ) { keys.push({text: key, width:0, dataIndex: key, hidden : true}) } else
+	        		if ( key == 'window_type' ) { keys.push({text: key, width:0, dataIndex: key, hidden : true}) } else
+        			if ( key == 'layer_description' ) { keys.push({text: key, width:0, dataIndex: key, hidden : true}) } else
+       				if ( key == 'layer_source' ) { keys.push({text: key, width:0, dataIndex: key, hidden : true}) } else
 		        	if ( key == 'data_window' ) { keys.push({text: key, width:0, dataIndex: key, hidden : true}) } else
+		        	if ( key == 'mapsymbol' ) { keys.push({text: key, width:0, dataIndex: key, hidden : true}) } else
 		        		keys.push({text: key, width:150, dataIndex: key}); 
 		        }
 		    }
@@ -1219,8 +2053,8 @@ Ext.define('MCLM.Map', {
 			    
 			    listeners: {
 			    	itemclick: function(dv, record, item, index, e) {
-			    		var selectedRec = dv.getSelectionModel().getSelection()[0];  
-			    		MCLM.Functions.openWindowData( selectedRec.data );
+			    		var selectedRec = dv.getSelectionModel().getSelection()[0];
+			    		MCLM.Functions.openWindowData( layerName, selectedRec.data );
 			    	}
 			    }
 			    
@@ -1232,6 +2066,7 @@ Ext.define('MCLM.Map', {
 		createStore : function ( storeData, columns ) {
 			var arrData = [];
 			var theData = storeData;
+
 			if ( !$.isArray( storeData ) ) {
 				arrData.push( storeData );
 				theData = arrData;
@@ -1244,6 +2079,7 @@ Ext.define('MCLM.Map', {
 			}); 	
 			return store;
 		},
+		
 		addGrid : function ( layerName, data ) {
 			
 			var storeColumns = MCLM.Map.getStoreColumnsFromJson( data[0] );   
@@ -1303,14 +2139,8 @@ Ext.define('MCLM.Map', {
 			    	} 
 		    	   
 					//Adiciona ao Layer Stack
-					var layerStackStore = Ext.getStore('store.layerStack');
-					var stackGridPanel = Ext.getCmp('stackGridPanel');
-					var layerStack = layerStackStore.getRange();
-					layerStack.push( node.data );
-					layerStackStore.loadData( layerStack );    				
-					if ( stackGridPanel ) {
-						stackGridPanel.getView().refresh();
-					}
+			    	MCLM.Map.addToLayerStack( node.data );
+
 				},
 				failure: function(response, opts) {
 					MCLM.Functions.hideMainLoadingIcon();
@@ -1331,7 +2161,9 @@ Ext.define('MCLM.Map', {
 			var coord = center.split(",");
 			var lat = Number( coord[0].trim() );
 			var lon = Number( coord[1].trim() );
-			var coordinate = ol.proj.transform([lat, lon], 'EPSG:4326', 'EPSG:3857');
+			
+			//var coordinate = ol.proj.transform([lat, lon], 'EPSG:4326', 'EPSG:3857');
+			var coordinate = center;
 			
 			MCLM.Map.theView.animate({
 				  zoom		: zoom,
@@ -1385,26 +2217,6 @@ Ext.define('MCLM.Map', {
 			});
 			return result;
 		},		
-		
-		// --------------------------------------------------------------------------------------------
-		// TESTE - APAGAR
-		showLayers : function () {
-			var layers = MCLM.Map.map.getLayers();
-			var length = layers.getLength();
-			for (var i = 0; i < length; i++) {
-				var layerName = layers.item(i).get('name');
-				
-				var alias = layers.item(i).get('alias');
-				var serverUrl = layers.item(i).get('serverUrl');
-				var serialId = layers.item(i).get('serialId');
-				var layerType = layers.item(i).get('layerType');				
-				
-				console.log( " > " + layerName + " | " + serialId + " (" + alias + ")");
-			}
-			return null;
-		},
-		
-		
 		
 	}
 

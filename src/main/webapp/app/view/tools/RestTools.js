@@ -10,14 +10,7 @@ Ext.define('MCLM.view.tools.RestTools', {
         background: '#FFFFFF'
     }, 
     
-    items: [{
-	    iconCls: 'forecast-icon',
-        handler: 'showForecast',
-	    width: MCLM.Globals.btnWidth,
-	    height: MCLM.Globals.btnHeight,
-	    id : 'showForecastID',
-        xtype: 'button',
-    },{
+    items: [/*{
 	    iconCls: 'aeroplane-icon',
 	    width: MCLM.Globals.btnWidth,
 	    height: MCLM.Globals.btnHeight,
@@ -25,7 +18,7 @@ Ext.define('MCLM.view.tools.RestTools', {
 	    enableToggle: true,
         id : 'aeroplaneID',
         xtype: 'button',
-    },{
+    },*/{
 	    iconCls: 'ship-icon',
 	    enableToggle: true,
 	    width: MCLM.Globals.btnWidth,
@@ -47,14 +40,6 @@ Ext.define('MCLM.view.tools.RestTools', {
 	    height: MCLM.Globals.btnHeight,
 	    handler: 'showStreetPhoto',
         id : 'photoID',
-        xtype: 'button',
-    },{
-	    iconCls: 'buoy-icon',
-	    enableToggle: true,
-	    width: MCLM.Globals.btnWidth,
-	    height: MCLM.Globals.btnHeight,
-	    handler: 'toggleSeaMapLayer',
-        id : 'seaMapID',
         xtype: 'button',
     }],
 

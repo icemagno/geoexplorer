@@ -28,6 +28,12 @@ Ext.define('MCLM.view.cenarios.SaveCenarioForm', {
         allowBlank : false,
         readOnly: true,
     },{
+    	fieldLabel: 'Centro do Mapa HDMS',
+    	id : 'mapCenterHDMSId',
+    	name: 'mapCenterHDMS',
+    	allowBlank : false,
+    	//xtype : 'hidden',
+    },{
         fieldLabel: 'Nível de Zoom',
         id : 'mapZoomConfigField',
         width: 150,

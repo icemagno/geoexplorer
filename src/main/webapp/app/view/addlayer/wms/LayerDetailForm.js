@@ -53,6 +53,12 @@ Ext.define('MCLM.view.addlayer.wms.LayerDetailForm', {
             	// 
             },
         }           
+    }, {
+        fieldLabel: 'Filtro CQL',
+        width: 330,
+        id:'cqlFilter',
+        name: 'cqlFilter',
+        allowBlank: true,
     },{
         fieldLabel: 'Parend ID',
         width: 350,
@@ -60,6 +66,13 @@ Ext.define('MCLM.view.addlayer.wms.LayerDetailForm', {
         name: 'layerFolderID',
         id:'parentFolderID',
         readOnly: true,
+    },{
+        fieldLabel: 'Server ID',
+        width: 350,
+        name: 'idServer',
+        id:'idServer',
+        allowBlank: true,
+        xtype : 'hidden',
     }],
     buttons: [{
     		  // Interceptado pelo controller 'MCLM.view.addlayer.wms.CapabilitiesController'	

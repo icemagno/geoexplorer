@@ -3,6 +3,7 @@ package br.mil.mar.casnav.mclm.misc;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -13,6 +14,7 @@ import java.nio.charset.Charset;
 import java.util.List;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -39,66 +41,28 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
 import org.apache.http.protocol.HttpContext;
 
+import br.mil.mar.casnav.mclm.persistence.exceptions.ForbiddenException;
+import br.mil.mar.casnav.mclm.persistence.exceptions.UnauthorizedException;
+
 
 public class WebClient {
 	private final String USER_AGENT = "Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9.2.13) Gecko/20101206 Ubuntu/10.10 (maverick) Firefox/3.6.13";
 	private CookieStore cookieStore;
+
+	public void saveImage(String imageUrl, String destinationFile) throws IOException {
+		imageUrl = imageUrl.replace(" ", "");
+		System.out.println("SAVE IMG: " + imageUrl );
+		File picutreFile = new File( destinationFile );
+        URL url=new URL( imageUrl );
+        HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+        conn.setRequestProperty("User-Agent", USER_AGENT);
+        conn.setRequestProperty("Connection", "keep-alive");
+        conn.setConnectTimeout( 240000 );
+        conn.setRequestMethod("GET");  
+        conn.connect();
+        FileUtils.copyInputStreamToFile( conn.getInputStream(), picutreFile );		
+	}	
 	
-	
-	/*
-	public void payloadTest() throws Exception {
-		
-		String url = "http://www.vadeonibus.com.br/vdo/vdo/vdo";
-		
-		CloseableHttpClient httpClient = HttpClientBuilder.create().build();
-		HttpPost httppost;
-
-		Configurator cfg = Configurator.getInstance();
-		boolean useProxy = cfg.useProxy();
-		String proxyHost = cfg.getProxyHost();
-		String proxyUser = cfg.getProxyUser();
-		String proxyPassword = cfg.getProxyPassword();
-		int proxyPort = cfg.getProxyPort();
-		
-		if ( !useProxy ) {
-			httpClient = HttpClientBuilder.create().build();
-			httppost = new HttpPost( url );
-		} else {
-			CredentialsProvider credsProvider = new BasicCredentialsProvider();
-			credsProvider.setCredentials( new AuthScope(proxyHost, proxyPort),  new UsernamePasswordCredentials(proxyUser, proxyPassword));		
-			HttpHost proxy = new HttpHost(proxyHost, proxyPort);
-			RequestConfig config = RequestConfig.custom().setProxy(proxy).build();			 
-			httpClient = HttpClients.custom().setDefaultCredentialsProvider(credsProvider).build();	
-			httppost = new HttpPost( url );
-			httppost.setConfig(config);	
-			
-
-		}
-		
-
-		
-		// Produce the output
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		Writer writer = new OutputStreamWriter(out, "UTF-8");
-		writer.write("7|0|9|http://www.vadeonibus.com.br/vdo/vdo/|2A394A19492B477A375A658D6C1EAA03|vdo.client.VdoService|buscarPosicaoTodosOnibus|java.lang.String/2004016611|I|Z|422|12861420|1|2|3|4|4|5|6|7|5|8|2|1|9|");
-
-		// Create the request
-
-		httppost.setEntity(new ByteArrayEntity(out.toByteArray()));
-
-
-		HttpResponse httpResponse = httpClient.execute(httppost);
-		
-		InputStream inputStream = httpResponse.getEntity().getContent();		
-		StringWriter writerNew = new StringWriter();
-		IOUtils.copy(inputStream, writerNew, "UTF-8");
-		String theString = writerNew.toString();
-		httpClient.close();		
-		
-		System.out.println( theString );
-		
-	}
-	*/
 	
 	public int doPutFile( File file, String contentType, String url, String content, String geoUser, String geoPassword ) throws Exception {
 		int code = 0;
@@ -107,9 +71,9 @@ public class WebClient {
 		String encodedAuth = new String( Base64.encodeBase64( geoCreds.getBytes() ) );
 		HttpURLConnection con = (HttpURLConnection) new URL( url ).openConnection();
 		con.setRequestMethod( "PUT" );
-		con.setRequestProperty("Authorization", "Basic " + encodedAuth );
 		con.setRequestProperty("User-Agent", USER_AGENT);
 		con.setRequestProperty("Content-type", contentType);
+		con.setRequestProperty("Authorization", "Basic " + encodedAuth );
 		con.setConnectTimeout( 120000 );
 		
 		con.setDoOutput(true);
@@ -280,8 +244,12 @@ public class WebClient {
 	}
 
 	public String doGet(String url) throws Exception {
+		return this.doGet(url, "UTF-8");
+	}
+	
+	public String doGet(String url, String charset) throws Exception {
 		
-		System.out.println("DOGET: " + url );
+		System.out.println("DOGET (" + charset + "): " + url );
 		
 		String result = "NO_ANSWER";
 		CloseableHttpClient httpClient;
@@ -295,7 +263,8 @@ public class WebClient {
 		int proxyPort = cfg.getProxyPort();
 
 		if ( !useProxy ) {
-			httpClient = HttpClientBuilder.create().build();
+			RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(30 * 1000).build();
+			httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
 			getRequest = new HttpGet(url);
 		} else {
 			CredentialsProvider credsProvider = new BasicCredentialsProvider();
@@ -310,8 +279,9 @@ public class WebClient {
 			getRequest.setConfig(config);			 
 		}
 		
+		//conn.setConnectTimeout( 240000 );
 		getRequest.addHeader("accept", "application/json");
-		getRequest.addHeader("Content-Type", "plain/text; charset=utf-8");
+		getRequest.addHeader("Content-Type", "plain/text; charset=" + charset );
 		getRequest.setHeader("User-Agent", USER_AGENT);
 
 		HttpClientContext context = HttpClientContext.create();
@@ -324,16 +294,30 @@ public class WebClient {
 		}		
 		
 		
-		response.setHeader("Content-Type", "plain/text; charset=UTF-8");
+		response.setHeader("Content-Type", "plain/text; charset=" + charset);
 		int stCode = response.getStatusLine().getStatusCode();
 		
 		if ( stCode != 200) {
 			result = "Error " + stCode + " when accessing URL " + url;
+			
+			System.out.println( result );
+			
+			if( stCode == 403 ) {
+				httpClient.close();
+				throw new ForbiddenException(url);
+			}
+
+			if( stCode == 401 ) {
+				httpClient.close();
+				throw new UnauthorizedException(url);
+			}
+			
+			
 		} else {
 			HttpEntity entity = response.getEntity();
-			InputStreamReader isr = new InputStreamReader(entity.getContent(), "UTF-8");
+			InputStreamReader isr = new InputStreamReader(entity.getContent(), charset);
 			result = convertStreamToString(isr);
-			Charset.forName("UTF-8").encode(result);
+			Charset.forName(charset).encode(result);
 			isr.close();
 		}
 

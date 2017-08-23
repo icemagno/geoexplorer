@@ -32,6 +32,20 @@ public class ServerRepository extends BasicRepository {
 		closeSession();
 	}
 	
+	public void updatePGRServer( Postgres server ) throws UpdateException {
+		DaoFactory<Postgres> df = new DaoFactory<Postgres>();
+		IDao<Postgres> fm = df.getDao(this.session, Postgres.class);
+		try {
+			fm.updateDO(server);
+			commit();
+		} catch (UpdateException e) {
+			rollBack();
+			closeSession();
+			throw e;
+		}
+		closeSession();
+	}	
+	
 	public Server insertServerWMS(Server server) throws InsertException {
 		DaoFactory<Server> df = new DaoFactory<Server>();
 		IDao<Server> fm = df.getDao(this.session, Server.class);
@@ -162,6 +176,33 @@ public class ServerRepository extends BasicRepository {
 		closeSession();
 	}
 	
+	public void deteleTablePGRDepends( int idServer ) throws DeleteException {
+		try {
+			String tables = "select id_table from postgres_tables where id_server = " + idServer;
+			String dataLayers = "select id_data_layer from data_layers where id_table in  (" + tables + ")";
+			String nodeDatas = "select id_node_data from node_data where id_data_layer in  ("+dataLayers+") ";
+			
+			String sqlA = "delete from dictionary where id_node_data in (" + nodeDatas + ")";
+			String sqlB = "delete from node_data where id_data_layer in  ("+dataLayers+") ";
+			String sqlC = "delete from data_layers where id_table in  (" + tables + ")";
+			String sqlD = "delete from postgres_tables where id_server = " + idServer;
+			String sqlE = "delete from servers_postgres where id_server = " + idServer;
+			
+			DaoFactory<PostgresTable> df = new DaoFactory<PostgresTable>();
+			IDao<PostgresTable> fm = df.getDao(this.session, PostgresTable.class);			
+			
+			fm.executeQuery( sqlA, false);
+			fm.executeQuery( sqlB, false);
+			fm.executeQuery( sqlC, false);
+			fm.executeQuery( sqlD, false);
+			fm.executeQuery( sqlE, true);
+			
+		} catch ( Exception e ) {
+			throw new DeleteException( e.getMessage() );
+		}
+		
+	}
+	
 	public void deleteServerPGR(Postgres server) throws DeleteException {
 		DaoFactory<Postgres> df = new DaoFactory<Postgres>();
 		IDao<Postgres> fm = df.getDao(this.session, Postgres.class);
@@ -176,6 +217,20 @@ public class ServerRepository extends BasicRepository {
 		closeSession();
 	}
 
+	public void deleteTablePGR(PostgresTable table) throws DeleteException {
+		DaoFactory<PostgresTable> df = new DaoFactory<PostgresTable>();
+		IDao<PostgresTable> fm = df.getDao(this.session, PostgresTable.class);
+		try {
+			fm.deleteDO(table);
+			commit();
+		} catch (DeleteException e) {
+			rollBack();
+			closeSession();
+			throw e;			
+		}
+		closeSession();
+	}	
+	
 	public PostgresTable getTable(int idTable) throws Exception {
 		DaoFactory<PostgresTable> df = new DaoFactory<PostgresTable>();
 		IDao<PostgresTable> fm = df.getDao(this.session, PostgresTable.class);
@@ -204,6 +259,28 @@ public class ServerRepository extends BasicRepository {
 		}
 		closeSession();
 		return table;		
+	}
+
+	public void deletePgTable(int idTable) throws Exception {
+		String sel = "select id_data_layer from data_layers where id_table = " + idTable;
+		String nodeDatas = "select id_node_data from node_data where id_data_layer in ("+sel+") ";
+		
+		String sqlA = "delete from dictionary where id_node_data in ("+nodeDatas+") ";
+		String sqlB = "delete from node_data where id_data_layer in ("+sel+") ";
+		String sqlC = "delete from data_layers where id_table = " + idTable;
+		String sqlD = "delete from postgres_tables where id_table = " + idTable;
+		
+		DaoFactory<PostgresTable> df = new DaoFactory<PostgresTable>();
+		IDao<PostgresTable> fm = df.getDao(this.session, PostgresTable.class);			
+		
+		fm.executeQuery( sqlA, false);
+		fm.executeQuery( sqlB, false);		
+		fm.executeQuery( sqlC, false);		
+		fm.executeQuery( sqlD, true);		
 	}		
+	
+	
+	
+	
 	
 }

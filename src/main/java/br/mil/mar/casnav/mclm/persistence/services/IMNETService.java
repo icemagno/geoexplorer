@@ -65,7 +65,7 @@ public class IMNETService {
 	}
 
 
-	public String getWarningDetail(String source) throws Exception {
+	public synchronized String getWarningDetail(String source) throws Exception {
 		WebClient wc = new WebClient();
 		String result = wc.doGet( source.replace("https", "http") );
 		JSONObject obj = XML.toJSONObject(result);

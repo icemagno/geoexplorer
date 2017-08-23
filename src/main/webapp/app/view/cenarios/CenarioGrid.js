@@ -49,7 +49,7 @@ Ext.define('MCLM.view.cenarios.CenarioGrid', {
 		    },{
 		        target: 'id303',
 		        title: 'Carregar Cenário',
-		        text: 'Recupera um cenário para a área de trabalho. O conteúdo atual será apagado.',
+		        text: 'Recupera um cenário. O conteúdo atual será apagado.',
 		        width: 150,
 		        dismissDelay: 5000 
 		    },{

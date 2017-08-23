@@ -11,10 +11,16 @@ Ext.define('MCLM.view.servers.ServersGrid', {
     loadMask: true,
     autoScroll: true,
     columns:[
-	     {text:'Nome', dataIndex:'name', width:200},
-	     {text:'Endereço', dataIndex:'url', width:300},
-	     {text:'Versão', dataIndex:'version', width:70}
+	     {text:'Nome', dataIndex:'name', width:200,editor: 'textfield'},
+	     {text:'Endereço', dataIndex:'url', width:300,editor: 'textfield'},
+	     {text:'Versão', dataIndex:'version', width:70,editor: 'textfield'}
     ],
+    
+    selType: 'cellmodel',
+    plugins: {
+        ptype: 'cellediting',
+        clicksToEdit: 2
+    },
     
     
     dockedItems: [{
@@ -31,6 +37,18 @@ Ext.define('MCLM.view.servers.ServersGrid', {
     }],		
     
 	listeners:{
+		
+		edit : function( a, b) {
+			
+	    	var layerTree = Ext.getCmp('layerTree');
+			var rootMaintree = layerTree.getRootNode();
+			
+	  		var layerTreeStore = Ext.getStore('store.layerTree');
+	  		layerTreeStore.load( { node: rootMaintree } );	
+	  		
+		},		
+	
+		
 		afterrender:function(){
 			
 		    Ext.tip.QuickTipManager.register({
