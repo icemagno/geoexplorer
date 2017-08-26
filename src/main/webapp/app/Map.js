@@ -2161,9 +2161,7 @@ Ext.define('MCLM.Map', {
 			var coord = center.split(",");
 			var lat = Number( coord[0].trim() );
 			var lon = Number( coord[1].trim() );
-			
-			//var coordinate = ol.proj.transform([lat, lon], 'EPSG:4326', 'EPSG:3857');
-			var coordinate = center;
+			var coordinate = [lat, lon];
 			
 			MCLM.Map.theView.animate({
 				  zoom		: zoom,

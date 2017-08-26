@@ -203,7 +203,9 @@ Ext.define('MCLM.Functions', {
 			if( !orgMilWindow ) {
 				orgMilWindow = Ext.create('MCLM.view.apolo.orgmil.OrgMilWindow');
 			}
-			orgMilWindow.update( Ext.encode(respText) );
+			
+			//orgMilWindow.update( Ext.encode(respText) );
+			
 			orgMilWindow.show();
 		},
 
@@ -341,6 +343,8 @@ Ext.define('MCLM.Functions', {
 					'orgid': record.id,
 				},       
 				success: function(response, opts) {
+					
+					console.log( response.responseText );
 					
 					var respText = Ext.decode( response.responseText );
 

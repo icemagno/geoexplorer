@@ -77,6 +77,8 @@ Ext.define('MCLM.view.trabalho.TrabalhoTree', {
         viewready: 'viewready',
 		afterrender:function(){
 			
+			
+			
 		    Ext.tip.QuickTipManager.register({
 				target: 'exportMapBtn',
 				title: 'Exportar',
@@ -84,13 +86,13 @@ Ext.define('MCLM.view.trabalho.TrabalhoTree', {
 				width: 150,
 				dismissDelay: 5000 
 				
-			}, {
+			},{
 		        target: 'svWsBtn',
 		        title: 'Salvar',
 		        text: 'Salva o Cenário.',
 		        width: 150,
 		        dismissDelay: 5000 
-		    }, {
+		    },{
 		        target: 'mngCenaryBtn',
 		        title: 'Gerenciar Cenários',
 		        text: 'Gerencia os Cenários (carregar, apagar, tornar público ou privado).',
@@ -108,13 +110,14 @@ Ext.define('MCLM.view.trabalho.TrabalhoTree', {
 		        text: 'Salva uma cópia do Cenário atual.',
 		        width: 150,
 		        dismissDelay: 5000 
-		    }, {
+		    }/*,{
 		        target: 'adTextBtn',
 		        title: 'Adicionar caixa de texto',
 		        text: 'Adiciona uma caixa de texto ao cenário.',
 		        width: 150,
 		        dismissDelay: 5000 
-		    });			
+		    }*/);			
+			
 			
 		},
     	load:'onLoadNode'

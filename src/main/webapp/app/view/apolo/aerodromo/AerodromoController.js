@@ -2,7 +2,7 @@ Ext.define('MCLM.view.apolo.aerodromo.AerodromoController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.aerodromoController',
     
-    teste : function() {
+    showMetarImage : function() {
     	
     	var aerodromoWindow = Ext.getCmp('aerodromoWindow');
     	var codAerodromo = aerodromoWindow.codAerodromo;

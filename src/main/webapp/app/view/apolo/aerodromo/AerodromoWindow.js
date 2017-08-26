@@ -13,20 +13,19 @@ Ext.define('MCLM.view.apolo.aerodromo.AerodromoWindow', {
 	controller : 'aerodromoController',
 	
 	title : "Aerodromo",
-	bodyPadding: 0,
 	
+	bodyPadding: 0,
 	width : 800,
 	height: 500,
-	
 	layout : 'border',
-	
     frame : false,
-    
     constrain: true,
     bodyStyle:"background:#FFFFFF;",
     renderTo: Ext.getBody(),
 	resizable: false,
 
+	
+	
     items: [{
         xtype: 'dataPanel'
     }],
@@ -35,12 +34,12 @@ Ext.define('MCLM.view.apolo.aerodromo.AerodromoWindow', {
         xtype: 'toolbar',
         items: [{
         	iconCls: 'owm-rain-icon',
-        	id: 'ttt1',
+        	id: 'metarRainId',
             handler : 'getMetarTaf'
         },{
         	iconCls: 'owm-wind-icon',
-        	id: 'ttt2',
-            handler : 'teste'
+        	id: 'metarImageId',
+            handler : 'showMetarImage'
         }]
     }]
 

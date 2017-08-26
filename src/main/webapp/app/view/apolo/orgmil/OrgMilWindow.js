@@ -4,19 +4,46 @@ Ext.define('MCLM.view.apolo.orgmil.OrgMilWindow', {
 	id : 'orgMilWindow',
 	
 	title : "Organização",
+
+    requires: [
+      'MCLM.view.apolo.orgmil.OrgMilTabContainer',
+      'MCLM.view.apolo.orgmil.OrgMilController',
+	],		
+	
+	controller : 'orgMilController',
+	
 	bodyPadding: 0,
-	
-	width : 236,
+	width : 800,
 	height: 500,
-	
-    scrollable: true,
+	layout : 'border',
     frame : false,
-    
     constrain: true,
     bodyStyle:"background:#FFFFFF;",
     renderTo: Ext.getBody(),
 	resizable: false,
+    
+    
+    renderTo: Ext.getBody(),
 	
-	html : '',
+	
+    items: [{
+        xtype: 'orgMilTabContainer'
+    }],
+
+    dockedItems: [{
+        xtype: 'toolbar',
+        items: [{
+        	iconCls: 'owm-rain-icon',
+        	id: 'ttt1',
+            handler : 'getMetarTaf'
+        },{
+        	iconCls: 'owm-wind-icon',
+        	id: 'ttt2',
+            handler : 'teste'
+        }]
+    }]
+    
+    
+	
 
 });
