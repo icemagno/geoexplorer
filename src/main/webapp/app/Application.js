@@ -103,10 +103,10 @@ Ext.define('MCLM.Application', {
 				
 				/* 5. */ MCLM.view.photo.PhotoHelper.init();		// inicializa o Mapilary
 				
-				
-				/* 6. */ $("#topMainToolBarUserName").html( config.user.name );
-						 $("#topMainToolBarUserNameName").html( config.user.userName );
-				/* 7. */ //$("#osmSource").html( config.geoserverUrl );
+				Ext.getCmp('id111').setDisabled(true);
+				Ext.getCmp('id120').setDisabled(true);
+				Ext.getCmp('btnStyle').setDisabled(true);
+				Ext.getCmp('drawFeicaoBtn').setDisabled(true);
 				
 		        // ---------------------------------------------
 			},

@@ -759,10 +759,10 @@ body {
 }
 	
 #topMainToolBar {
-	background-image: url("../img/apolo_back_strip.jpg");
+	background-image: url("../img/geodata_bar.png");
 	background-repeat: repeat-x;
 	width : 100%;
-	height : 35px;
+	height : 45px;
 }
 
 .inmet-icon {
