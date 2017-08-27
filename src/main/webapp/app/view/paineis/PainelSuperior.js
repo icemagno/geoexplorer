@@ -9,6 +9,6 @@ Ext.define('MCLM.view.paineis.PainelSuperior', {
     frame: false,
     collapsed: false,
     html : 	"<div id='topMainToolBar'>" +
-    			"<a href='http://apolo.defesa.mil.br'><img style='margin-left:17px;height:40px;' src='img/geoexplorer-barra.png'></a>" +
+    			"<a href='http://geodata.cmabreu.com.br/'><img style='margin-left:17px;height:44px;' src='img/geoexplorer-barra.png'></a>" +
     		"</div>",
 });

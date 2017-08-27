@@ -429,7 +429,7 @@ Ext.define('MCLM.Map', {
 		},
 		toWorld : function() {
 			var map = MCLM.Map.map;
-			MCLM.Map.map.getView().fit([-16716960.433033716, -7413397.061675084, 23358056.252544772, 10745594.873977667]);	
+			MCLM.Map.map.getView().fit([-90, -180, 90,180]);	
 		},
 		getCenterHDMS : function() {
 			var center = MCLM.Map.map.getView().getCenter();
@@ -773,6 +773,7 @@ Ext.define('MCLM.Map', {
 		},
 		
 		checkInternetAccess : function() {
+			/*
 			var image = new Image();
 			image.src = 'https://www.google.com.br/images/branding/googlelogo/2x/googlelogo_color_120x44dp.png';
 			image.onload = function() {
@@ -781,6 +782,7 @@ Ext.define('MCLM.Map', {
 			image.onerror = function() {
 				Ext.Msg.alert('Alerta!','Não foi possível acessar a internet a partir de seu navegador. Alguns serviços podem não estar disponíveis. Clique aqui para fechar esta mensagem.' );		  
 			};
+			*/
 		},
 		
 		updateScale : function() {

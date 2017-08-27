@@ -1,22 +1,16 @@
 package br.mil.mar.casnav.mclm.interceptor;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import org.apache.struts2.ServletActionContext;
-
 import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.interceptor.Interceptor;
-
-import br.mil.mar.casnav.mclm.misc.User;
-import br.mil.mar.casnav.mclm.persistence.services.apolo.ApoloService;
 
 public class ClientAccessInterceptor implements Interceptor {
 	private static final long serialVersionUID = -2344136157076941239L;
 
 	
 	public String intercept(ActionInvocation invocation) {
+		
+		/*
+		
 		HttpServletRequest request = ServletActionContext.getRequest();
 		HttpSession session = request.getSession();
 		
@@ -49,12 +43,13 @@ public class ClientAccessInterceptor implements Interceptor {
 		}
 		
 		
-		
+		*/
 		try {
 			return invocation.invoke();
 		} catch ( Exception ignored ) {
 			return "notLogged";
 		}
+		
 	}
  
 	@Override

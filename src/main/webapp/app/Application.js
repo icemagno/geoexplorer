@@ -107,6 +107,7 @@ Ext.define('MCLM.Application', {
 				Ext.getCmp('id120').setDisabled(true);
 				Ext.getCmp('btnStyle').setDisabled(true);
 				Ext.getCmp('drawFeicaoBtn').setDisabled(true);
+				Ext.getCmp('exportMapBtn').setDisabled(true);
 				
 		        // ---------------------------------------------
 			},

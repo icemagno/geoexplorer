@@ -3,9 +3,18 @@
 <configuration>
 	
 	<mclm>
+		 
 		<databaseName>mclm</databaseName>
 		<userName>postgres</userName>
 		<password>admin</password>
+		
+		
+		<!--  
+		<databaseName>cmabreuc_mclm</databaseName>
+		<userName>cmabreuc_icemagno</userName>
+		<password>n7Etri@x36</password>		
+		-->
+		
 		<databasePort>5432</databasePort>
 		<databaseAddr>localhost</databaseAddr>
 		
