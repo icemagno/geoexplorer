@@ -10,5 +10,6 @@ Ext.define('MCLM.view.paineis.PainelSuperior', {
     collapsed: false,
     html : 	"<div id='topMainToolBar'>" +
     			"<a href='http://geodata.cmabreu.com.br/'><img style='margin-left:17px;height:44px;' src='img/geoexplorer-barra.png'></a>" +
+				"<div id='topMainToolBarUserName'>by Carlos Magno Abreu</div>" +
     		"</div>",
 });

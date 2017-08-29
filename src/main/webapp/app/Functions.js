@@ -3,41 +3,6 @@ Ext.define('MCLM.Functions', {
 	statics: {
 		countLog : 0,
 		
-		translateAerodromos : function( what ) {
-			var aeroWindow = {};
-			aeroWindow["id"] = "Identificador";
-			aeroWindow["sigla"] = "Sigla";
-			aeroWindow["nome"] = "Nome";
-			aeroWindow["logradouro"] = "Rua";
-			aeroWindow["numeroEnd"] = "Número";
-			aeroWindow["bairro"] = "Bairro";
-			aeroWindow["cep"] = "CEP";
-			aeroWindow["caractNotaveis"] = "Características";
-			aeroWindow["fonte"] = "Fonte";
-			aeroWindow["infoContato"] = "Contato";
-			aeroWindow["sumarioPistas"] = "Sumário";
-			aeroWindow["distancia"] = "Distância";
-			aeroWindow["orgControladora"] = "Controlador";
-			aeroWindow["listCapacidadesLogisticas"] = "Cap. Logísticas";
-			aeroWindow["listTiposCapacidadeLogistica"] = "Tipos Cap. Logística";
-			aeroWindow["anacSlotControlado"] = "anacSlotControlado";
-			aeroWindow["anacSituacaoAerodromo"] = "anacSituacaoAerodromo";
-			aeroWindow["anacLocalidade"] = "anacLocalidade";
-			aeroWindow["tipoNome"] = "Tipo";
-			aeroWindow["paisNome"] = "País";
-			aeroWindow["estadoNome"] = "Estado";
-			aeroWindow["anacAerodromoSituacaoAtualizacaoNome"] = "Sit. Nome";
-			aeroWindow["administracaoNome"] = "Administração";
-			aeroWindow["cidadeNome"] = "Cidade";
-			aeroWindow["anacAerodromoUtilizacaoNome"] = "Utilização";
-			
-			
-			
-			return aeroWindow[what];
-			
-		} ,
-				 
-	
 		syntaxHighlight : function(json) {
 		    if (typeof json != 'string') {
 		         json = JSON.stringify(json, undefined, 2);
@@ -269,7 +234,7 @@ Ext.define('MCLM.Functions', {
 						var umidade = mtr.umidade;
 						var ventoDir = mtr.vento_dir;
 						var ventoInt = mtr.vento_int;
-						var visibilidade = mtr.visibilidade.replace('>','&gt;').replace('<','&lt;');
+						var visibilidade = mtr.visibilidade.toString().replace('>','&gt;').replace('<','&lt;');
 						
 						var metar = '<table class="aeroWeather" style="height:60px;width:100%">' +
 								'<tr><td rowspan="4">'+tempo+'</td><td>' + tempoDesc + '</td> <td>' + att +'</td></tr>' + 
